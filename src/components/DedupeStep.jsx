@@ -94,7 +94,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
         return { matched: [], unmatched: [], extensions };
       case 'weak':
         return {
-          matched: matched.filter((result) => (result.meta?.score ?? 0) < 15),
+          matched: matched.filter((result) => (result.meta?.confidence ?? 'none') !== 'strong'),
           unmatched: [],
           extensions: [],
         };
@@ -321,6 +321,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
 
 function MatchCard({ r, today, onReject }) {
   const score = r.meta?.score ?? 0;
+  const confidence = r.meta?.confidence ?? 'none';
   const cardClass = r.meta.isExtension ? 'card-ext' : score >= 15 ? 'card-high' : score >= 10 ? 'card-mid' : 'card-low';
   const scoreClass = score >= 15 ? 'stat-good' : score >= 10 ? 'stat-warn' : 'stat-bad';
   const endsToday = sameDay(r.hq.end, today);
@@ -332,6 +333,7 @@ function MatchCard({ r, today, onReject }) {
         <span className="supplier-name">{r.hq.vendor}</span>
         {r.hq.type === 'exclusive' && <span className="pill pill-bad">EXCLUSIVE</span>}
         {r.meta.isExtension && <span className="pill pill-purple">EXTENSION</span>}
+        {confidence !== 'none' && <span className="pill">{confidence.toUpperCase()}</span>}
         {endsToday && <span className="pill pill-danger">ENDS TODAY</span>}
       </div>
       <div className="match-grid">
@@ -352,6 +354,15 @@ function MatchCard({ r, today, onReject }) {
           <span key={index} className={`why-chip chip-${why.type}`}>{why.text}</span>
         ))}
       </div>
+      {(r.meta.stages || []).length > 0 && (
+        <div className="feature-chips">
+          {r.meta.stages.map((stage) => (
+            <div key={stage.key} className="match-meta">
+              <strong>{stage.label}:</strong> {formatStageDelta(stage.delta)} {stage.reasons.length ? `· ${stage.reasons.join(', ')}` : '· no signal'}
+            </div>
+          ))}
+        </div>
+      )}
       <div className="card-actions">
         <button className="btn btn-reject" onClick={() => onReject(r.hq.id)}>Reject</button>
       </div>
@@ -361,6 +372,7 @@ function MatchCard({ r, today, onReject }) {
 
 function UnmatchedCard({ r, today }) {
   const endsToday = sameDay(r.hq.end, today);
+  const topCandidates = (r.meta?.candidateRankings || []).filter((candidate) => candidate.score > 0);
   return (
     <div className={`match-card card-unmatched ${endsToday ? 'card-today' : ''}`}>
       <div className="match-header">
@@ -371,9 +383,27 @@ function UnmatchedCard({ r, today }) {
       </div>
       <div className="match-text">{r.hq.text}</div>
       <div className="match-meta">{r.hq.ongoing ? 'Ongoing' : r.hq.end ? `Ends: ${dateFmt.format(r.hq.end)}` : ''}</div>
+      {(r.meta?.stages || []).map((stage) => (
+        <div key={stage.key} className="match-meta">
+          <strong>{stage.label}:</strong> {formatStageDelta(stage.delta)} {stage.reasons.length ? `· ${stage.reasons.join(', ')}` : '· no signal'}
+        </div>
+      ))}
+      {topCandidates.length > 0 && (
+        <div className="feature-chips">
+          {topCandidates.map((candidate, index) => (
+            <div key={`${candidate.supplier}-${index}`} className="match-meta">
+              <strong>Candidate:</strong> {candidate.supplier} ({candidate.score}, {candidate.confidence})
+            </div>
+          ))}
+        </div>
+      )}
       <div className="feature-chips">
         {[...r.hq.bag.features].map((feature) => <span key={feature} className="feature-chip">{feature}</span>)}
       </div>
     </div>
   );
+}
+
+function formatStageDelta(delta) {
+  return delta > 0 ? `+${delta}` : `${delta}`;
 }

@@ -121,6 +121,10 @@ async function main() {
     norwegianMatch.meta.why.some((reason) => reason.text === "obc"),
     "Expected Norwegian alias match to retain onboard-credit reasoning.",
   );
+  assert.ok(
+    norwegianMatch.meta.stages.some((stage) => stage.key === "features"),
+    "Expected Norwegian match to expose feature-stage scoring.",
+  );
 
   const royalMatch = findMatch(matches, "Royal Caribbean");
   assert.equal(royalMatch.web?.supplier, "Royal Caribbean");
@@ -133,6 +137,7 @@ async function main() {
   assert.equal(carnivalMatch.web, null);
   assert.deepEqual(collectWarningTypes(carnivalMatch.meta.why), ["neg"]);
   assert.equal(carnivalMatch.meta.why[0].text, "no web deals");
+  assert.deepEqual(carnivalMatch.meta.candidateRankings, []);
 
   const rawGroups = parseRawToGroups(tagged.text);
   assert.deepEqual(

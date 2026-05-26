@@ -1,0 +1,67 @@
+[
+  {
+    "label": "NCL",
+    "status": "known",
+    "canonicalName": "Norwegian",
+    "familyKey": "norwegian",
+    "matchedBy": "alias"
+  },
+  {
+    "label": "Margaritaville at Sea",
+    "status": "known",
+    "canonicalName": "Margaritaville at Sea",
+    "familyKey": "margaritaville at sea",
+    "matchedBy": "canonical"
+  },
+  {
+    "label": "ALGV",
+    "status": "known",
+    "canonicalName": "ALG Vacations",
+    "familyKey": "alg vacations",
+    "matchedBy": "alias"
+  },
+  {
+    "label": "Avanti Insider Tours",
+    "status": "known",
+    "canonicalName": "Avanti",
+    "familyKey": "avanti",
+    "matchedBy": "alias"
+  },
+  {
+    "label": "Viking",
+    "status": "ambiguous",
+    "canonicalName": "Viking Ocean",
+    "familyKey": "viking",
+    "matchedBy": "ambiguous-alias",
+    "candidates": ["Viking Ocean", "Viking River"]
+  },
+  {
+    "label": "Disney",
+    "status": "ambiguous",
+    "canonicalName": "Adventures by Disney",
+    "familyKey": null,
+    "matchedBy": "ambiguous-alias",
+    "candidates": [
+      "Adventures by Disney",
+      "Aulani, A Disney Resort & Spa",
+      "Disney Cruise Line",
+      "DisneyWorld",
+      "Disneyland"
+    ]
+  },
+  {
+    "label": "Scenic/Emerald Cruises",
+    "status": "ambiguous",
+    "canonicalName": "Emerald Cruises",
+    "familyKey": null,
+    "matchedBy": "ambiguous-alias",
+    "candidates": ["Emerald Cruises", "Scenic River"]
+  },
+  {
+    "label": "Mystery Escapes",
+    "status": "unknown",
+    "canonicalName": null,
+    "familyKey": null,
+    "matchedBy": "unknown"
+  }
+]

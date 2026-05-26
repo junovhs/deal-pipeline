@@ -167,8 +167,36 @@ const dateFmt = new Intl.DateTimeFormat('en-US', {
 });
 export { dateFmt };
 
-function scorePair(hq, web) {
-  let score = 0;
+function createStage(key, label, delta, reasons = [], details = null) {
+  return { key, label, delta, reasons, details };
+}
+
+function confidenceFromScore(score, hasWeb, isExtension) {
+  if (!hasWeb) return 'none';
+  if (isExtension) return score >= 12 ? 'review' : 'weak';
+  if (score >= 18) return 'strong';
+  if (score >= 12) return 'review';
+  if (score > 0) return 'weak';
+  return 'none';
+}
+
+function buildEmptyMeta(overrides = {}) {
+  return {
+    score: 0,
+    why: [],
+    shared: new Set(),
+    hqOnly: new Set(),
+    webOnly: new Set(),
+    isExtension: false,
+    stages: [],
+    confidence: 'none',
+    candidateRankings: [],
+    ...overrides,
+  };
+}
+
+function scoreFeatureStage(hq, web) {
+  let delta = 0;
   const why = [];
   const fH = hq.bag.features;
   const fW = web.bag.features;
@@ -181,26 +209,45 @@ function scorePair(hq, web) {
 
   for (const f of shared) {
     const w = FEATURE_WEIGHTS[f] || 2;
-    score += w;
+    delta += w;
     why.push({ text: f, type: 'pos' });
   }
   for (const f of hqOnly) {
     const w = FEATURE_WEIGHTS[f] || 2;
-    score -= Math.ceil(w * 0.6);
+    delta -= Math.ceil(w * 0.6);
     why.push({ text: '−' + f, type: 'neg' });
   }
   for (const f of webOnly) {
     const w = FEATURE_WEIGHTS[f] || 2;
-    score -= Math.ceil(w * 0.4);
+    delta -= Math.ceil(w * 0.4);
     why.push({ text: 'web+' + f, type: 'neg' });
   }
 
   if (fH.has('covert') !== fW.has('covert')) {
-    score -= 10;
+    delta -= 10;
     why.push({ text: 'covert≠', type: 'neg' });
   }
 
-  // Number agreement
+  return {
+    delta,
+    why,
+    hqFeats,
+    webFeats,
+    shared,
+    hqOnly,
+    webOnly,
+    stage: createStage('features', 'Feature overlap', delta, why.map((item) => item.text), {
+      shared: [...shared],
+      hqOnly: [...hqOnly],
+      webOnly: [...webOnly],
+    }),
+  };
+}
+
+function scoreNumberStage(hq, web) {
+  let delta = 0;
+  const why = [];
+
   const hqD = hq.bag.dollars, webD = web.bag.dollars;
   const hqP = hq.bag.percents, webP = web.bag.percents;
   let numbersMismatch = false;
@@ -211,11 +258,11 @@ function scorePair(hq, web) {
       const d = Math.abs(a - b);
       if (d < bestDiff) bestDiff = d;
     }
-    if (bestDiff === 0) { score += 6; why.push({ text: '$=' + hqD[0], type: 'pos' }); }
-    else if (bestDiff <= 50) { score += 2; why.push({ text: '$≈', type: 'neu' }); }
-    else { score -= 5; numbersMismatch = true; why.push({ text: '$≠(' + hqD.join(',') + ' vs ' + webD.join(',') + ')', type: 'neg' }); }
-  } else if (hqD.length && !webD.length) { score -= 1; why.push({ text: '$hq-only', type: 'neu' }); }
-  else if (!hqD.length && webD.length) { score -= 1; why.push({ text: '$web-only', type: 'neu' }); }
+    if (bestDiff === 0) { delta += 6; why.push({ text: '$=' + hqD[0], type: 'pos' }); }
+    else if (bestDiff <= 50) { delta += 2; why.push({ text: '$≈', type: 'neu' }); }
+    else { delta -= 5; numbersMismatch = true; why.push({ text: '$≠(' + hqD.join(',') + ' vs ' + webD.join(',') + ')', type: 'neg' }); }
+  } else if (hqD.length && !webD.length) { delta -= 1; why.push({ text: '$hq-only', type: 'neu' }); }
+  else if (!hqD.length && webD.length) { delta -= 1; why.push({ text: '$web-only', type: 'neu' }); }
 
   if (hqP.length && webP.length) {
     let bestDiff = Infinity;
@@ -223,54 +270,157 @@ function scorePair(hq, web) {
       const d = Math.abs(a - b);
       if (d < bestDiff) bestDiff = d;
     }
-    if (bestDiff === 0) { score += 5; why.push({ text: '%=' + hqP[0], type: 'pos' }); }
-    else if (bestDiff <= 5) { score += 2; why.push({ text: '%≈', type: 'neu' }); }
-    else { score -= 4; numbersMismatch = true; why.push({ text: '%≠(' + hqP.join(',') + ' vs ' + webP.join(',') + ')', type: 'neg' }); }
-  } else if (hqP.length && !webP.length) { score -= 1; why.push({ text: '%hq-only', type: 'neu' }); }
-  else if (!hqP.length && webP.length) { score -= 1; why.push({ text: '%web-only', type: 'neu' }); }
+    if (bestDiff === 0) { delta += 5; why.push({ text: '%=' + hqP[0], type: 'pos' }); }
+    else if (bestDiff <= 5) { delta += 2; why.push({ text: '%≈', type: 'neu' }); }
+    else { delta -= 4; numbersMismatch = true; why.push({ text: '%≠(' + hqP.join(',') + ' vs ' + webP.join(',') + ')', type: 'neg' }); }
+  } else if (hqP.length && !webP.length) { delta -= 1; why.push({ text: '%hq-only', type: 'neu' }); }
+  else if (!hqP.length && webP.length) { delta -= 1; why.push({ text: '%web-only', type: 'neu' }); }
 
-  // Date matching
+  return {
+    delta,
+    why,
+    numbersMismatch,
+    stage: createStage('numbers', 'Money and percent alignment', delta, why.map((item) => item.text), {
+      hqDollars: hqD,
+      webDollars: webD,
+      hqPercents: hqP,
+      webPercents: webP,
+      numbersMismatch,
+    }),
+  };
+}
+
+function scoreDateStage(hq, web, numbersMismatch) {
+  let delta = 0;
+  const why = [];
   let isExtension = false;
+
   if (hq.ongoing && !web.expiryDate) {
-    score += 3; why.push({ text: 'ongoing✓', type: 'pos' });
+    delta += 3; why.push({ text: 'ongoing✓', type: 'pos' });
   } else if (hq.ongoing && web.expiryDate) {
-    score -= 1; why.push({ text: 'ongoing/dated', type: 'neu' });
+    delta -= 1; why.push({ text: 'ongoing/dated', type: 'neu' });
   } else if (hq.end && web.expiryDate) {
     if (sameDay(hq.end, web.expiryDate)) {
-      score += 4; why.push({ text: 'date=', type: 'pos' });
+      delta += 4; why.push({ text: 'date=', type: 'pos' });
     } else {
       const daysDiff = Math.round((hq.end - web.expiryDate) / 86400000);
       if (Math.abs(daysDiff) <= 2) {
-        score += 2; why.push({ text: 'date≈' + daysDiff + 'd', type: 'neu' });
+        delta += 2; why.push({ text: 'date≈' + daysDiff + 'd', type: 'neu' });
       } else if (daysDiff > 2 && daysDiff <= 90 && !numbersMismatch) {
-        score += 1; isExtension = true;
+        delta += 1; isExtension = true;
         why.push({ text: 'extended+' + daysDiff + 'd', type: 'ext' });
       } else if (daysDiff > 2 && daysDiff <= 90 && numbersMismatch) {
-        score -= 2; why.push({ text: 'date-shift+$≠', type: 'neg' });
+        delta -= 2; why.push({ text: 'date-shift+$≠', type: 'neg' });
       } else if (daysDiff < -2) {
-        score -= 1; why.push({ text: 'date-behind', type: 'neg' });
+        delta -= 1; why.push({ text: 'date-behind', type: 'neg' });
       }
     }
   }
 
-  // Text similarity bonus
+  return {
+    delta,
+    why,
+    isExtension,
+    stage: createStage('dates', 'Date alignment', delta, why.map((item) => item.text), {
+      hqEnd: hq.end?.toISOString?.() || null,
+      webExpiry: web.expiryDate?.toISOString?.() || null,
+      ongoing: Boolean(hq.ongoing),
+      isExtension,
+    }),
+  };
+}
+
+function scoreTextStage(hq, web, hqFeats, webFeats) {
+  let delta = 0;
+  const why = [];
+  let similarity = 0;
+
   if (hqFeats.size === 0 && webFeats.size === 0) {
-    const sim = textSimilarity(hq.text, web.text);
-    if (sim > 0.3) {
-      const pts = Math.round(sim * 10);
-      score += pts;
-      why.push({ text: 'text(' + Math.round(sim * 100) + '%)', type: 'pos' });
+    similarity = textSimilarity(hq.text, web.text);
+    if (similarity > 0.3) {
+      const pts = Math.round(similarity * 10);
+      delta += pts;
+      why.push({ text: 'text(' + Math.round(similarity * 100) + '%)', type: 'pos' });
     }
   } else {
-    const sim = textSimilarity(hq.text, web.text);
-    if (sim > 0.25) {
-      const pts = Math.min(3, Math.round(sim * 5));
-      score += pts;
-      why.push({ text: 'text(' + Math.round(sim * 100) + '%)', type: 'neu' });
+    similarity = textSimilarity(hq.text, web.text);
+    if (similarity > 0.25) {
+      const pts = Math.min(3, Math.round(similarity * 5));
+      delta += pts;
+      why.push({ text: 'text(' + Math.round(similarity * 100) + '%)', type: 'neu' });
     }
   }
 
-  return { score, why, shared, hqOnly, webOnly, isExtension };
+  return {
+    delta,
+    why,
+    similarity,
+    stage: createStage('text', 'Text similarity', delta, why.map((item) => item.text), {
+      similarity,
+    }),
+  };
+}
+
+function scorePair(hq, web) {
+  const featureStage = scoreFeatureStage(hq, web);
+  const numberStage = scoreNumberStage(hq, web);
+  const dateStage = scoreDateStage(hq, web, numberStage.numbersMismatch);
+  const textStage = scoreTextStage(hq, web, featureStage.hqFeats, featureStage.webFeats);
+
+  const stages = [
+    featureStage.stage,
+    numberStage.stage,
+    dateStage.stage,
+    textStage.stage,
+  ].filter((stage) => stage.delta !== 0 || stage.reasons.length > 0);
+
+  const why = [
+    ...featureStage.why,
+    ...numberStage.why,
+    ...dateStage.why,
+    ...textStage.why,
+  ];
+
+  const score =
+    featureStage.delta +
+    numberStage.delta +
+    dateStage.delta +
+    textStage.delta;
+
+  const isExtension = dateStage.isExtension;
+
+  return {
+    score,
+    why,
+    shared: featureStage.shared,
+    hqOnly: featureStage.hqOnly,
+    webOnly: featureStage.webOnly,
+    isExtension,
+    stages,
+    confidence: confidenceFromScore(score, true, isExtension),
+  };
+}
+
+function buildCandidateRankings(matrixRow, webGroup) {
+  if (!matrixRow || !webGroup?.length) return [];
+  return matrixRow
+    .map((meta, index) => ({
+      supplier: webGroup[index]?.supplier || '',
+      title: webGroup[index]?.raw?.title || webGroup[index]?.text || '',
+      score: meta.score,
+      confidence: meta.confidence,
+      isExtension: meta.isExtension,
+      why: meta.why.slice(0, 4),
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+}
+
+function attachCandidateRankings(meta, matrixRow, webGroup) {
+  return {
+    ...meta,
+    candidateRankings: buildCandidateRankings(matrixRow, webGroup),
+  };
 }
 
 // --- Hungarian algorithm (unchanged) ---
@@ -344,10 +494,17 @@ function greedyMatch(hqGroup, webGroup, matrix) {
   }
   for (let i = 0; i < hqGroup.length; i++) {
     const a = assignment.get(i);
+    const fallback = attachCandidateRankings(
+      buildEmptyMeta(),
+      matrix[i],
+      webGroup,
+    );
     results.push({
       hq: hqGroup[i],
       web: a ? webGroup[a.webIdx] : null,
-      meta: a ? a.meta : { score: 0, why: [], shared: new Set(), hqOnly: new Set(), webOnly: new Set(), isExtension: false },
+      meta: a
+        ? attachCandidateRankings(a.meta, matrix[i], webGroup)
+        : fallback,
     });
   }
   return results;
@@ -367,7 +524,9 @@ function optimalMatch(hqGroup, webGroup) {
     return assignment.map(([i, j]) => ({
       hq: hqGroup[i],
       web: j !== -1 ? webGroup[j] : null,
-      meta: j !== -1 ? matrix[i][j] : { score: 0, why: [], shared: new Set(), hqOnly: new Set(), webOnly: new Set(), isExtension: false },
+      meta: j !== -1
+        ? attachCandidateRankings(matrix[i][j], matrix[i], webGroup)
+        : attachCandidateRankings(buildEmptyMeta(), matrix[i], webGroup),
     }));
   }
   return greedyMatch(hqGroup, webGroup, matrix);
@@ -472,7 +631,10 @@ export function runFullMatch(hqDeals, websiteDeals, { filterSupplier = '' } = {}
       for (const hq of hqGroup) {
         allResults.push({
           hq, web: null,
-          meta: { score: 0, why: [{ text: 'no web deals', type: 'neg' }], shared: new Set(), hqOnly: new Set(), webOnly: new Set(), isExtension: false },
+          meta: buildEmptyMeta({
+            why: [{ text: 'no web deals', type: 'neg' }],
+            stages: [createStage('availability', 'Candidate availability', 0, ['no web deals'])],
+          }),
         });
       }
     } else {
