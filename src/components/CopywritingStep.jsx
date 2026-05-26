@@ -7,7 +7,6 @@ import {
   cleanAndParsePatchJSON,
   applyDealPatch,
   appendDealToRawInput,
-  DEFAULT_HOUSE_STYLE,
 } from "../logic/copywriting";
 
 let confettiLoaded = false;
@@ -37,77 +36,34 @@ function fireConfetti() {
   }
 }
 
-function lsGet(key, fallback) {
-  try {
-    const v = localStorage.getItem("dp-copy-" + key);
-    return v !== null ? JSON.parse(v) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-function lsSet(key, val) {
-  try {
-    localStorage.setItem("dp-copy-" + key, JSON.stringify(val));
-  } catch {}
-}
-
-export default function CopywritingStep({ initialText, showToast }) {
-  const [view, setView] = useState(() => lsGet("view", "input"));
-  const [rawInput, setRawInput] = useState(
-    () => lsGet("rawInput", "") || initialText || "",
-  );
-  const [jsonInput, setJsonInput] = useState(() => lsGet("jsonInput", ""));
-  const [finalGroups, setFinalGroups] = useState(() =>
-    lsGet("finalGroups", []),
-  );
+export default function CopywritingStep({ session, onSessionChange, showToast }) {
+  const { view, rawInput, jsonInput, finalGroups, houseStyle, dealNotes } = session;
   const [copySuccess, setCopySuccess] = useState({});
   const [validationError, setValidationError] = useState(null);
   const [validationWarnings, setValidationWarnings] = useState(null);
   const [pendingData, setPendingData] = useState(null);
   const [showReset, setShowReset] = useState(false);
-
-  const [houseStyle, setHouseStyle] = useState(() =>
-    lsGet("houseStyle", DEFAULT_HOUSE_STYLE),
-  );
   const [showStyleEditor, setShowStyleEditor] = useState(false);
-
-  const [dealNotes, setDealNotes] = useState(() => lsGet("dealNotes", {}));
   const [expandedNotes, setExpandedNotes] = useState({});
-
   const [patchModal, setPatchModal] = useState(null);
   const [patchInput, setPatchInput] = useState("");
-
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [quickAddVendor, setQuickAddVendor] = useState("");
   const [quickAddDealText, setQuickAddDealText] = useState("");
   const [quickAddExclusive, setQuickAddExclusive] = useState(false);
 
   useEffect(() => {
-    lsSet("view", view);
-  }, [view]);
-  useEffect(() => {
-    lsSet("rawInput", rawInput);
-  }, [rawInput]);
-  useEffect(() => {
-    lsSet("jsonInput", jsonInput);
-  }, [jsonInput]);
-  useEffect(() => {
-    lsSet("finalGroups", finalGroups);
-  }, [finalGroups]);
-  useEffect(() => {
-    lsSet("houseStyle", houseStyle);
-  }, [houseStyle]);
-  useEffect(() => {
-    lsSet("dealNotes", dealNotes);
-  }, [dealNotes]);
-
-  useEffect(() => {
-    if (initialText && initialText !== rawInput) setRawInput(initialText);
-  }, [initialText]);
-
-  useEffect(() => {
     loadConfetti();
   }, []);
+
+  const updateSession = useCallback(
+    (patch) => {
+      onSessionChange((prev) => (
+        typeof patch === "function" ? patch(prev) : { ...prev, ...patch }
+      ));
+    },
+    [onSessionChange],
+  );
 
   const handleGeneratePrompt = useCallback(() => {
     const groups = parseRawToGroups(rawInput);
@@ -137,28 +93,49 @@ export default function CopywritingStep({ initialText, showToast }) {
         return;
       }
 
-      setFinalGroups(result.data);
-      setView("work");
+      updateSession({
+        finalGroups: result.data,
+        view: "work",
+      });
       window.scrollTo(0, 0);
     } catch (e) {
       showToast("JSON Syntax Error: " + e.message, "error");
     }
-  }, [rawInput, jsonInput, showToast]);
+  }, [jsonInput, rawInput, showToast, updateSession]);
 
   const handleProceedPastGate = useCallback(() => {
     if (pendingData) {
-      setFinalGroups(pendingData);
-      setView("work");
+      updateSession({
+        finalGroups: pendingData,
+        view: "work",
+      });
       setValidationWarnings(null);
       setPendingData(null);
       window.scrollTo(0, 0);
     }
-  }, [pendingData]);
+  }, [pendingData, updateSession]);
 
   const handleCancelGate = useCallback(() => {
     setValidationWarnings(null);
     setPendingData(null);
   }, []);
+
+  const toggleCheck = useCallback((vIdx, dIdx, forceState = null) => {
+    updateSession((prev) => ({
+      ...prev,
+      finalGroups: prev.finalGroups.map((g, gi) => ({
+        ...g,
+        deals: g.deals.map((d, di) => {
+          if (gi === vIdx && di === dIdx) {
+            const next = forceState !== null ? forceState : !d.checked;
+            if (next) fireConfetti();
+            return { ...d, checked: next };
+          }
+          return d;
+        }),
+      })),
+    }));
+  }, [updateSession]);
 
   const handleCopy = useCallback((text, key, isComplete, vIdx, dIdx) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -172,35 +149,23 @@ export default function CopywritingStep({ initialText, showToast }) {
         });
       }, 1500);
     });
-  }, []);
-
-  const toggleCheck = useCallback((vIdx, dIdx, forceState = null) => {
-    setFinalGroups((prev) =>
-      prev.map((g, gi) => ({
-        ...g,
-        deals: g.deals.map((d, di) => {
-          if (gi === vIdx && di === dIdx) {
-            const next = forceState !== null ? forceState : !d.checked;
-            if (next) fireConfetti();
-            return { ...d, checked: next };
-          }
-          return d;
-        }),
-      })),
-    );
-  }, []);
+  }, [toggleCheck]);
 
   const reset = useCallback(() => {
-    setRawInput("");
-    setJsonInput("");
-    setFinalGroups([]);
-    setView("input");
+    updateSession({
+      view: "input",
+      rawInput: "",
+      jsonInput: "",
+      finalGroups: [],
+      dealNotes: {},
+    });
     setShowReset(false);
     setValidationWarnings(null);
     setPendingData(null);
     setPatchModal(null);
     setPatchInput("");
-  }, []);
+    setExpandedNotes({});
+  }, [updateSession]);
 
   const handleSingleDealPrompt = useCallback(
     (group, deal, note = "") => {
@@ -228,14 +193,14 @@ export default function CopywritingStep({ initialText, showToast }) {
         vendorIndex: patchModal.group.vendorIndex,
         dealIndex: patchModal.deal.dealIndex,
       });
-      setFinalGroups(nextGroups);
+      updateSession({ finalGroups: nextGroups });
       setPatchModal(null);
       setPatchInput("");
       showToast("Deal updated", "success");
     } catch (e) {
       showToast(e.message, "error");
     }
-  }, [patchInput, patchModal, finalGroups, showToast]);
+  }, [finalGroups, patchInput, patchModal, showToast, updateSession]);
 
   const handleQuickAdd = useCallback(() => {
     try {
@@ -244,7 +209,7 @@ export default function CopywritingStep({ initialText, showToast }) {
         dealText: quickAddDealText,
         isExclusive: quickAddExclusive,
       });
-      setRawInput(nextRaw);
+      const nextSessionPatch = { rawInput: nextRaw };
 
       if (view === "work") {
         const groups = parseRawToGroups(nextRaw);
@@ -309,9 +274,10 @@ export default function CopywritingStep({ initialText, showToast }) {
             deals: mergedDeals,
           };
         });
-
-        setFinalGroups(nextGroups);
+        nextSessionPatch.finalGroups = nextGroups;
       }
+
+      updateSession(nextSessionPatch);
 
       setQuickAddVendor("");
       setQuickAddDealText("");
@@ -329,6 +295,7 @@ export default function CopywritingStep({ initialText, showToast }) {
     view,
     finalGroups,
     showToast,
+    updateSession,
   ]);
 
   const totalDeals = finalGroups.reduce((acc, g) => acc + g.deals.length, 0);
@@ -405,7 +372,7 @@ export default function CopywritingStep({ initialText, showToast }) {
           >
             <textarea
               value={houseStyle}
-              onChange={(e) => setHouseStyle(e.target.value)}
+              onChange={(e) => updateSession({ houseStyle: e.target.value })}
               className="modal-textarea"
               spellCheck={false}
             />
@@ -632,10 +599,12 @@ export default function CopywritingStep({ initialText, showToast }) {
                             className="deal-note-input"
                             value={dealNotes[noteKey] || ""}
                             onChange={(e) =>
-                              setDealNotes((prev) => ({
-                                ...prev,
-                                [noteKey]: e.target.value,
-                              }))
+                              updateSession({
+                                dealNotes: {
+                                  ...dealNotes,
+                                  [noteKey]: e.target.value,
+                                },
+                              })
                             }
                             placeholder="Example: make this more customer-facing, use a stronger CTA, don't say member offer"
                             spellCheck={false}
@@ -763,7 +732,7 @@ export default function CopywritingStep({ initialText, showToast }) {
         >
           <textarea
             value={houseStyle}
-            onChange={(e) => setHouseStyle(e.target.value)}
+            onChange={(e) => updateSession({ houseStyle: e.target.value })}
             className="modal-textarea"
             spellCheck={false}
           />
@@ -812,7 +781,7 @@ export default function CopywritingStep({ initialText, showToast }) {
           <div className="panel-body">
             <textarea
               value={rawInput}
-              onChange={(e) => setRawInput(e.target.value)}
+              onChange={(e) => updateSession({ rawInput: e.target.value })}
               placeholder="v Vendor Name&#10;d Deal text..."
               spellCheck={false}
             />
@@ -835,7 +804,7 @@ export default function CopywritingStep({ initialText, showToast }) {
           <div className="panel-body">
             <textarea
               value={jsonInput}
-              onChange={(e) => setJsonInput(e.target.value)}
+              onChange={(e) => updateSession({ jsonInput: e.target.value })}
               placeholder="Paste JSON here..."
               spellCheck={false}
             />

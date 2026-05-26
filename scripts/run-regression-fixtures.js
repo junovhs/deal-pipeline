@@ -33,7 +33,7 @@ function collectWarningTypes(warnings) {
 }
 
 async function main() {
-  const rawPromo = await readFixture("raw-promo-email.txt");
+  const rawPromo = await readFixture("raw-promo-email-sample.txt");
   const websiteRows = JSON.parse(await readFixture("website-deals.json"));
   const aiResponse = await readFixture("ai-response.txt");
 

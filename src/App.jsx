@@ -1,7 +1,8 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import DealtagStep from './components/DealtagStep';
 import DedupeStep from './components/DedupeStep';
 import CopywritingStep from './components/CopywritingStep';
+import { DEFAULT_HOUSE_STYLE } from './logic/copywriting';
 
 const STEPS = [
   { key: 'tag', label: '1. Tag', desc: 'Classify raw deals' },
@@ -9,73 +10,157 @@ const STEPS = [
   { key: 'copy', label: '3. Copy', desc: 'Write & track' },
 ];
 
-const LS_KEY = 'deal-pipeline-step';
+const STORAGE_KEY = 'deal-pipeline-session';
 
-function loadStep() {
-  try { return localStorage.getItem(LS_KEY) || 'tag'; } catch { return 'tag'; }
+function createDefaultSession() {
+  return {
+    activeStep: 'tag',
+    tag: {
+      input: '',
+      output: '',
+      stats: null,
+      includeX: true,
+    },
+    dedupe: {
+      hqText: '',
+      websiteRows: [],
+      lastRun: null,
+      threshold: 8,
+      supplierFilter: '',
+      viewFilter: 'all',
+      restrictToday: false,
+      rejectedHQIds: [],
+    },
+    copy: {
+      view: 'input',
+      rawInput: '',
+      jsonInput: '',
+      finalGroups: [],
+      houseStyle: DEFAULT_HOUSE_STYLE,
+      dealNotes: {},
+    },
+  };
+}
+
+function loadSession() {
+  const fallback = createDefaultSession();
+
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return {
+      ...fallback,
+      ...parsed,
+      tag: { ...fallback.tag, ...(parsed.tag || {}) },
+      dedupe: { ...fallback.dedupe, ...(parsed.dedupe || {}) },
+      copy: { ...fallback.copy, ...(parsed.copy || {}) },
+    };
+  } catch {
+    return fallback;
+  }
 }
 
 export default function App() {
-  const [step, setStepRaw] = useState(loadStep);
-  const [taggedText, setTaggedText] = useState('');
-  const [unmatchedText, setUnmatchedText] = useState('');
+  const [session, setSession] = useState(loadSession);
   const [notify, setNotify] = useState(null);
   const [showGlobalReset, setShowGlobalReset] = useState(false);
-  const resetRefs = useRef({ tag: null, dedupe: null, copy: null });
+  const [resetVersion, setResetVersion] = useState(0);
+  const toastTimerRef = useRef(null);
 
-  const setStep = useCallback((s) => {
-    setStepRaw(s);
-    try { localStorage.setItem(LS_KEY, s); } catch {}
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    } catch {}
+  }, [session]);
+
+  useEffect(
+    () => () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    },
+    [],
+  );
+
+  const setStep = useCallback((step) => {
+    setSession((prev) => ({ ...prev, activeStep: step }));
+  }, []);
+
+  const updateStepState = useCallback((stepKey, updater) => {
+    setSession((prev) => {
+      const current = prev[stepKey];
+      const next =
+        typeof updater === 'function' ? updater(current) : { ...current, ...updater };
+      return { ...prev, [stepKey]: next };
+    });
   }, []);
 
   const showToast = useCallback((msg, type = 'info') => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
     setNotify({ msg, type });
-    setTimeout(() => setNotify(null), 4000);
+    toastTimerRef.current = setTimeout(() => {
+      setNotify(null);
+      toastTimerRef.current = null;
+    }, 4000);
   }, []);
 
-  // Flow data forward: Tag → Dedupe
   const handleTagComplete = useCallback((text) => {
-    setTaggedText(text);
-    setStep('dedupe');
+    setSession((prev) => ({
+      ...prev,
+      activeStep: 'dedupe',
+      dedupe: {
+        ...prev.dedupe,
+        hqText: text,
+        lastRun: null,
+        rejectedHQIds: [],
+      },
+      copy: {
+        ...createDefaultSession().copy,
+        houseStyle: prev.copy.houseStyle,
+      },
+    }));
     showToast('Tagged text loaded into Dedupe', 'success');
-  }, [showToast, setStep]);
+  }, [showToast]);
 
-  // Flow data forward: Dedupe → Copy
   const handleDedupeComplete = useCallback((text) => {
-    setUnmatchedText(text);
-    setStep('copy');
+    setSession((prev) => ({
+      ...prev,
+      activeStep: 'copy',
+      copy: {
+        ...createDefaultSession().copy,
+        rawInput: text,
+        houseStyle: prev.copy.houseStyle,
+      },
+    }));
     showToast('Unmatched deals loaded into Copywriting', 'success');
-  }, [showToast, setStep]);
+  }, [showToast]);
 
   const handleGlobalReset = useCallback(() => {
-    // Clear all localStorage keys used by steps
     try {
-      Object.keys(localStorage).forEach(k => {
-        if (k.startsWith('dp-') || k === LS_KEY) localStorage.removeItem(k);
-      });
+      localStorage.removeItem(STORAGE_KEY);
     } catch {}
-    setTaggedText('');
-    setUnmatchedText('');
+    setSession(createDefaultSession());
+    setNotify(null);
     setShowGlobalReset(false);
-    setStep('tag');
-    // Force remount all steps by toggling a key
-    window.location.reload();
-  }, [setStep]);
+    setResetVersion((version) => version + 1);
+  }, []);
 
   return (
     <div className="app">
-      {/* Header */}
       <header className="app-header">
         <h1 className="app-title">Deal Pipeline</h1>
         <nav className="step-nav">
-          {STEPS.map(s => (
+          {STEPS.map((step) => (
             <button
-              key={s.key}
-              className={`step-tab ${step === s.key ? 'active' : ''}`}
-              onClick={() => setStep(s.key)}
+              key={step.key}
+              className={`step-tab ${session.activeStep === step.key ? 'active' : ''}`}
+              onClick={() => setStep(step.key)}
             >
-              <span className="step-label">{s.label}</span>
-              <span className="step-desc">{s.desc}</span>
+              <span className="step-label">{step.label}</span>
+              <span className="step-desc">{step.desc}</span>
             </button>
           ))}
         </nav>
@@ -84,13 +169,12 @@ export default function App() {
         </button>
       </header>
 
-      {/* Global reset modal */}
       {showGlobalReset && (
         <div className="modal-overlay">
           <div className="modal">
             <h3>Reset Everything?</h3>
             <div className="modal-body">
-              <p>This will clear ALL data across all three steps. You'll start completely fresh.</p>
+              <p>This will clear ALL data across all three steps. You&apos;ll start completely fresh.</p>
             </div>
             <div className="modal-actions">
               <button className="btn" onClick={() => setShowGlobalReset(false)}>Cancel</button>
@@ -100,32 +184,37 @@ export default function App() {
         </div>
       )}
 
-      {/* Toast */}
       {notify && (
         <div className={`toast toast-${notify.type}`}>
           {notify.msg}
-          <button onClick={() => setNotify(null)}>×</button>
+          <button onClick={() => setNotify(null)}>x</button>
         </div>
       )}
 
-      {/* ALL steps stay mounted — hidden via CSS so state persists on tab switch */}
       <main className="app-main">
-        <div style={{ display: step === 'tag' ? 'block' : 'none' }}>
+        <div style={{ display: session.activeStep === 'tag' ? 'block' : 'none' }}>
           <DealtagStep
+            key={`tag-${resetVersion}`}
+            session={session.tag}
+            onSessionChange={(updater) => updateStepState('tag', updater)}
             onComplete={handleTagComplete}
             showToast={showToast}
           />
         </div>
-        <div style={{ display: step === 'dedupe' ? 'block' : 'none' }}>
+        <div style={{ display: session.activeStep === 'dedupe' ? 'block' : 'none' }}>
           <DedupeStep
-            initialText={taggedText}
+            key={`dedupe-${resetVersion}`}
+            session={session.dedupe}
+            onSessionChange={(updater) => updateStepState('dedupe', updater)}
             onComplete={handleDedupeComplete}
             showToast={showToast}
           />
         </div>
-        <div style={{ display: step === 'copy' ? 'block' : 'none' }}>
+        <div style={{ display: session.activeStep === 'copy' ? 'block' : 'none' }}>
           <CopywritingStep
-            initialText={unmatchedText}
+            key={`copy-${resetVersion}`}
+            session={session.copy}
+            onSessionChange={(updater) => updateStepState('copy', updater)}
             showToast={showToast}
           />
         </div>
