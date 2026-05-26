@@ -1,0 +1,17 @@
+[
+  {
+    "name": "copywriting",
+    "purpose": "Dense dependency cluster with 3 files.",
+    "files": [
+      "src/App.jsx",
+      "src/components/CopywritingStep.jsx",
+      "src/logic/copywriting.js"
+    ],
+    "interface_symbols": [],
+    "hotspot_files": [
+      "src/logic/copywriting.js"
+    ],
+    "internal_edge_density": 0.5,
+    "external_callers": 3
+  }
+]

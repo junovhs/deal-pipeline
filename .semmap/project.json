@@ -1,0 +1,39 @@
+{
+  "name": "deal-pipeline",
+  "one_liner": "A bespoke pipeline that takes a simple list of deals from a weekly Dream Vacations promo email, and takes them all the way to published deals with full copy.",
+  "language_primary": "typescript",
+  "languages": [
+    "typescript",
+    "javascript"
+  ],
+  "total_files": 17,
+  "total_lines": 6695,
+  "subsystems": [
+    "copywriting"
+  ],
+  "entry_points": [
+    "index.html"
+  ],
+  "generated_at": "2026-05-26T18:01:26Z",
+  "omni_ast_version": "0.4.27",
+  "file_hashes": {
+    "SEMMAP.md": "f50880271a6c672c95efded334209c1c2775f231d157f280849fdf13407234ef",
+    "criticism.md": "75c8e37068eddda887202da7d3f9baf080d5714e0e54bc870dac67b1c9287151",
+    "index.html": "ce2d84e1ef625260b6fb9b3c58a6b8d0fafea6065e7b4d830a64602db8c0f208",
+    "package-lock.json": "80292aa74be2afdbfabeb2dddb3e63269f147f04354580341039af89300eb722",
+    "package.json": "80e8a8528eadbf93f25782749aaf59cf3ff2745badf8f55e79c757d00506fb22",
+    "scripts/run-regression-fixtures.js": "91dcb4b1acb34488e94ba2d612d3bc29cb7009fe4d35e3d873502ddee7a140c6",
+    "src/App.css": "94fd3ebd1bf631ac623b438e87e76be938b098c0f013df90d95ebc42bdc6f059",
+    "src/App.jsx": "71f0c8f50e597b8f96afa1e2173233ef58500c028837fc8cbd70c2e4e5ae917e",
+    "src/components/CopywritingStep.jsx": "3809f362395e089dd3dbc489cfbbb18ce480951c44c4b1482418c1c07455a020",
+    "src/components/DealtagStep.jsx": "3bab379b3665ca917128ca08abae4358ab00d6e90c24c3fb34063868e116d5c5",
+    "src/components/DedupeStep.jsx": "2bab11e9647a8949fe19a4131df2d2a857e712d926c1771468524e9933b7e938",
+    "src/logic/copywriting.js": "300b71a05f3f1cadaf9703eae5f020a69d1921674cb5d169cc26509556d72239",
+    "src/logic/dealtag.js": "b7f60d113c405a6bc92093d933ffa3b5e1fae5394f5c1b7aa21f113a791f5945",
+    "src/logic/dedupe.js": "47e63a48d24abd6ca0f5668b8d0ebd8214cb92ab794a103f626b75868acfe7b6",
+    "src/logic/suppliers.js": "d15c8003d898e03f568b75dbeae38bbbc9241faca37d3e60800bdbc8bccbf88e",
+    "src/main.jsx": "8ee4671e8554b519db8bea04231ea37201ae1b050cced38aba132a744db26b7a",
+    "vite.config.js": "6dc0ce25c4170ac9fbadb4dbd19ca5c2ceb57b9c5efc5090b82e2923f53dd679"
+  },
+  "generated_at_commit": "91ab53b4bb227da3d7fe45937e36fa03a8f4fa4d"
+}

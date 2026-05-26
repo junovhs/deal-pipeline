@@ -1,0 +1,107 @@
+[
+  {
+    "from": "scripts/run-regression-fixtures.js",
+    "to": "src/logic/dealtag.js",
+    "kind": "import"
+  },
+  {
+    "from": "scripts/run-regression-fixtures.js",
+    "to": "src/logic/dedupe.js",
+    "kind": "import"
+  },
+  {
+    "from": "scripts/run-regression-fixtures.js",
+    "to": "src/logic/copywriting.js",
+    "kind": "import"
+  },
+  {
+    "from": "src/App.jsx",
+    "to": "src/components/DealtagStep.jsx",
+    "kind": "import"
+  },
+  {
+    "from": "src/App.jsx",
+    "to": "src/components/DedupeStep.jsx",
+    "kind": "import"
+  },
+  {
+    "from": "src/App.jsx",
+    "to": "src/components/CopywritingStep.jsx",
+    "kind": "import"
+  },
+  {
+    "from": "src/App.jsx",
+    "to": "src/logic/copywriting.js",
+    "kind": "import"
+  },
+  {
+    "from": "src/components/CopywritingStep.jsx",
+    "to": "src/logic/copywriting.js",
+    "kind": "import"
+  },
+  {
+    "from": "src/components/DealtagStep.jsx",
+    "to": "src/logic/dealtag.js",
+    "kind": "import"
+  },
+  {
+    "from": "src/components/DedupeStep.jsx",
+    "to": "src/logic/dedupe.js",
+    "kind": "import"
+  },
+  {
+    "from": "src/logic/dealtag.js",
+    "to": "src/logic/suppliers.js",
+    "kind": "import"
+  },
+  {
+    "from": "src/logic/dedupe.js",
+    "to": "src/logic/suppliers.js",
+    "kind": "import"
+  },
+  {
+    "from": "src/main.jsx",
+    "to": "src/App.jsx",
+    "kind": "import"
+  },
+  {
+    "from": "src/main.jsx",
+    "to": "src/App.css",
+    "kind": "import"
+  },
+  {
+    "from": "scripts/run-regression-fixtures.js",
+    "to": "src/logic/dealtag.js",
+    "kind": "call"
+  },
+  {
+    "from": "scripts/run-regression-fixtures.js",
+    "to": "src/logic/dedupe.js",
+    "kind": "call"
+  },
+  {
+    "from": "scripts/run-regression-fixtures.js",
+    "to": "src/logic/copywriting.js",
+    "kind": "call"
+  },
+  {
+    "from": "src/components/CopywritingStep.jsx",
+    "to": "src/logic/copywriting.js",
+    "kind": "call"
+  },
+  {
+    "from": "src/components/DealtagStep.jsx",
+    "to": "src/logic/dealtag.js",
+    "kind": "call"
+  },
+  {
+    "from": "src/components/DedupeStep.jsx",
+    "to": "src/logic/dedupe.js",
+    "kind": "call"
+  },
+  {
+    "from": "src/logic/dedupe.js",
+    "to": "src/logic/suppliers.js",
+    "kind": "call"
+  }
+]

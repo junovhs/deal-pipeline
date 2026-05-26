@@ -1,0 +1,597 @@
+[
+  {
+    "path": "SEMMAP.md",
+    "layer": 0,
+    "file_kind": "generated",
+    "description": "Generated semantic map.",
+    "exports": [],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {}
+  },
+  {
+    "path": "criticism.md",
+    "layer": 0,
+    "file_kind": "generated",
+    "description": "Support file for criticism.",
+    "exports": [],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {}
+  },
+  {
+    "path": "package.json",
+    "layer": 0,
+    "file_kind": "script",
+    "description": "Node.js package manifest.",
+    "exports": [],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {}
+  },
+  {
+    "path": "vite.config.js",
+    "layer": 0,
+    "file_kind": "production",
+    "description": "Implements vite.config functionality.",
+    "exports": [
+      "default"
+    ],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {}
+  },
+  {
+    "path": "package-lock.json",
+    "layer": 1,
+    "file_kind": "generated",
+    "description": "Implements package-lock functionality. data.",
+    "exports": [],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {}
+  },
+  {
+    "path": "scripts/run-regression-fixtures.js",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Implements run-regression-fixtures functionality.",
+    "exports": [],
+    "coupling": "mixed",
+    "behavior_tags": [
+      "owns-const-state",
+      "persists",
+      "async"
+    ],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 2.0,
+    "semantic_summary": "async side-effecting adapter",
+    "analysis": {
+      "functions": {
+        "total": 4,
+        "public": 0,
+        "max_cognitive_complexity": 0,
+        "avg_cognitive_complexity": 0
+      },
+      "calls": {
+        "total_calls": 72,
+        "resolved_calls": 8,
+        "unresolved_calls": 64,
+        "resolution_rate": 0.11111111
+      },
+      "control_flow": {
+        "max_nesting_depth": 0,
+        "cognitive_complexity": 0
+      },
+      "concurrency": {
+        "total_sites": 5,
+        "has_async": true,
+        "has_locks": false,
+        "has_spawn": false
+      },
+      "activation": {
+        "total_sites": 11,
+        "kinds": [
+          "callback-surface"
+        ]
+      }
+    }
+  },
+  {
+    "path": "src/App.jsx",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Implements App functionality.",
+    "exports": [
+      "App",
+      "default"
+    ],
+    "coupling": "mixed",
+    "behavior_tags": [
+      "owns-const-state",
+      "swallows-errors"
+    ],
+    "quality_tags": [
+      "syntax-degraded"
+    ],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 5.2666664,
+    "semantic_summary": "side-effecting constant-owning module that swallows errors",
+    "analysis": {
+      "functions": {
+        "total": 3,
+        "public": 1,
+        "max_cognitive_complexity": 8,
+        "avg_cognitive_complexity": 4
+      },
+      "calls": {
+        "total_calls": 56,
+        "resolved_calls": 5,
+        "unresolved_calls": 51,
+        "resolution_rate": 0.08928572
+      },
+      "control_flow": {
+        "max_nesting_depth": 2,
+        "cognitive_complexity": 13
+      },
+      "error_handling": {
+        "total_sites": 2,
+        "panics": 0,
+        "swallowed": 2,
+        "propagated": 0
+      },
+      "concurrency": {
+        "total_sites": 2,
+        "has_async": false,
+        "has_locks": false,
+        "has_spawn": true
+      },
+      "docs": {
+        "documented_symbols": 0,
+        "undocumented_public": 1
+      },
+      "syntax": {
+        "error_count": 68,
+        "missing_count": 20
+      },
+      "activation": {
+        "total_sites": 10,
+        "kinds": [
+          "callback-surface",
+          "component-export"
+        ]
+      }
+    }
+  },
+  {
+    "path": "src/components/CopywritingStep.jsx",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Implements copywriting step.",
+    "exports": [
+      "CopywritingStep",
+      "default"
+    ],
+    "coupling": "mixed",
+    "behavior_tags": [
+      "owns-state"
+    ],
+    "quality_tags": [
+      "complex-flow",
+      "syntax-degraded"
+    ],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 8.6,
+    "semantic_summary": "side-effecting stateful module",
+    "analysis": {
+      "functions": {
+        "total": 4,
+        "public": 1,
+        "max_cognitive_complexity": 28,
+        "avg_cognitive_complexity": 7
+      },
+      "calls": {
+        "total_calls": 172,
+        "resolved_calls": 2,
+        "unresolved_calls": 170,
+        "resolution_rate": 0.011627907
+      },
+      "control_flow": {
+        "max_nesting_depth": 3,
+        "cognitive_complexity": 30
+      },
+      "concurrency": {
+        "total_sites": 3,
+        "has_async": false,
+        "has_locks": false,
+        "has_spawn": true
+      },
+      "docs": {
+        "documented_symbols": 0,
+        "undocumented_public": 1
+      },
+      "syntax": {
+        "error_count": 296,
+        "missing_count": 122
+      },
+      "activation": {
+        "total_sites": 22,
+        "kinds": [
+          "callback-surface",
+          "component-export"
+        ]
+      }
+    }
+  },
+  {
+    "path": "src/components/DealtagStep.jsx",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Implements dealtag step.",
+    "exports": [
+      "DealtagStep",
+      "default"
+    ],
+    "coupling": "pure",
+    "quality_tags": [
+      "syntax-degraded"
+    ],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 1.4,
+    "semantic_summary": "pure computation",
+    "analysis": {
+      "functions": {
+        "total": 2,
+        "public": 1,
+        "max_cognitive_complexity": 2,
+        "avg_cognitive_complexity": 1
+      },
+      "calls": {
+        "total_calls": 36,
+        "resolved_calls": 1,
+        "unresolved_calls": 35,
+        "resolution_rate": 0.027777778
+      },
+      "control_flow": {
+        "max_nesting_depth": 1,
+        "cognitive_complexity": 3
+      },
+      "docs": {
+        "documented_symbols": 0,
+        "undocumented_public": 1
+      },
+      "syntax": {
+        "error_count": 57,
+        "missing_count": 27
+      },
+      "activation": {
+        "total_sites": 6,
+        "kinds": [
+          "callback-surface",
+          "component-export"
+        ]
+      }
+    }
+  },
+  {
+    "path": "src/components/DedupeStep.jsx",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Implements dedupe step.",
+    "exports": [
+      "DedupeStep",
+      "default"
+    ],
+    "coupling": "pure",
+    "behavior_tags": [
+      "async"
+    ],
+    "quality_tags": [
+      "complex-flow",
+      "syntax-degraded"
+    ],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 7.4,
+    "semantic_summary": "async pure computation",
+    "analysis": {
+      "functions": {
+        "total": 4,
+        "public": 1,
+        "max_cognitive_complexity": 22,
+        "avg_cognitive_complexity": 5
+      },
+      "calls": {
+        "total_calls": 105,
+        "resolved_calls": 1,
+        "unresolved_calls": 104,
+        "resolution_rate": 0.00952381
+      },
+      "control_flow": {
+        "max_nesting_depth": 2,
+        "cognitive_complexity": 22
+      },
+      "concurrency": {
+        "total_sites": 2,
+        "has_async": true,
+        "has_locks": false,
+        "has_spawn": false
+      },
+      "docs": {
+        "documented_symbols": 0,
+        "undocumented_public": 1
+      },
+      "syntax": {
+        "error_count": 200,
+        "missing_count": 85
+      },
+      "activation": {
+        "total_sites": 20,
+        "kinds": [
+          "callback-surface",
+          "component-export",
+          "string-dispatch"
+        ]
+      }
+    }
+  },
+  {
+    "path": "src/logic/copywriting.js",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Validates and merge.",
+    "exports": [
+      "appendDealToRawInput",
+      "cleanAndParsePatchJSON",
+      "parseRawToGroups",
+      "cleanAndParseJSON"
+    ],
+    "coupling": "pure",
+    "behavior_tags": [
+      "owns-const-state"
+    ],
+    "quality_tags": [
+      "undocumented"
+    ],
+    "hotspot": true,
+    "fan_in": 0,
+    "risk_score": 9.4,
+    "semantic_summary": "pure computation constant-owning module",
+    "analysis": {
+      "functions": {
+        "total": 12,
+        "public": 10,
+        "max_cognitive_complexity": 12,
+        "avg_cognitive_complexity": 4
+      },
+      "calls": {
+        "total_calls": 125,
+        "resolved_calls": 8,
+        "unresolved_calls": 117,
+        "resolution_rate": 0.064
+      },
+      "control_flow": {
+        "max_nesting_depth": 3,
+        "cognitive_complexity": 56
+      },
+      "docs": {
+        "documented_symbols": 0,
+        "undocumented_public": 11
+      },
+      "activation": {
+        "total_sites": 19,
+        "kinds": [
+          "callback-surface"
+        ]
+      },
+      "guards": {
+        "total_sites": 1
+      }
+    }
+  },
+  {
+    "path": "src/logic/dealtag.js",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Implements transform functionality.",
+    "exports": [
+      "transform"
+    ],
+    "coupling": "pure",
+    "behavior_tags": [
+      "owns-const-state"
+    ],
+    "quality_tags": [
+      "complex-flow"
+    ],
+    "hotspot": true,
+    "fan_in": 0,
+    "risk_score": 12.4,
+    "semantic_summary": "pure computation constant-owning module",
+    "analysis": {
+      "functions": {
+        "total": 9,
+        "public": 1,
+        "max_cognitive_complexity": 32,
+        "avg_cognitive_complexity": 6
+      },
+      "calls": {
+        "total_calls": 103,
+        "resolved_calls": 11,
+        "unresolved_calls": 92,
+        "resolution_rate": 0.106796116
+      },
+      "control_flow": {
+        "max_nesting_depth": 4,
+        "cognitive_complexity": 56
+      },
+      "docs": {
+        "documented_symbols": 0,
+        "undocumented_public": 1
+      },
+      "activation": {
+        "total_sites": 30,
+        "kinds": [
+          "callback-surface"
+        ]
+      }
+    }
+  },
+  {
+    "path": "src/logic/dedupe.js",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Parses hq dates.",
+    "exports": [
+      "ingestWebsiteJSON",
+      "runFullMatch",
+      "parseHQDates",
+      "dateFmt"
+    ],
+    "coupling": "mixed",
+    "behavior_tags": [
+      "owns-state"
+    ],
+    "quality_tags": [
+      "undocumented",
+      "complex-flow"
+    ],
+    "hotspot": true,
+    "fan_in": 0,
+    "risk_score": 16.8,
+    "semantic_summary": "side-effecting stateful module",
+    "analysis": {
+      "functions": {
+        "total": 17,
+        "public": 7,
+        "max_cognitive_complexity": 54,
+        "avg_cognitive_complexity": 9
+      },
+      "calls": {
+        "total_calls": 256,
+        "resolved_calls": 24,
+        "unresolved_calls": 232,
+        "resolution_rate": 0.09375
+      },
+      "control_flow": {
+        "max_nesting_depth": 4,
+        "cognitive_complexity": 157
+      },
+      "docs": {
+        "documented_symbols": 0,
+        "undocumented_public": 7
+      },
+      "activation": {
+        "total_sites": 42,
+        "kinds": [
+          "callback-surface"
+        ]
+      },
+      "guards": {
+        "total_sites": 1
+      }
+    }
+  },
+  {
+    "path": "src/logic/suppliers.js",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Implements canonical vendor.",
+    "exports": [
+      "supplierNames",
+      "canonicalVendor",
+      "familyOf",
+      "vendorFamily"
+    ],
+    "coupling": "pure",
+    "behavior_tags": [
+      "owns-const-state"
+    ],
+    "quality_tags": [
+      "undocumented",
+      "complex-flow"
+    ],
+    "hotspot": true,
+    "fan_in": 0,
+    "risk_score": 8.8,
+    "semantic_summary": "pure computation constant-owning module",
+    "analysis": {
+      "functions": {
+        "total": 3,
+        "public": 3,
+        "max_cognitive_complexity": 24,
+        "avg_cognitive_complexity": 8
+      },
+      "calls": {
+        "total_calls": 68,
+        "resolved_calls": 5,
+        "unresolved_calls": 63,
+        "resolution_rate": 0.073529415
+      },
+      "control_flow": {
+        "max_nesting_depth": 1,
+        "cognitive_complexity": 24
+      },
+      "docs": {
+        "documented_symbols": 0,
+        "undocumented_public": 7
+      },
+      "activation": {
+        "total_sites": 24,
+        "kinds": [
+          "callback-surface"
+        ]
+      }
+    }
+  },
+  {
+    "path": "src/main.jsx",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Support file for the src subsystem.",
+    "exports": [],
+    "quality_tags": [
+      "syntax-degraded"
+    ],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {
+      "syntax": {
+        "error_count": 1,
+        "missing_count": 1
+      }
+    }
+  },
+  {
+    "path": "index.html",
+    "layer": 3,
+    "file_kind": "production",
+    "description": "Deal Pipeline",
+    "exports": [],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {}
+  },
+  {
+    "path": "src/App.css",
+    "layer": 3,
+    "file_kind": "production",
+    "description": "Implements app functionality. styles.",
+    "exports": [],
+    "hotspot": false,
+    "fan_in": 0,
+    "risk_score": 1.0,
+    "analysis": {}
+  }
+]

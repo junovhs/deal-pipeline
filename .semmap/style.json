@@ -1,0 +1,203 @@
+{
+  "generated_at": "2026-05-26T18:01:27Z",
+  "entries": [
+    {
+      "file": "scripts/run-regression-fixtures.js",
+      "language": "javascript",
+      "idiom_category": "concurrency-pattern",
+      "excerpts": [
+        "import assert from \"node:assert/strict\";",
+        "import { readFile } from \"node:fs/promises\";",
+        "import path from \"node:path\";",
+        "import { fileURLToPath } from \"node:url\";",
+        "",
+        "import { transform } from \"../src/logic/dealtag.js\";",
+        "import {",
+        "  ingestWebsiteJSON,",
+        "  parseHQ,",
+        "  resetIds,",
+        "  runFullMatch,",
+        "} from \"../src/logic/dedupe.js\";",
+        "import {",
+        "  parseRawToGroups,",
+        "  validateAndMerge,"
+      ]
+    },
+    {
+      "file": "src/App.jsx",
+      "language": "javascript",
+      "idiom_category": "error-propagation",
+      "excerpts": [
+        "import React, { useCallback, useEffect, useRef, useState } from 'react';",
+        "import DealtagStep from './components/DealtagStep.jsx';",
+        "import DedupeStep from './components/DedupeStep.jsx';",
+        "import CopywritingStep from './components/CopywritingStep.jsx';",
+        "import { DEFAULT_HOUSE_STYLE } from './logic/copywriting.js';",
+        "",
+        "const STEPS = [",
+        "  { key: 'tag', label: '1. Tag', desc: 'Classify raw deals' },",
+        "  { key: 'dedupe', label: '2. Dedupe', desc: 'Match against website' },",
+        "  { key: 'copy', label: '3. Copy', desc: 'Write & track' },",
+        "];",
+        "",
+        "const STORAGE_KEY = 'deal-pipeline-session';",
+        "",
+        "function createDefaultSession() {"
+      ]
+    },
+    {
+      "file": "src/components/CopywritingStep.jsx",
+      "language": "javascript",
+      "idiom_category": "state-management",
+      "excerpts": [
+        "import React, { useState, useEffect, useCallback, useMemo } from \"react\";",
+        "import {",
+        "  parseRawToGroups,",
+        "  generatePrompt,",
+        "  generateSingleDealPrompt,",
+        "  validateAndMerge,",
+        "  cleanAndParsePatchJSON,",
+        "  applyDealPatch,",
+        "  appendDealToRawInput,",
+        "} from \"../logic/copywriting.js\";",
+        "",
+        "let confettiLoaded = false;",
+        "let confettiFn = null;",
+        "",
+        "function loadConfetti() {"
+      ]
+    },
+    {
+      "file": "src/components/DealtagStep.jsx",
+      "language": "javascript",
+      "idiom_category": "general-idioms",
+      "excerpts": [
+        "import React, { useMemo, useRef, useCallback } from 'react';",
+        "import { transform } from '../logic/dealtag.js';",
+        "",
+        "function parseLines(output) {",
+        "  if (!output) return [];",
+        "  return output.split('\\n').map((line) => {",
+        "    const tag = line.split('\\t', 1)[0];",
+        "    return { tag, text: line.slice(tag.length + 1) };",
+        "  });",
+        "}",
+        "",
+        "export default function DealtagStep({ session, onSessionChange, onComplete, showToast }) {",
+        "  const leftRef = useRef(null);",
+        "  const rightRef = useRef(null);",
+        "  const syncing = useRef(false);"
+      ]
+    },
+    {
+      "file": "src/components/DedupeStep.jsx",
+      "language": "javascript",
+      "idiom_category": "concurrency-pattern",
+      "excerpts": [
+        "import React, { useMemo, useCallback, useRef } from 'react';",
+        "import {",
+        "  parseHQ, resetIds, ingestWebsiteJSON, runFullMatch,",
+        "  exportUnmatched, sameDay, dateFmt,",
+        "} from '../logic/dedupe.js';",
+        "",
+        "function parseWebsiteRows(text) {",
+        "  const data = JSON.parse(text);",
+        "  return Array.isArray(data) ? data : data.entries || data.data || [];",
+        "}",
+        "",
+        "export default function DedupeStep({ session, onSessionChange, onComplete, showToast }) {",
+        "  const fileRef = useRef(null);",
+        "",
+        "  const {"
+      ]
+    },
+    {
+      "file": "src/logic/copywriting.js",
+      "language": "javascript",
+      "idiom_category": "general-idioms",
+      "excerpts": [
+        "// =============================================================================",
+        "// COPYWRITING LOGIC",
+        "// External-AI friendly:",
+        "//   - Full batch prompt generation",
+        "//   - Single-deal prompt generation",
+        "//   - Stable deal IDs",
+        "//   - Single-deal patch application",
+        "//   - Validation + merge",
+        "// =============================================================================",
+        "",
+        "export const DEFAULT_HOUSE_STYLE = `ABSOLUTE RULES (violating these is a critical error):",
+        "",
+        "1. NEVER ADD FACTUAL CLAIMS that are not in the source.",
+        "- If the source says \"$100 OBC\", do NOT add \"per stateroom\", \"per person\", \"per cabin\", or any other qualifier that isn't explicitly stated.",
+        "- If the source says \"PPGs for 2\", that means \"Free Gratuities for 2\" — do NOT change the meaning."
+      ]
+    },
+    {
+      "file": "src/logic/dealtag.js",
+      "language": "javascript",
+      "idiom_category": "general-idioms",
+      "excerpts": [
+        "// =============================================================================",
+        "// DEALTAG LOGIC — ported from dealtag/index.html",
+        "// Bug fixes applied:",
+        "//   1. looksLikeVendorCandidate: Unicode-aware regex (fixes Zoëtry etc)",
+        "//   2. transform: treat null currentKnown same as false (fixes orphaned deals)",
+        "// =============================================================================",
+        "",
+        "import { suppliers, aliases, norm } from './suppliers.js';",
+        "",
+        "// These matcher switches feed `isKnownSupplier` and `bestSupplierMatch`; they",
+        "// are live config, not orphaned constants.",
+        "const STRICT_SUPPLIERS = true;",
+        "const FAMILY_ALIASES_ALLOWED = false;",
+        "",
+        "const familyAliases = new Map();"
+      ]
+    },
+    {
+      "file": "src/logic/dedupe.js",
+      "language": "javascript",
+      "idiom_category": "state-management",
+      "excerpts": [
+        "// =============================================================================",
+        "// DEDUPE LOGIC — ported from dedupe/index.html",
+        "// Bug fixes applied:",
+        "//   1. Viking familyOf ordering — fixed in shared suppliers.js",
+        "//   2. Supplier list drift — eliminated by using shared suppliers.js",
+        "//   3. parseYear — handles garbage input, returns null instead of NaN",
+        "// =============================================================================",
+        "",
+        "import { norm, canonicalVendor, vendorFamily } from './suppliers.js';",
+        "",
+        "// --- Date parsing ---",
+        "",
+        "function parseYear(y) {",
+        "  if (!y) return null;",
+        "  // BUG FIX: Strip non-digit characters and validate"
+      ]
+    },
+    {
+      "file": "src/logic/suppliers.js",
+      "language": "javascript",
+      "idiom_category": "general-idioms",
+      "excerpts": [
+        "// =============================================================================",
+        "// SINGLE SOURCE OF TRUTH: Supplier list from Dealtag (confirmed up-to-date)",
+        "// Both Dealtag and Dedupe import from here. No more drift.",
+        "// =============================================================================",
+        "",
+        "// Shared vendor catalog for both tagging and dedupe; Neti flags it because the",
+        "// consuming imports live outside this file, but the runtime depends on it.",
+        "export const suppliers = [",
+        "  {name: \"Abercrombie & Kent\", url: \"abercrombie-kent\", cats: [\"tour\"]},",
+        "  {name: \"Adventures by Disney\", url: \"adventures-by-disney\", cats: [\"dis\", \"tour\"]},",
+        "  {name: \"African Travel\", url: \"african-travel\", cats: [\"tour\"]},",
+        "  {name: \"Ama Waterways\", url: \"ama\", cats: [\"riv\"]},",
+        "  {name: \"American Airline Vacations\", url: \"american-airline-vacations\", cats: [\"res\"]},",
+        "  {name: \"American Cruise Line\", url: \"american-cruise-line\", cats: [\"lux\", \"riv\"]},",
+        "  {name: \"Atlantis Paradise Island Bahamas\", url: \"atlantis\", cats: [\"res\"]},"
+      ]
+    }
+  ]
+}
