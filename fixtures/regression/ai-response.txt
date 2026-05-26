@@ -1,0 +1,40 @@
+Here is the copy batch:
+[
+  {
+    "vendorIndex": 1,
+    "deals": [
+      {
+        "headline": "Free Gratuities for 2 with $100 OBC",
+        "description": "Enjoy free gratuities and onboard credit with bonus code PB4",
+        "startDate": null,
+        "endDate": "06/15/2026",
+        "dateNote": null
+      },
+    ]
+  },
+  {
+    "vendorIndex": 2,
+    "deals": [
+      {
+        "headline": "Kids Sail Free with up to $500 OBC",
+        "description": "Save on family sailings with onboard credit",
+        "startDate": null,
+        "endDate": "07/20/2026",
+        "dateNote": null
+      }
+    ]
+  },
+  {
+    "vendorIndex": 3,
+    "deals": [
+      {
+        "headline": "Save 20% on select Carnival cruises",
+        "description": "Book now for limited-time savings",
+        "startDate": null,
+        "endDate": null,
+        "dateNote": "possible typo: ends 05/10/q7"
+      }
+    ]
+  },
+]
+End of payload.

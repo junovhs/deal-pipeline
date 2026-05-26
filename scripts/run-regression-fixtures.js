@@ -1,0 +1,158 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { transform } from "../src/logic/dealtag.js";
+import {
+  ingestWebsiteJSON,
+  parseHQ,
+  resetIds,
+  runFullMatch,
+} from "../src/logic/dedupe.js";
+import {
+  parseRawToGroups,
+  validateAndMerge,
+} from "../src/logic/copywriting.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const fixtureDir = path.join(__dirname, "..", "fixtures", "regression");
+
+async function readFixture(name) {
+  return readFile(path.join(fixtureDir, name), "utf8");
+}
+
+function findMatch(matches, vendor) {
+  const match = matches.find((row) => row.hq.vendor === vendor);
+  assert.ok(match, `Expected a dedupe result for ${vendor}.`);
+  return match;
+}
+
+function collectWarningTypes(warnings) {
+  return warnings.map((warning) => warning.type).sort();
+}
+
+async function main() {
+  const rawPromo = await readFixture("raw-promo-email.txt");
+  const websiteRows = JSON.parse(await readFixture("website-deals.json"));
+  const aiResponse = await readFixture("ai-response.txt");
+
+  const tagged = transform(rawPromo, { includeUnknowns: true });
+  const taggedLines = tagged.text.split("\n");
+  assert.deepEqual(tagged.stats, {
+    vendors: 3,
+    deals: 3,
+    excl: 1,
+    unknownSuppliers: 1,
+    lines: 10,
+  });
+  assert.deepEqual(taggedLines, [
+    "v\tNCL",
+    "ed\tEXCLUSIVE: Free Gratuities for 2 + $100 OBC ends 06/15/26",
+    "v\tRoyal Caribbean",
+    "d\tKids Sail Free + up to $500 OBC ends 07/20/26",
+    "v\tCarnival",
+    "d\tSave 20% off cruise fares ends 05/10/q7",
+    "X\tMystery Escapes",
+    "X\tSave $200 on select sailings ends 08/01/26",
+  ]);
+
+  resetIds();
+  const hqDeals = parseHQ(tagged.text);
+  assert.equal(hqDeals.length, 3);
+  assert.deepEqual(
+    hqDeals.map((deal) => ({
+      vendor: deal.vendor,
+      type: deal.type,
+      hasEndDate: Boolean(deal.end),
+    })),
+    [
+      { vendor: "Norwegian", type: "exclusive", hasEndDate: true },
+      { vendor: "Royal Caribbean", type: "deal", hasEndDate: true },
+      { vendor: "Carnival", type: "deal", hasEndDate: true },
+    ],
+  );
+
+  const websiteDeals = ingestWebsiteJSON(websiteRows);
+  assert.deepEqual(
+    websiteDeals.map((deal) => ({
+      supplier: deal.supplier,
+      vendorFamily: deal.vendorFamily,
+    })),
+    [
+      { supplier: "Norwegian", vendorFamily: "norwegian" },
+      { supplier: "Royal Caribbean", vendorFamily: "royal caribbean" },
+    ],
+  );
+
+  const matches = runFullMatch(hqDeals, websiteDeals);
+  assert.equal(matches.length, 3);
+
+  const norwegianMatch = findMatch(matches, "Norwegian");
+  assert.equal(norwegianMatch.web?.supplier, "Norwegian");
+  assert.ok(
+    norwegianMatch.meta.score >= 20,
+    `Expected Norwegian alias match to score strongly, got ${norwegianMatch.meta.score}.`,
+  );
+  assert.ok(
+    norwegianMatch.meta.why.some((reason) => reason.text === "obc"),
+    "Expected Norwegian alias match to retain onboard-credit reasoning.",
+  );
+
+  const royalMatch = findMatch(matches, "Royal Caribbean");
+  assert.equal(royalMatch.web?.supplier, "Royal Caribbean");
+  assert.ok(
+    royalMatch.meta.score >= 20,
+    `Expected Royal Caribbean match to score strongly, got ${royalMatch.meta.score}.`,
+  );
+
+  const carnivalMatch = findMatch(matches, "Carnival");
+  assert.equal(carnivalMatch.web, null);
+  assert.deepEqual(collectWarningTypes(carnivalMatch.meta.why), ["neg"]);
+  assert.equal(carnivalMatch.meta.why[0].text, "no web deals");
+
+  const rawGroups = parseRawToGroups(tagged.text);
+  assert.deepEqual(
+    rawGroups.map((group) => ({
+      name: group.name,
+      deals: group.deals.length,
+      exclusive: group.deals[0]?.isExclusive ?? false,
+    })),
+    [
+      { name: "NCL", deals: 1, exclusive: true },
+      { name: "Royal Caribbean", deals: 1, exclusive: false },
+      { name: "Carnival", deals: 1, exclusive: false },
+    ],
+  );
+
+  const merged = validateAndMerge(rawGroups, aiResponse);
+  assert.ok(!merged.error, `Unexpected copy validation error: ${merged.error?.title}`);
+  assert.equal(merged.data.length, 3);
+  assert.equal(merged.warnings.length, 3);
+
+  const [exclusiveDeal] = merged.data[0].deals;
+  assert.deepEqual(collectWarningTypes(exclusiveDeal.warnings), [
+    "code",
+    "embellishment",
+    "format",
+  ]);
+  assert.match(exclusiveDeal.description, /Ends 6\/15\.$/);
+
+  const [carnivalDeal] = merged.data[2].deals;
+  assert.equal(carnivalDeal.dateNote, "possible typo: ends 05/10/q7");
+  assert.ok(
+    carnivalDeal.warnings.some((warning) => warning.type === "date"),
+    "Expected the AI date note to surface as a copy-validation warning.",
+  );
+
+  console.log("Tag fixture: PASS");
+  console.log("Dedupe fixture: PASS");
+  console.log("Copy validation fixture: PASS");
+  console.log("All regression fixtures passed.");
+}
+
+main().catch((error) => {
+  console.error("Regression fixture failure:");
+  console.error(error);
+  process.exitCode = 1;
+});

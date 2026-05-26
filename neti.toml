@@ -1,0 +1,21 @@
+[engine]
+pass_count = 10
+dossier_candidate_limit = 25
+review_file_limit = 8
+
+[reporting]
+default_output = "console"
+include_scaffold_notice = false
+
+[dead]
+honor_neti_ignore = true
+
+[locality]
+layers = []
+
+[commands]
+check = [
+    "npm run test:fixtures",
+    "npm run build",
+]
+fix = []

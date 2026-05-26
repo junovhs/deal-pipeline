@@ -1,1 +1,4 @@
 node_modules
+**/.ishoo/*.local.toml
+**/.ishoo/cache/
+**/.ishoo/worktrees/
