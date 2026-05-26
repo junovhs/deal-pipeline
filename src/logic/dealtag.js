@@ -4,7 +4,7 @@
 // classify the same vendor labels the same way.
 // =============================================================================
 
-import { resolveVendor } from './suppliers.js';
+import { resolveVendor, isTagEligibleSupplier } from './suppliers.js';
 
 const SECTION_HEADING = /(offers?)\s*:?\s*$/i;
 const DATE_RE = /(?:\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)[a-z]*\b\s*\d{1,2},?\s*\d{2,4})/i;
@@ -51,8 +51,7 @@ function looksLikeVendorCandidate(t) {
 
 function isKnownSupplier(line) {
   const label = canonicalVendorLabel(line);
-  const resolution = resolveVendor(label.trim());
-  return resolution.status === 'known' || (resolution.status === 'ambiguous' && Boolean(resolution.familyKey));
+  return isTagEligibleSupplier(label.trim());
 }
 
 function isContinuation(line) {
@@ -113,7 +112,7 @@ export function transform(raw, { includeUnknowns = true } = {}) {
     if (looksLikeVendorCandidate(orig)) {
       const label = canonicalVendorLabel(orig);
       const resolution = resolveVendor(label.trim());
-      if (resolution.status === 'known' || (resolution.status === 'ambiguous' && resolution.familyKey)) {
+      if (resolution.tagEligible) {
         vendorCount++;
         if (resolution.status === 'ambiguous') ambiguousCount++;
         out.push(`v\t${label}`);

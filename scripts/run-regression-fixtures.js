@@ -103,6 +103,13 @@ async function main() {
       `Unexpected family key for ${fixture.label}`,
     );
     assert.equal(actual.matchedBy, fixture.matchedBy, `Unexpected match mode for ${fixture.label}`);
+    if (Object.hasOwn(fixture, "tagEligible")) {
+      assert.equal(
+        actual.tagEligible,
+        fixture.tagEligible,
+        `Unexpected tag eligibility for ${fixture.label}`,
+      );
+    }
     if (fixture.candidates) {
       assert.deepEqual(actual.candidates, fixture.candidates, `Unexpected candidates for ${fixture.label}`);
     }

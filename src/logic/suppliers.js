@@ -193,6 +193,7 @@ const SUPPLIER_ALIASES = {
 
 const SUPPLIER_FAMILIES = [
   { key: "scenic", members: ["Scenic Eclipse Ocean Voyages", "Scenic River"] },
+  { key: "scenic-emerald", members: ["Emerald Cruises", "Scenic River"] },
   { key: "tauck", members: ["Tauck Cruises", "Tauck Tours"] },
   { key: "viking", members: ["Viking Ocean", "Viking River"] },
 ];
@@ -211,18 +212,23 @@ const SUPPLIER_AMBIGUITIES = [
   {
     label: "scenic emerald cruises",
     candidates: ["Emerald Cruises", "Scenic River"],
+    family: "scenic-emerald",
+    preferredCanonicalName: "Emerald Cruises",
+    tagEligible: true,
   },
   {
     label: "tauck",
     candidates: ["Tauck Cruises", "Tauck Tours"],
     family: "tauck",
     preferredCanonicalName: "Tauck Cruises",
+    tagEligible: true,
   },
   {
     label: "viking",
     candidates: ["Viking Ocean", "Viking River"],
     family: "viking",
     preferredCanonicalName: "Viking Ocean",
+    tagEligible: true,
   },
 ];
 
@@ -232,6 +238,15 @@ const SUPPLIER_KEYWORD_RULES = [
   { pattern: /\bncl\b|\bnorwegian\b/, canonicalName: "Norwegian" },
   { pattern: /\broyal\b|\brccl?\b/, canonicalName: "Royal Caribbean" },
 ];
+
+const TAG_INELIGIBLE_SUPPLIERS = new Set([
+  "Avanti",
+  "Bedsonline",
+  "Brightline",
+  "Classic Vacations",
+  "Pleasant Holidays",
+  "Viator",
+]);
 
 export function norm(s) {
   return (s || "")
@@ -302,6 +317,7 @@ function buildKnownResolution(entry, rawInput, normalizedInput, matchedBy) {
     familyKey: familyOf[entry.name] || norm(entry.name),
     matchedBy,
     candidates: [entry.name],
+    tagEligible: !TAG_INELIGIBLE_SUPPLIERS.has(entry.name),
   };
 }
 
@@ -314,6 +330,7 @@ function buildAmbiguousResolution(ambiguity, rawInput, normalizedInput, matchedB
     familyKey: ambiguity.family || null,
     matchedBy,
     candidates: [...ambiguity.candidates],
+    tagEligible: Boolean(ambiguity.tagEligible),
   };
 }
 
@@ -326,6 +343,7 @@ function buildUnknownResolution(rawInput, normalizedInput) {
     familyKey: null,
     matchedBy: "unknown",
     candidates: [],
+    tagEligible: false,
   };
 }
 
@@ -374,6 +392,10 @@ export function resolveVendor(input) {
 export function canonicalVendor(input) {
   const resolution = resolveVendor(input);
   return resolution.canonicalName || cleanVendorInput(input) || null;
+}
+
+export function isTagEligibleSupplier(input) {
+  return resolveVendor(input).tagEligible;
 }
 
 export function vendorFamily(name) {

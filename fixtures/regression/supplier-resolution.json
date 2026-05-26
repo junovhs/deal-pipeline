@@ -4,28 +4,32 @@
     "status": "known",
     "canonicalName": "Norwegian",
     "familyKey": "norwegian",
-    "matchedBy": "alias"
+    "matchedBy": "alias",
+    "tagEligible": true
   },
   {
     "label": "Margaritaville at Sea",
     "status": "known",
     "canonicalName": "Margaritaville at Sea",
     "familyKey": "margaritaville at sea",
-    "matchedBy": "canonical"
+    "matchedBy": "canonical",
+    "tagEligible": true
   },
   {
     "label": "ALGV",
     "status": "known",
     "canonicalName": "ALG Vacations",
     "familyKey": "alg vacations",
-    "matchedBy": "alias"
+    "matchedBy": "alias",
+    "tagEligible": true
   },
   {
     "label": "Avanti Insider Tours",
     "status": "known",
     "canonicalName": "Avanti",
     "familyKey": "avanti",
-    "matchedBy": "alias"
+    "matchedBy": "alias",
+    "tagEligible": false
   },
   {
     "label": "Viking",
@@ -33,7 +37,8 @@
     "canonicalName": "Viking Ocean",
     "familyKey": "viking",
     "matchedBy": "ambiguous-alias",
-    "candidates": ["Viking Ocean", "Viking River"]
+    "candidates": ["Viking Ocean", "Viking River"],
+    "tagEligible": true
   },
   {
     "label": "Disney",
@@ -47,21 +52,32 @@
       "Disney Cruise Line",
       "DisneyWorld",
       "Disneyland"
-    ]
+    ],
+    "tagEligible": false
   },
   {
     "label": "Scenic/Emerald Cruises",
     "status": "ambiguous",
     "canonicalName": "Emerald Cruises",
-    "familyKey": null,
+    "familyKey": "scenic-emerald",
     "matchedBy": "ambiguous-alias",
-    "candidates": ["Emerald Cruises", "Scenic River"]
+    "candidates": ["Emerald Cruises", "Scenic River"],
+    "tagEligible": true
+  },
+  {
+    "label": "Viator",
+    "status": "known",
+    "canonicalName": "Viator",
+    "familyKey": "viator",
+    "matchedBy": "canonical",
+    "tagEligible": false
   },
   {
     "label": "Mystery Escapes",
     "status": "unknown",
     "canonicalName": null,
     "familyKey": null,
-    "matchedBy": "unknown"
+    "matchedBy": "unknown",
+    "tagEligible": false
   }
 ]
