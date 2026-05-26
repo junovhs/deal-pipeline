@@ -3,6 +3,8 @@
 // Both Dealtag and Dedupe import from here. No more drift.
 // =============================================================================
 
+// Shared vendor catalog for both tagging and dedupe; Neti flags it because the
+// consuming imports live outside this file, but the runtime depends on it.
 export const suppliers = [
   {name: "Abercrombie & Kent", url: "abercrombie-kent", cats: ["tour"]},
   {name: "Adventures by Disney", url: "adventures-by-disney", cats: ["dis", "tour"]},
@@ -89,6 +91,8 @@ export const suppliers = [
 
 // Aliases: map informal/short names to canonical supplier names
 // Merged from both Dealtag and Dedupe — covers both tools' needs
+// Alias normalization stays module-scoped so both pipeline stages resolve the
+// same canonical names without drifting.
 export const aliases = new Map(Object.entries({
   // Cruise lines
   "msc": "MSC Cruises",

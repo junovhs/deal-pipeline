@@ -7,12 +7,16 @@
 
 import { suppliers, aliases, norm } from './suppliers.js';
 
+// These matcher switches feed `isKnownSupplier` and `bestSupplierMatch`; they
+// are live config, not orphaned constants.
 const STRICT_SUPPLIERS = true;
 const FAMILY_ALIASES_ALLOWED = false;
 
 const familyAliases = new Map();
 
 // --- Stop tokens for Jaccard matching ---
+// Jaccard stop words intentionally live at module scope because supplier-token
+// scoring reuses the same vocabulary during every match pass.
 const STOP_TOKENS = new Set([
   "vacations","vacation","tours","tour","travel","travels",
   "holidays","holiday","cruises","cruise","resorts","resort",

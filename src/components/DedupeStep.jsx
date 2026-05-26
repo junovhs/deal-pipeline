@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useRef } from 'react';
 import {
   parseHQ, resetIds, ingestWebsiteJSON, runFullMatch,
   exportUnmatched, sameDay, dateFmt,
-} from '../logic/dedupe';
+} from '../logic/dedupe.js';
 
 function parseWebsiteRows(text) {
   const data = JSON.parse(text);

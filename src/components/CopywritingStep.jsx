@@ -7,7 +7,7 @@ import {
   cleanAndParsePatchJSON,
   applyDealPatch,
   appendDealToRawInput,
-} from "../logic/copywriting";
+} from "../logic/copywriting.js";
 
 let confettiLoaded = false;
 let confettiFn = null;

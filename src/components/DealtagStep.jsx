@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useCallback } from 'react';
-import { transform } from '../logic/dealtag';
+import { transform } from '../logic/dealtag.js';
 
 function parseLines(output) {
   if (!output) return [];

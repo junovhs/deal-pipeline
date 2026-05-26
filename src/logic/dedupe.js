@@ -84,6 +84,8 @@ export function parseHQDates(text) {
 
 // --- Feature bag extraction ---
 
+// Feature extraction and scoring tables are shared by `extractFeatureBag` and
+// `scorePair`, so keeping them module-scoped makes the match rules explicit.
 const FEATURE_PATTERNS = [
   ["obc", /\bobc\b|on\s*board\s*credit|bar\s*tab/i],
   ["ppg", /\bppg\b|prepaid\s*gratuit|free\s*gratuit|gratuit/i],

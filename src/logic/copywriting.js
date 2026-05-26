@@ -196,6 +196,8 @@ function extractWords(text) {
   );
 }
 
+// Validation relies on these shared lexical allowlists and code detectors to
+// distinguish normal marketing glue from fabricated facts or leaked rate codes.
 // Heuristic allowlist for customer-facing connective language.
 const ALLOWED_AI_WORDS = new Set([
   "book",
