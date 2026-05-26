@@ -1,329 +1,384 @@
 // =============================================================================
-// SINGLE SOURCE OF TRUTH: Supplier list from Dealtag (confirmed up-to-date)
-// Both Dealtag and Dedupe import from here. No more drift.
+// SHARED SUPPLIER NORMALIZATION
+// One auditable catalog feeds both Dealtag and Dedupe.
 // =============================================================================
 
-// Shared vendor catalog for both tagging and dedupe; Neti flags it because the
-// consuming imports live outside this file, but the runtime depends on it.
-export const suppliers = [
-  {name: "Abercrombie & Kent", url: "abercrombie-kent", cats: ["tour"]},
-  {name: "Adventures by Disney", url: "adventures-by-disney", cats: ["dis", "tour"]},
-  {name: "African Travel", url: "african-travel", cats: ["tour"]},
-  {name: "Ama Waterways", url: "ama", cats: ["riv"]},
-  {name: "American Airline Vacations", url: "american-airline-vacations", cats: ["res"]},
-  {name: "American Cruise Line", url: "american-cruise-line", cats: ["lux", "riv"]},
-  {name: "Atlantis Paradise Island Bahamas", url: "atlantis", cats: ["res"]},
-  {name: "Atlas Ocean Voyages", url: "atlas", cats: ["lux"]},
-  {name: "Aulani, A Disney Resort & Spa", url: "disney-aulani", cats: ["dis", "res"]},
-  {name: "Avalon Waterways", url: "avalon", cats: ["riv"]},
-  {name: "Azamara", url: "azamara", cats: ["lux"]},
-  {name: "Beaches", url: "beaches", cats: ["res"]},
-  {name: "BlueSky Tours", url: "bluesky-tours", cats: ["tour"]},
-  {name: "Breathless", url: "breathless", cats: ["res"]},
-  {name: "Carnival", url: "carnival", cats: ["pop"]},
-  {name: "Celebrity Cruises", url: "celebrity", cats: ["pop"]},
-  {name: "CIE Tours", url: "cie", cats: ["tour"]},
-  {name: "Club Med", url: "club-med", cats: ["res"]},
-  {name: "Collette", url: "collette", cats: ["tour"]},
-  {name: "Costa Cruises", url: "costa", cats: ["pop"]},
-  {name: "CroisiEurope", url: "croisieurope", cats: ["riv"]},
-  {name: "Crystal Cruises", url: "crystal", cats: ["lux"]},
-  {name: "Cunard", url: "cunard", cats: ["lux"]},
-  {name: "Delta Vacations", url: "delta-vacations", cats: ["res"]},
-  {name: "Disney Cruise Line", url: "disney-cruise-line", cats: ["pop", "dis"]},
-  {name: "Disneyland", url: "disneyland", cats: ["dis", "res"]},
-  {name: "DisneyWorld", url: "disneyworld", cats: ["dis", "res"]},
-  {name: "Dreams", url: "dreams", cats: ["res"]},
-  {name: "El Dorado Spa Resorts & Hotels", url: "el-dorado", cats: ["res"]},
-  {name: "Emerald Cruises", url: "emerald", cats: ["lux"]},
-  {name: "Excellence Resorts", url: "excellence", cats: ["res"]},
-  {name: "Explora Journeys", url: "explora", cats: ["lux"]},
-  {name: "Four Seasons Yachts", url: "four-seasons-yachts", cats: ["lux"]},
-  {name: "Funjet", url: "funjet", cats: ["res"]},
-  {name: "G Adventures", url: "g-adventures", cats: ["tour"]},
-  {name: "Globus Journeys", url: "globus", cats: ["tour"]},
-  {name: "Great Safaris", url: "great-safaris", cats: ["tour"]},
-  {name: "Hard Rock Hotels", url: "hardrock", cats: ["res"]},
-  {name: "Holland America Line", url: "holland-america", cats: ["pop"]},
-  {name: "HX Expeditions", url: "hurtigruten", cats: ["adv"]},
-  {name: "Iberostar Hotels & Resorts", url: "iberostar", cats: ["res"]},
-  {name: "Karisma Hotels & Resorts", url: "karisma", cats: ["res"]},
-  {name: "Lindblad Expeditions & National Geographic", url: "lindblad-national-geographic", cats: ["adv"]},
-  {name: "Meet & Greet Italy", url: "meet-and-greet-italy", cats: ["tour"]},
-  {name: "Melia", url: "melia", cats: ["res"]},
-  {name: "MSC Cruises", url: "msc", cats: ["pop"]},
-  {name: "Norwegian", url: "norwegian", cats: ["pop"]},
-  {name: "Oceania Cruises", url: "oceania", cats: ["lux"]},
-  {name: "Outrigger Hotels & Resorts", url: "outrigger", cats: ["res"]},
-  {name: "Palace Resorts", url: "palace-resorts", cats: ["res"]},
-  {name: "Paul Gauguin Cruises", url: "paul-gauguin", cats: ["lux"]},
-  {name: "Ponant", url: "ponant", cats: ["lux"]},
-  {name: "Princess", url: "princess", cats: ["pop"]},
-  {name: "Regent Seven Seas Cruises", url: "regent", cats: ["lux"]},
-  {name: "Ritz-Carlton Yacht Collection", url: "ritz-carlton-yacht-collection", cats: ["lux"]},
-  {name: "RIU Hotels & Resorts", url: "riu", cats: ["res"]},
-  {name: "Riverside Cruises", url: "riverside", cats: ["riv"]},
-  {name: "Riviera River Cruises", url: "riviera", cats: ["riv"]},
-  {name: "Roadtrips", url: "roadtrips", cats: ["tour"]},
-  {name: "Rocky Mountaineer", url: "rocky-mountaineer", cats: ["tour", "rail"]},
-  {name: "Royal Caribbean", url: "royal-caribbean", cats: ["pop"]},
-  {name: "Sandals", url: "sandals", cats: ["res"]},
-  {name: "Scenic Eclipse Ocean Voyages", url: "scenic-eclipse", cats: ["lux", "adv"]},
-  {name: "Scenic River", url: "scenic", cats: ["riv"]},
-  {name: "Seabourn", url: "seabourn", cats: ["lux"]},
-  {name: "Secrets", url: "secrets", cats: ["res"]},
-  {name: "Silversea", url: "silversea", cats: ["lux"]},
-  {name: "Southwest Vacations", url: "southwest-vacations", cats: ["res"]},
-  {name: "Star Clippers", url: "star-clippers", cats: ["lux"]},
-  {name: "Tauck Cruises", url: "tauck-cruises", cats: ["lux"]},
-  {name: "Tauck Tours", url: "tauck-tours", cats: ["tour", "riv"]},
-  {name: "Trafalgar", url: "trafalgar", cats: ["tour"]},
-  {name: "UnCruise Adventures", url: "uncruise", cats: ["adv"]},
-  {name: "United Vacations", url: "united-vacations", cats: ["res"]},
-  {name: "Uniworld", url: "uniworld", cats: ["riv"]},
-  {name: "Viking Ocean", url: "viking-ocean", cats: ["lux", "adv"]},
-  {name: "Viking River", url: "viking-river", cats: ["riv"]},
-  {name: "Villas of Distinction", url: "villas-of-distinction", cats: ["res"]},
-  {name: "Virgin Voyages", url: "virgin", cats: ["pop"]},
-  {name: "Windstar", url: "windstar", cats: ["lux"]},
-  {name: "Zo\u00ebtry Wellness & Spa Resorts", url: "zoetry", cats: ["res"]}
-].sort((a,b) => a.name.localeCompare(b.name));
+const SUPPLIER_CATALOG = [
+  { name: "Abercrombie & Kent", url: "abercrombie-kent", cats: ["tour"] },
+  { name: "Adventures by Disney", url: "adventures-by-disney", cats: ["dis", "tour"] },
+  { name: "African Travel", url: "african-travel", cats: ["tour"] },
+  { name: "ALG Vacations", url: "alg-vacations", cats: ["res"] },
+  { name: "Ama Waterways", url: "ama", cats: ["riv"] },
+  { name: "American Airline Vacations", url: "american-airline-vacations", cats: ["res"] },
+  { name: "American Cruise Line", url: "american-cruise-line", cats: ["lux", "riv"] },
+  { name: "Atlantis Paradise Island Bahamas", url: "atlantis", cats: ["res"] },
+  { name: "Atlas Ocean Voyages", url: "atlas", cats: ["lux"] },
+  { name: "Aulani, A Disney Resort & Spa", url: "disney-aulani", cats: ["dis", "res"] },
+  { name: "Avalon Waterways", url: "avalon", cats: ["riv"] },
+  { name: "Avanti", url: "avanti", cats: ["tour", "res"] },
+  { name: "Azamara", url: "azamara", cats: ["lux"] },
+  { name: "Beaches", url: "beaches", cats: ["res"] },
+  { name: "Bedsonline", url: "bedsonline", cats: ["res"] },
+  { name: "BlueSky Tours", url: "bluesky-tours", cats: ["tour"] },
+  { name: "Breathless", url: "breathless", cats: ["res"] },
+  { name: "Brightline", url: "brightline", cats: ["rail"] },
+  { name: "Carnival", url: "carnival", cats: ["pop"] },
+  { name: "Celebrity Cruises", url: "celebrity", cats: ["pop"] },
+  { name: "CIE Tours", url: "cie", cats: ["tour"] },
+  { name: "Classic Vacations", url: "classic-vacations", cats: ["res"] },
+  { name: "Club Med", url: "club-med", cats: ["res"] },
+  { name: "Collette", url: "collette", cats: ["tour"] },
+  { name: "Costa Cruises", url: "costa", cats: ["pop"] },
+  { name: "CroisiEurope", url: "croisieurope", cats: ["riv"] },
+  { name: "Crystal Cruises", url: "crystal", cats: ["lux"] },
+  { name: "Cunard", url: "cunard", cats: ["lux"] },
+  { name: "Delta Vacations", url: "delta-vacations", cats: ["res"] },
+  { name: "Disney Cruise Line", url: "disney-cruise-line", cats: ["pop", "dis"] },
+  { name: "Disneyland", url: "disneyland", cats: ["dis", "res"] },
+  { name: "DisneyWorld", url: "disneyworld", cats: ["dis", "res"] },
+  { name: "Dreams", url: "dreams", cats: ["res"] },
+  { name: "El Dorado Spa Resorts & Hotels", url: "el-dorado", cats: ["res"] },
+  { name: "Emerald Cruises", url: "emerald", cats: ["lux"] },
+  { name: "Excellence Resorts", url: "excellence", cats: ["res"] },
+  { name: "Explora Journeys", url: "explora", cats: ["lux"] },
+  { name: "Four Seasons Yachts", url: "four-seasons-yachts", cats: ["lux"] },
+  { name: "Funjet", url: "funjet", cats: ["res"] },
+  { name: "G Adventures", url: "g-adventures", cats: ["tour"] },
+  { name: "Globus Journeys", url: "globus", cats: ["tour"] },
+  { name: "Great Safaris", url: "great-safaris", cats: ["tour"] },
+  { name: "Hard Rock Hotels", url: "hardrock", cats: ["res"] },
+  { name: "Holland America Line", url: "holland-america", cats: ["pop"] },
+  { name: "HX Expeditions", url: "hurtigruten", cats: ["adv"] },
+  { name: "Iberostar Hotels & Resorts", url: "iberostar", cats: ["res"] },
+  { name: "Karisma Hotels & Resorts", url: "karisma", cats: ["res"] },
+  { name: "Lindblad Expeditions & National Geographic", url: "lindblad-national-geographic", cats: ["adv"] },
+  { name: "Margaritaville at Sea", url: "margaritaville-at-sea", cats: ["pop"] },
+  { name: "Meet & Greet Italy", url: "meet-and-greet-italy", cats: ["tour"] },
+  { name: "Melia", url: "melia", cats: ["res"] },
+  { name: "MSC Cruises", url: "msc", cats: ["pop"] },
+  { name: "Norwegian", url: "norwegian", cats: ["pop"] },
+  { name: "Oceania Cruises", url: "oceania", cats: ["lux"] },
+  { name: "Outrigger Hotels & Resorts", url: "outrigger", cats: ["res"] },
+  { name: "Palace Resorts", url: "palace-resorts", cats: ["res"] },
+  { name: "Paul Gauguin Cruises", url: "paul-gauguin", cats: ["lux"] },
+  { name: "Pleasant Holidays", url: "pleasant-holidays", cats: ["res"] },
+  { name: "Ponant", url: "ponant", cats: ["lux"] },
+  { name: "Princess", url: "princess", cats: ["pop"] },
+  { name: "Regent Seven Seas Cruises", url: "regent", cats: ["lux"] },
+  { name: "Ritz-Carlton Yacht Collection", url: "ritz-carlton-yacht-collection", cats: ["lux"] },
+  { name: "RIU Hotels & Resorts", url: "riu", cats: ["res"] },
+  { name: "Riverside Cruises", url: "riverside", cats: ["riv"] },
+  { name: "Riviera River Cruises", url: "riviera", cats: ["riv"] },
+  { name: "Roadtrips", url: "roadtrips", cats: ["tour"] },
+  { name: "Rocky Mountaineer", url: "rocky-mountaineer", cats: ["tour", "rail"] },
+  { name: "Royal Caribbean", url: "royal-caribbean", cats: ["pop"] },
+  { name: "Sandals", url: "sandals", cats: ["res"] },
+  { name: "Scenic Eclipse Ocean Voyages", url: "scenic-eclipse", cats: ["lux", "adv"] },
+  { name: "Scenic River", url: "scenic", cats: ["riv"] },
+  { name: "Seabourn", url: "seabourn", cats: ["lux"] },
+  { name: "Secrets", url: "secrets", cats: ["res"] },
+  { name: "Silversea", url: "silversea", cats: ["lux"] },
+  { name: "Southwest Vacations", url: "southwest-vacations", cats: ["res"] },
+  { name: "Star Clippers", url: "star-clippers", cats: ["lux"] },
+  { name: "Tauck Cruises", url: "tauck-cruises", cats: ["lux"] },
+  { name: "Tauck Tours", url: "tauck-tours", cats: ["tour", "riv"] },
+  { name: "Trafalgar", url: "trafalgar", cats: ["tour"] },
+  { name: "UnCruise Adventures", url: "uncruise", cats: ["adv"] },
+  { name: "United Vacations", url: "united-vacations", cats: ["res"] },
+  { name: "Uniworld", url: "uniworld", cats: ["riv"] },
+  { name: "Viator", url: "viator", cats: ["tour"] },
+  { name: "Viking Ocean", url: "viking-ocean", cats: ["lux", "adv"] },
+  { name: "Viking River", url: "viking-river", cats: ["riv"] },
+  { name: "Villas of Distinction", url: "villas-of-distinction", cats: ["res"] },
+  { name: "Virgin Voyages", url: "virgin", cats: ["pop"] },
+  { name: "Windstar", url: "windstar", cats: ["lux"] },
+  { name: "Zoëtry Wellness & Spa Resorts", url: "zoetry", cats: ["res"] },
+].sort((a, b) => a.name.localeCompare(b.name));
 
-// Aliases: map informal/short names to canonical supplier names
-// Merged from both Dealtag and Dedupe — covers both tools' needs
-// Alias normalization stays module-scoped so both pipeline stages resolve the
-// same canonical names without drifting.
-export const aliases = new Map(Object.entries({
-  // Cruise lines
-  "msc": "MSC Cruises",
-  "msc cruises": "MSC Cruises",
-  "celebrity": "Celebrity Cruises",
-  "celebrity cruises": "Celebrity Cruises",
-  "holland": "Holland America Line",
-  "holland america": "Holland America Line",
-  "holland america line": "Holland America Line",
-  "rcl": "Royal Caribbean",
-  "rccl": "Royal Caribbean",
-  "rcc": "Royal Caribbean",
-  "royal": "Royal Caribbean",
-  "royal caribbean": "Royal Caribbean",
-  "ncl": "Norwegian",
-  "norwegian cruise line": "Norwegian",
-  "norwegian cruise": "Norwegian",
-  "oceania": "Oceania Cruises",
-  "oceania cruises": "Oceania Cruises",
-  "paul gauguin": "Paul Gauguin Cruises",
-  "paul gauguin cruises": "Paul Gauguin Cruises",
-  "regent": "Regent Seven Seas Cruises",
-  "regent seven seas": "Regent Seven Seas Cruises",
-  "seven seas": "Regent Seven Seas Cruises",
-  "carnival": "Carnival",
-  "carnival cruise": "Carnival",
-  "carnival cruises": "Carnival",
-  "carnival cruise line": "Carnival",
-  "princess": "Princess",
-  "princess cruises": "Princess",
-  "disney cruise": "Disney Cruise Line",
-  "disney cruises": "Disney Cruise Line",
-  "disney cruise line": "Disney Cruise Line",
-  "virgin": "Virgin Voyages",
-  "virgin voyages": "Virgin Voyages",
-  "virgin cruise": "Virgin Voyages",
-  "cunard": "Cunard",
-  "seabourn": "Seabourn",
-  "seabourn cruises": "Seabourn",
-  "silversea": "Silversea",
-  "silversea cruises": "Silversea",
-  "crystal": "Crystal Cruises",
-  "crystal cruises": "Crystal Cruises",
-  "azamara": "Azamara",
-  "ponant": "Ponant",
-  "windstar": "Windstar",
-  "windstar cruises": "Windstar",
-  "costa": "Costa Cruises",
-  "costa cruises": "Costa Cruises",
-  "explora": "Explora Journeys",
-  "explora journeys": "Explora Journeys",
-  "emerald": "Emerald Cruises",
-  "emerald cruises": "Emerald Cruises",
-  "star clippers": "Star Clippers",
-  "ritz-carlton": "Ritz-Carlton Yacht Collection",
-  "ritz carlton": "Ritz-Carlton Yacht Collection",
-  "four seasons": "Four Seasons Yachts",
-  "four seasons yachts": "Four Seasons Yachts",
-
-  // River cruise
-  "avalon": "Avalon Waterways",
-  "avalon waterways": "Avalon Waterways",
-  "amawaterways": "Ama Waterways",
-  "ama waterways": "Ama Waterways",
-  "ama": "Ama Waterways",
-  "croisieurope": "CroisiEurope",
-  "croisi europe": "CroisiEurope",
-  "riverside": "Riverside Cruises",
-  "riverside cruises": "Riverside Cruises",
-  "riviera": "Riviera River Cruises",
-  "riviera river": "Riviera River Cruises",
-  "riviera river cruises": "Riviera River Cruises",
-  "uniworld": "Uniworld",
-  "uniworld cruises": "Uniworld",
-  "scenic river": "Scenic River",
-  "scenic": "Scenic River",
-
-  // Viking (all map to canonical names from supplier list)
-  "viking": "Viking Ocean",
-  "viking cruises": "Viking Ocean",
-  "viking ocean": "Viking Ocean",
-  "viking river": "Viking River",
-
-  // Expedition
-  "hurtigruten": "HX Expeditions",
-  "hx": "HX Expeditions",
-  "hx expeditions": "HX Expeditions",
-  "lindblad": "Lindblad Expeditions & National Geographic",
-  "lindblad expeditions": "Lindblad Expeditions & National Geographic",
-  "national geographic": "Lindblad Expeditions & National Geographic",
-  "atlas": "Atlas Ocean Voyages",
-  "atlas ocean": "Atlas Ocean Voyages",
-  "atlas ocean voyages": "Atlas Ocean Voyages",
-  "uncruise": "UnCruise Adventures",
-
-  // Resorts
-  "sandals": "Sandals",
-  "beaches": "Beaches",
-  "breathless": "Breathless",
-  "club med": "Club Med",
-  "clubmed": "Club Med",
-  "el dorado": "El Dorado Spa Resorts & Hotels",
-  "dreams": "Dreams",
-  "excellence": "Excellence Resorts",
-  "hard rock": "Hard Rock Hotels",
-  "hard rock hotels": "Hard Rock Hotels",
-  "iberostar": "Iberostar Hotels & Resorts",
-  "karisma": "Karisma Hotels & Resorts",
-  "outrigger": "Outrigger Hotels & Resorts",
-  "palace": "Palace Resorts",
-  "palace resorts": "Palace Resorts",
-  "riu": "RIU Hotels & Resorts",
-  "secrets": "Secrets",
-  "villas": "Villas of Distinction",
-  "villas of distinction": "Villas of Distinction",
-  "zoetry": "Zo\u00ebtry Wellness & Spa Resorts",
-  "zo\u00ebtry": "Zo\u00ebtry Wellness & Spa Resorts",
-  "melia": "Melia",
-  "atlantis": "Atlantis Paradise Island Bahamas",
-  "funjet": "Funjet",
-
-  // Airlines vacations
-  "american airlines vacations": "American Airline Vacations",
-  "american airline vacations": "American Airline Vacations",
-  "delta": "Delta Vacations",
-  "delta vacations": "Delta Vacations",
-  "southwest": "Southwest Vacations",
-  "southwest vacations": "Southwest Vacations",
-  "united": "United Vacations",
-  "united vacations": "United Vacations",
-
-  // Disney
-  "disney world": "DisneyWorld",
-  "walt disney world": "DisneyWorld",
-  "disneyland": "Disneyland",
-  "aulani": "Aulani, A Disney Resort & Spa",
-  "adventures by disney": "Adventures by Disney",
-
-  // Tours
-  "bluesky": "BlueSky Tours",
-  "cie": "CIE Tours",
-  "cie tours": "CIE Tours",
-  "collette": "Collette",
-  "globus": "Globus Journeys",
-  "globus journeys": "Globus Journeys",
-  "g adventures": "G Adventures",
-  "trafalgar": "Trafalgar",
-  "tauck": "Tauck Cruises",
-  "tauck cruises": "Tauck Cruises",
-  "tauck tours": "Tauck Tours",
-  "rocky mountaineer": "Rocky Mountaineer",
-  "roadtrips": "Roadtrips",
-  "meet and greet italy": "Meet & Greet Italy",
-  "african travel": "African Travel",
-  "great safaris": "Great Safaris",
-  "abercrombie": "Abercrombie & Kent",
-  "abercrombie and kent": "Abercrombie & Kent",
-
-  // American Cruise Line
-  "american cruise": "American Cruise Line",
-  "american cruise line": "American Cruise Line",
-}));
-
-// Vendor family grouping for Dedupe matching
-// Brands that should match against each other share a family key
-// BUG FIX: Viking overrides are AFTER the spread so they actually take effect
-export const familyOf = {
-  // Base: every supplier is its own family by default
-  ...Object.fromEntries(suppliers.map(s => [s.name, norm(s.name)])),
-  // Override: group Viking brands together
-  "Viking Ocean": "viking",
-  "Viking River": "viking",
-  // Override: normalize naming variations
-  "Princess": "princess",
-  "Princess Cruises": "princess",
-  "Norwegian": "norwegian",
-  "Norwegian Cruise Line": "norwegian",
-  "Carnival": "carnival",
-  "Carnival Cruise Line": "carnival",
-  "HX Expeditions": "hx expeditions",
-  "Hurtigruten": "hx expeditions",
-  "Scenic Eclipse Ocean Voyages": "scenic",
-  "Scenic River": "scenic",
+const SUPPLIER_ALIASES = {
+  "Abercrombie & Kent": ["abercrombie", "abercrombie and kent"],
+  "Adventures by Disney": ["adventures by disney"],
+  "African Travel": ["african travel"],
+  "ALG Vacations": ["alg vacations", "algv", "luxe by alg vacations"],
+  "Ama Waterways": ["ama", "ama waterways", "amawaterways"],
+  "American Airline Vacations": ["american airline vacations", "american airlines vacations"],
+  "American Cruise Line": ["american cruise", "american cruise line"],
+  "Atlantis Paradise Island Bahamas": ["atlantis"],
+  "Atlas Ocean Voyages": ["atlas", "atlas ocean", "atlas ocean voyages"],
+  "Aulani, A Disney Resort & Spa": ["aulani"],
+  "Avalon Waterways": ["avalon", "avalon waterways"],
+  Avanti: ["avanti", "avanti insider tours"],
+  Azamara: ["azamara"],
+  Beaches: ["beaches"],
+  Bedsonline: ["bedsonline"],
+  "BlueSky Tours": ["bluesky"],
+  Breathless: ["breathless"],
+  Brightline: ["brightline"],
+  Carnival: ["carnival", "carnival cruise", "carnival cruises", "carnival cruise line"],
+  "Celebrity Cruises": ["celebrity", "celebrity cruises"],
+  "CIE Tours": ["cie", "cie tours"],
+  "Classic Vacations": ["classic vacations"],
+  "Club Med": ["club med", "clubmed"],
+  Collette: ["collette"],
+  "Costa Cruises": ["costa", "costa cruises"],
+  CroisiEurope: ["croisieurope", "croisi europe"],
+  "Crystal Cruises": ["crystal", "crystal cruises"],
+  Cunard: ["cunard"],
+  "Delta Vacations": ["delta", "delta vacations"],
+  "Disney Cruise Line": ["disney cruise", "disney cruises", "disney cruise line"],
+  Disneyland: ["disneyland"],
+  DisneyWorld: ["disney world", "walt disney world"],
+  Dreams: ["dreams"],
+  "El Dorado Spa Resorts & Hotels": ["el dorado"],
+  "Emerald Cruises": ["emerald", "emerald cruises"],
+  "Excellence Resorts": ["excellence"],
+  "Explora Journeys": ["explora", "explora journeys"],
+  "Four Seasons Yachts": ["four seasons", "four seasons yachts"],
+  Funjet: ["funjet"],
+  "G Adventures": ["g adventures"],
+  "Globus Journeys": ["globus", "globus journeys"],
+  "Great Safaris": ["great safaris"],
+  "Hard Rock Hotels": ["hard rock", "hard rock hotels"],
+  "Holland America Line": ["holland", "holland america", "holland america line"],
+  "HX Expeditions": ["hx", "hx expeditions", "hurtigruten"],
+  "Iberostar Hotels & Resorts": ["iberostar"],
+  "Karisma Hotels & Resorts": ["karisma"],
+  "Lindblad Expeditions & National Geographic": [
+    "lindblad",
+    "lindblad expeditions",
+    "national geographic",
+  ],
+  "Margaritaville at Sea": ["margaritaville at sea"],
+  "Meet & Greet Italy": ["meet and greet italy"],
+  Melia: ["melia"],
+  "MSC Cruises": ["msc", "msc cruises"],
+  Norwegian: ["ncl", "norwegian", "norwegian cruise", "norwegian cruise line"],
+  "Oceania Cruises": ["oceania", "oceania cruises"],
+  "Outrigger Hotels & Resorts": ["outrigger"],
+  "Palace Resorts": ["palace", "palace resorts"],
+  "Paul Gauguin Cruises": ["paul gauguin", "paul gauguin cruises"],
+  "Pleasant Holidays": ["pleasant holidays"],
+  Ponant: ["ponant"],
+  Princess: ["princess", "princess cruises"],
+  "Regent Seven Seas Cruises": ["regent", "regent seven seas", "seven seas"],
+  "Ritz-Carlton Yacht Collection": ["ritz carlton", "ritz-carlton"],
+  "RIU Hotels & Resorts": ["riu"],
+  "Riverside Cruises": ["riverside", "riverside cruises"],
+  "Riviera River Cruises": ["riviera", "riviera river", "riviera river cruises"],
+  Roadtrips: ["roadtrips"],
+  "Rocky Mountaineer": ["rocky mountaineer"],
+  "Royal Caribbean": ["rcc", "rcl", "rccl", "royal", "royal caribbean"],
+  Sandals: ["sandals"],
+  "Scenic Eclipse Ocean Voyages": ["scenic eclipse", "scenic eclipse ocean voyages"],
+  "Scenic River": ["scenic", "scenic river"],
+  Seabourn: ["seabourn", "seabourn cruises"],
+  Secrets: ["secrets"],
+  Silversea: ["silversea", "silversea cruises"],
+  "Southwest Vacations": ["southwest", "southwest vacations"],
+  "Star Clippers": ["star clippers"],
+  "Tauck Cruises": ["tauck cruises"],
+  "Tauck Tours": ["tauck tours"],
+  Trafalgar: ["trafalgar"],
+  "UnCruise Adventures": ["uncruise"],
+  "United Vacations": ["united", "united vacations"],
+  Uniworld: ["uniworld", "uniworld cruises"],
+  Viator: ["viator"],
+  "Viking Ocean": ["viking cruises", "viking ocean"],
+  "Viking River": ["viking river"],
+  "Villas of Distinction": ["villas", "villas of distinction"],
+  "Virgin Voyages": ["virgin", "virgin cruise", "virgin voyages"],
+  Windstar: ["windstar", "windstar cruises"],
+  "Zoëtry Wellness & Spa Resorts": ["zoetry", "zoëtry"],
 };
 
-// --- Shared utilities ---
+const SUPPLIER_FAMILIES = [
+  { key: "scenic", members: ["Scenic Eclipse Ocean Voyages", "Scenic River"] },
+  { key: "tauck", members: ["Tauck Cruises", "Tauck Tours"] },
+  { key: "viking", members: ["Viking Ocean", "Viking River"] },
+];
+
+const SUPPLIER_AMBIGUITIES = [
+  {
+    label: "disney",
+    candidates: [
+      "Adventures by Disney",
+      "Aulani, A Disney Resort & Spa",
+      "Disney Cruise Line",
+      "DisneyWorld",
+      "Disneyland",
+    ],
+  },
+  {
+    label: "scenic emerald cruises",
+    candidates: ["Emerald Cruises", "Scenic River"],
+  },
+  {
+    label: "tauck",
+    candidates: ["Tauck Cruises", "Tauck Tours"],
+    family: "tauck",
+    preferredCanonicalName: "Tauck Cruises",
+  },
+  {
+    label: "viking",
+    candidates: ["Viking Ocean", "Viking River"],
+    family: "viking",
+    preferredCanonicalName: "Viking Ocean",
+  },
+];
+
+const SUPPLIER_KEYWORD_RULES = [
+  { pattern: /\bhx\b|\bhurtigruten\b/, canonicalName: "HX Expeditions" },
+  { pattern: /\bmargaritaville at sea\b/, canonicalName: "Margaritaville at Sea" },
+  { pattern: /\bncl\b|\bnorwegian\b/, canonicalName: "Norwegian" },
+  { pattern: /\broyal\b|\brccl?\b/, canonicalName: "Royal Caribbean" },
+];
 
 export function norm(s) {
-  return (s || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/&/g, ' and ').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  return (s || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-// Resolve any input string to a canonical supplier name
+function cleanVendorInput(input) {
+  return (input || "")
+    .replace(/^•\s*/, "")
+    .replace(/:$/, "")
+    .trim();
+}
+
+export const supplierCatalog = SUPPLIER_CATALOG.map((entry) => ({
+  ...entry,
+  family: norm(entry.name),
+}));
+
+export const suppliers = supplierCatalog.map(({ name, url, cats }) => ({ name, url, cats }));
+
+const catalogByName = new Map(supplierCatalog.map((entry) => [entry.name, entry]));
+const catalogByNormName = new Map(supplierCatalog.map((entry) => [norm(entry.name), entry]));
+
+export const aliases = new Map();
+for (const [canonicalName, rawAliases] of Object.entries(SUPPLIER_ALIASES)) {
+  if (!catalogByName.has(canonicalName)) {
+    throw new Error(`Alias target is not in supplier catalog: ${canonicalName}`);
+  }
+  for (const rawAlias of rawAliases) {
+    aliases.set(norm(rawAlias), canonicalName);
+  }
+}
+
+export const familyOf = Object.fromEntries(
+  supplierCatalog.map((entry) => [entry.name, norm(entry.name)]),
+);
+for (const family of SUPPLIER_FAMILIES) {
+  for (const member of family.members) {
+    familyOf[member] = family.key;
+  }
+}
+
+const ambiguousByLabel = new Map();
+for (const ambiguity of SUPPLIER_AMBIGUITIES) {
+  ambiguousByLabel.set(norm(ambiguity.label), {
+    ...ambiguity,
+    family:
+      ambiguity.family ||
+      (() => {
+        const familyKeys = [...new Set(ambiguity.candidates.map((name) => familyOf[name]))];
+        return familyKeys.length === 1 ? familyKeys[0] : null;
+      })(),
+  });
+}
+
+function buildKnownResolution(entry, rawInput, normalizedInput, matchedBy) {
+  return {
+    rawInput,
+    normalizedInput,
+    status: "known",
+    canonicalName: entry.name,
+    familyKey: familyOf[entry.name] || norm(entry.name),
+    matchedBy,
+    candidates: [entry.name],
+  };
+}
+
+function buildAmbiguousResolution(ambiguity, rawInput, normalizedInput, matchedBy) {
+  return {
+    rawInput,
+    normalizedInput,
+    status: "ambiguous",
+    canonicalName: ambiguity.preferredCanonicalName || ambiguity.candidates[0] || null,
+    familyKey: ambiguity.family || null,
+    matchedBy,
+    candidates: [...ambiguity.candidates],
+  };
+}
+
+function buildUnknownResolution(rawInput, normalizedInput) {
+  return {
+    rawInput,
+    normalizedInput,
+    status: "unknown",
+    canonicalName: null,
+    familyKey: null,
+    matchedBy: "unknown",
+    candidates: [],
+  };
+}
+
+export function resolveVendor(input) {
+  const rawInput = cleanVendorInput(input);
+  if (!rawInput) {
+    return buildUnknownResolution(rawInput, "");
+  }
+
+  const normalizedInput = norm(rawInput);
+
+  const directAmbiguity = ambiguousByLabel.get(normalizedInput);
+  if (directAmbiguity) {
+    return buildAmbiguousResolution(directAmbiguity, rawInput, normalizedInput, "ambiguous-alias");
+  }
+
+  const directCatalog = catalogByNormName.get(normalizedInput);
+  if (directCatalog) {
+    return buildKnownResolution(directCatalog, rawInput, normalizedInput, "canonical");
+  }
+
+  const directAlias = aliases.get(normalizedInput);
+  if (directAlias) {
+    return buildKnownResolution(
+      catalogByName.get(directAlias),
+      rawInput,
+      normalizedInput,
+      "alias",
+    );
+  }
+
+  for (const rule of SUPPLIER_KEYWORD_RULES) {
+    if (rule.pattern.test(normalizedInput)) {
+      return buildKnownResolution(
+        catalogByName.get(rule.canonicalName),
+        rawInput,
+        normalizedInput,
+        "keyword",
+      );
+    }
+  }
+
+  return buildUnknownResolution(rawInput, normalizedInput);
+}
+
 export function canonicalVendor(input) {
-  if (!input) return null;
-  const n = norm(input.replace(/:$/, ''));
-  // Direct alias lookup
-  const aliased = aliases.get(n);
-  if (aliased) return aliased;
-  // Direct match against supplier list
-  const byNorm = suppliers.find(s => norm(s.name) === n);
-  if (byNorm) return byNorm.name;
-  // Fuzzy fallback: keyword matching
-  if (/\bviking\b/.test(n)) return 'Viking Ocean';
-  if (/\bncl\b|\bnorwegian\b/.test(n)) return 'Norwegian';
-  if (/\broyal\b|\brccl?\b/.test(n)) return 'Royal Caribbean';
-  if (/\bprincess\b/.test(n)) return 'Princess';
-  if (/\bcarnival\b/.test(n)) return 'Carnival';
-  if (/\bmsc\b/.test(n)) return 'MSC Cruises';
-  if (/\bholland\b/.test(n)) return 'Holland America Line';
-  if (/\bcelebrity\b/.test(n)) return 'Celebrity Cruises';
-  if (/\bvirgin\b/.test(n)) return 'Virgin Voyages';
-  if (/\boceania\b/.test(n)) return 'Oceania Cruises';
-  if (/\bseabourn\b/.test(n)) return 'Seabourn';
-  if (/\bsilversea\b/.test(n)) return 'Silversea';
-  if (/\bcrystal\b/.test(n)) return 'Crystal Cruises';
-  if (/\bazamara\b/.test(n)) return 'Azamara';
-  if (/\bcunard\b/.test(n)) return 'Cunard';
-  if (/\bavalon\b/.test(n)) return 'Avalon Waterways';
-  if (/\bama\b/.test(n)) return 'Ama Waterways';
-  if (/\briviera\b/.test(n)) return 'Riviera River Cruises';
-  if (/\buniworld\b/.test(n)) return 'Uniworld';
-  if (/\bscenic\b/.test(n)) return 'Scenic River';
-  if (/\bhurtigruten\b|\bhx\b/.test(n)) return 'HX Expeditions';
-  return input.trim();
+  const resolution = resolveVendor(input);
+  return resolution.canonicalName || cleanVendorInput(input) || null;
 }
 
 export function vendorFamily(name) {
-  const c = canonicalVendor(name);
-  return familyOf[c] || norm(c);
+  const resolution = resolveVendor(name);
+  return resolution.familyKey || norm(resolution.canonicalName || cleanVendorInput(name));
 }
 
-// Supplier name list for quick lookups
-export const supplierNames = suppliers.map(s => s.name);
+export const supplierNames = suppliers.map((supplier) => supplier.name);

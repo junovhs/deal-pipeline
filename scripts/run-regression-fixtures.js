@@ -10,6 +10,7 @@ import {
   resetIds,
   runFullMatch,
 } from "../src/logic/dedupe.js";
+import { resolveVendor } from "../src/logic/suppliers.js";
 import {
   parseRawToGroups,
   validateAndMerge,
@@ -36,6 +37,7 @@ async function main() {
   const rawPromo = await readFixture("raw-promo-email-sample.txt");
   const websiteRows = JSON.parse(await readFixture("website-deals.json"));
   const aiResponse = await readFixture("ai-response.txt");
+  const supplierResolutions = JSON.parse(await readFixture("supplier-resolution.json"));
 
   const tagged = transform(rawPromo, { includeUnknowns: true });
   const taggedLines = tagged.text.split("\n");
@@ -43,6 +45,7 @@ async function main() {
     vendors: 3,
     deals: 3,
     excl: 1,
+    ambiguousSuppliers: 0,
     unknownSuppliers: 1,
     lines: 10,
   });
@@ -77,13 +80,33 @@ async function main() {
   assert.deepEqual(
     websiteDeals.map((deal) => ({
       supplier: deal.supplier,
+      supplierStatus: deal.supplierStatus,
       vendorFamily: deal.vendorFamily,
     })),
     [
-      { supplier: "Norwegian", vendorFamily: "norwegian" },
-      { supplier: "Royal Caribbean", vendorFamily: "royal caribbean" },
+      { supplier: "Norwegian", supplierStatus: "known", vendorFamily: "norwegian" },
+      { supplier: "Royal Caribbean", supplierStatus: "known", vendorFamily: "royal caribbean" },
     ],
   );
+
+  for (const fixture of supplierResolutions) {
+    const actual = resolveVendor(fixture.label);
+    assert.equal(actual.status, fixture.status, `Unexpected status for ${fixture.label}`);
+    assert.equal(
+      actual.canonicalName ?? null,
+      fixture.canonicalName,
+      `Unexpected canonical supplier for ${fixture.label}`,
+    );
+    assert.equal(
+      actual.familyKey ?? null,
+      fixture.familyKey,
+      `Unexpected family key for ${fixture.label}`,
+    );
+    assert.equal(actual.matchedBy, fixture.matchedBy, `Unexpected match mode for ${fixture.label}`);
+    if (fixture.candidates) {
+      assert.deepEqual(actual.candidates, fixture.candidates, `Unexpected candidates for ${fixture.label}`);
+    }
+  }
 
   const matches = runFullMatch(hqDeals, websiteDeals);
   assert.equal(matches.length, 3);
@@ -147,6 +170,7 @@ async function main() {
 
   console.log("Tag fixture: PASS");
   console.log("Dedupe fixture: PASS");
+  console.log("Supplier resolution fixture: PASS");
   console.log("Copy validation fixture: PASS");
   console.log("All regression fixtures passed.");
 }

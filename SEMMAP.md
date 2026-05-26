@@ -138,43 +138,47 @@ Exports: default
 `package-lock.json`
 Implements package-lock functionality. data.
 
+`scripts/run-regression-fixtures.js`
+Implements run-regression-fixtures functionality. [COUPLING:mixed] [BEHAVIOR:owns-const-state,persists,async]
+Semantic: async side-effecting adapter
+
 `src/App.jsx`
 Implements App functionality. [COUPLING:mixed] [BEHAVIOR:owns-const-state,swallows-errors] [QUALITY:syntax-degraded]
 Exports: App, default
 Semantic: side-effecting constant-owning module that swallows errors
 
 `src/components/CopywritingStep.jsx`
-Implements copywriting step. [COUPLING:mixed] [BEHAVIOR:owns-state,swallows-errors] [QUALITY:complex-flow,syntax-degraded]
+Implements copywriting step. [COUPLING:mixed] [BEHAVIOR:owns-state] [QUALITY:complex-flow,syntax-degraded]
 Exports: CopywritingStep, default
-Semantic: side-effecting stateful module that swallows errors
+Semantic: side-effecting stateful module
 
 `src/components/DealtagStep.jsx`
-Implements dealtag step. [COUPLING:pure] [BEHAVIOR:swallows-errors] [QUALITY:complex-flow,syntax-degraded]
+Implements dealtag step. [COUPLING:pure] [QUALITY:syntax-degraded]
 Exports: DealtagStep, default
-Semantic: pure computation that swallows errors
+Semantic: pure computation
 
 `src/components/DedupeStep.jsx`
-Implements dedupe step. [COUPLING:pure] [BEHAVIOR:async,swallows-errors] [QUALITY:complex-flow,syntax-degraded]
+Implements dedupe step. [COUPLING:pure] [BEHAVIOR:async] [QUALITY:complex-flow,syntax-degraded]
 Exports: DedupeStep, default
-Semantic: async pure computation that swallows errors
+Semantic: async pure computation
 
 `src/logic/copywriting.js`
-Validates and merge. [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:undocumented]
+Validates and merge. [HOTSPOT] [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:undocumented]
 Exports: appendDealToRawInput, cleanAndParsePatchJSON, parseRawToGroups, cleanAndParseJSON
 Semantic: pure computation constant-owning module
 
 `src/logic/dealtag.js`
-Implements transform functionality. [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:complex-flow]
+Implements transform functionality. [HOTSPOT] [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:complex-flow]
 Exports: transform
 Semantic: pure computation constant-owning module
 
 `src/logic/dedupe.js`
-Parses hq dates. [COUPLING:mixed] [BEHAVIOR:owns-state] [QUALITY:undocumented,complex-flow]
+Parses hq dates. [HOTSPOT] [COUPLING:mixed] [BEHAVIOR:owns-state] [QUALITY:undocumented,complex-flow]
 Exports: ingestWebsiteJSON, runFullMatch, parseHQDates, dateFmt
 Semantic: side-effecting stateful module
 
 `src/logic/suppliers.js`
-Implements vendor family. [HOTSPOT] [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:undocumented,complex-flow]
+Implements canonical vendor. [HOTSPOT] [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:undocumented,complex-flow]
 Exports: supplierNames, canonicalVendor, familyOf, vendorFamily
 Semantic: pure computation constant-owning module
 
@@ -198,13 +202,23 @@ DependencyGraph:
   index.html:
     Imports: []
     ImportedBy: []
+  # --- High Fan-In Hotspots ---
+  copywriting.js:
+    Imports: []
+    ImportedBy: [App.jsx, CopywritingStep.jsx, run-regression-fixtures.js]
+  dealtag.js:
+    Imports: [suppliers.js]
+    ImportedBy: [DealtagStep.jsx, run-regression-fixtures.js]
+  dedupe.js:
+    Imports: [suppliers.js]
+    ImportedBy: [DedupeStep.jsx, run-regression-fixtures.js]
   # --- Layer 0 -- Config ---
   SEMMAP.md, criticism.md, package.json, vite.config.js:
     Imports: []
     ImportedBy: []
   # --- Layer 1 -- Domain (Engine) ---
   App.jsx:
-    Imports: [CopywritingStep.jsx, DealtagStep.jsx, DedupeStep.jsx]
+    Imports: [CopywritingStep.jsx, DealtagStep.jsx, DedupeStep.jsx, copywriting.js]
     ImportedBy: [main.jsx]
   CopywritingStep.jsx:
     Imports: [copywriting.js]
@@ -215,20 +229,14 @@ DependencyGraph:
   DedupeStep.jsx:
     Imports: [dedupe.js]
     ImportedBy: [App.jsx]
-  copywriting.js:
-    Imports: []
-    ImportedBy: [CopywritingStep.jsx]
-  dealtag.js:
-    Imports: [suppliers.js]
-    ImportedBy: [DealtagStep.jsx]
-  dedupe.js:
-    Imports: [suppliers.js]
-    ImportedBy: [DedupeStep.jsx]
   main.jsx:
     Imports: [App.css, App.jsx]
     ImportedBy: []
   package-lock.json:
     Imports: []
+    ImportedBy: []
+  run-regression-fixtures.js:
+    Imports: [copywriting.js, dealtag.js, dedupe.js]
     ImportedBy: []
   suppliers.js:
     Imports: []

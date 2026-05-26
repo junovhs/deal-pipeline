@@ -6,7 +6,7 @@
 //   3. parseYear — handles garbage input, returns null instead of NaN
 // =============================================================================
 
-import { norm, canonicalVendor, vendorFamily } from './suppliers.js';
+import { norm, resolveVendor } from './suppliers.js';
 
 // --- Date parsing ---
 
@@ -382,6 +382,7 @@ export function parseHQ(text) {
   const lines = (text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const items = [];
   let currentVendor = null;
+  let currentVendorResolution = null;
 
   for (const line of lines) {
     const m = line.match(/^([ve]d?|V|D|ED)\s*\t\s*(.+)$/i);
@@ -390,7 +391,8 @@ export function parseHQ(text) {
     const content = m[2].trim();
 
     if (tag === 'v') {
-      currentVendor = canonicalVendor(content.replace(/:$/, ''));
+      currentVendorResolution = resolveVendor(content.replace(/:$/, ''));
+      currentVendor = currentVendorResolution.canonicalName || content.replace(/:$/, '').trim();
     } else {
       if (!currentVendor) continue;
       const type = tag === 'ed' ? 'exclusive' : 'deal';
@@ -400,7 +402,9 @@ export function parseHQ(text) {
         id: ++nextId,
         type,
         vendor: currentVendor,
-        vendorFamily: vendorFamily(currentVendor),
+        vendorFamily: currentVendorResolution?.familyKey || norm(currentVendor),
+        vendorStatus: currentVendorResolution?.status || 'unknown',
+        vendorCandidates: currentVendorResolution?.candidates || [currentVendor],
         text: content,
         originalLine: line,
         start: dates.start,
@@ -419,22 +423,35 @@ export function parseHQ(text) {
 export function ingestWebsiteJSON(arr) {
   return (arr || []).map(row => {
     const supplier = row.shopOverline || '';
-    const vendor = canonicalVendor(supplier);
-    const family = vendorFamily(vendor);
+    const resolution = resolveVendor(supplier);
+    const vendor = resolution.canonicalName || supplier.trim();
+    const family = resolution.familyKey || norm(vendor);
     const expiry = row.expiryDate ? new Date(row.expiryDate) : null;
     const post = row.postDate ? new Date(row.postDate) : null;
     const text = [row.title || '', row.shopListing || ''].join(' · ');
     const bag = extractFeatureBag(text);
-    return { raw: row, supplier: vendor, vendorFamily: family, expiryDate: expiry, postDate: post, text, bag };
+    return {
+      raw: row,
+      supplier: vendor,
+      supplierStatus: resolution.status,
+      supplierCandidates: resolution.candidates,
+      vendorFamily: family,
+      expiryDate: expiry,
+      postDate: post,
+      text,
+      bag,
+    };
   });
 }
 
 // --- Full matching pipeline ---
 
 export function runFullMatch(hqDeals, websiteDeals, { filterSupplier = '' } = {}) {
+  const filterResolution = filterSupplier ? resolveVendor(filterSupplier) : null;
+  const filterName = filterResolution?.canonicalName || filterSupplier;
   const hqByFamily = {};
   for (const hq of hqDeals) {
-    if (filterSupplier && canonicalVendor(hq.vendor) !== canonicalVendor(filterSupplier)) continue;
+    if (filterName && hq.vendor !== filterName) continue;
     const fam = hq.vendorFamily;
     if (!hqByFamily[fam]) hqByFamily[fam] = [];
     hqByFamily[fam].push(hq);
