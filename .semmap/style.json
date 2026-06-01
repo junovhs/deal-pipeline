@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-26T18:01:27Z",
+  "generated_at": "2026-06-01T17:48:02Z",
   "entries": [
     {
       "file": "scripts/run-regression-fixtures.js",
@@ -18,9 +18,9 @@
         "  resetIds,",
         "  runFullMatch,",
         "} from \"../src/logic/dedupe.js\";",
+        "import { resolveVendor } from \"../src/logic/suppliers.js\";",
         "import {",
-        "  parseRawToGroups,",
-        "  validateAndMerge,"
+        "  parseRawToGroups,"
       ]
     },
     {
@@ -139,20 +139,20 @@
       "idiom_category": "general-idioms",
       "excerpts": [
         "// =============================================================================",
-        "// DEALTAG LOGIC — ported from dealtag/index.html",
-        "// Bug fixes applied:",
-        "//   1. looksLikeVendorCandidate: Unicode-aware regex (fixes Zoëtry etc)",
-        "//   2. transform: treat null currentKnown same as false (fixes orphaned deals)",
+        "// DEALTAG LOGIC",
+        "// Shared supplier normalization now lives in suppliers.js so tagging and dedupe",
+        "// classify the same vendor labels the same way.",
         "// =============================================================================",
         "",
-        "import { suppliers, aliases, norm } from './suppliers.js';",
+        "import { resolveVendor, isTagEligibleSupplier } from './suppliers.js';",
         "",
-        "// These matcher switches feed `isKnownSupplier` and `bestSupplierMatch`; they",
-        "// are live config, not orphaned constants.",
-        "const STRICT_SUPPLIERS = true;",
-        "const FAMILY_ALIASES_ALLOWED = false;",
+        "const SECTION_HEADING = /(offers?)\\s*:?\\s*$/i;",
+        "const DATE_RE = /(?:\\b\\d{1,2}\\/\\d{1,2}(?:\\/\\d{2,4})?\\b|\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)[a-z]*\\b\\s*\\d{1,2},?\\s*\\d{2,4})/i;",
+        "const DEAL_MARKER = /(ends?\\b|ongoing\\b|end\\s*date\\b|valid\\s*(?:through|until)\\b|expires?\\b)/i;",
+        "const DEAL_CUES = /\\b(save|savings?|off|deposit|gratuities|obc|upgrade|kids\\s+sail\\s+free|reduced)\\b/i;",
         "",
-        "const familyAliases = new Map();"
+        "function isExclusiveLine(t) {",
+        "  return /\\bTLN\\b/i.test(t) || /\\bEXCLUSIVE\\b/.test(t) || /^\\s*(?:•\\s*)?Exclusive\\s*[:\\-]/i.test(t);"
       ]
     },
     {
@@ -168,7 +168,7 @@
         "//   3. parseYear — handles garbage input, returns null instead of NaN",
         "// =============================================================================",
         "",
-        "import { norm, canonicalVendor, vendorFamily } from './suppliers.js';",
+        "import { norm, resolveVendor } from './suppliers.js';",
         "",
         "// --- Date parsing ---",
         "",
@@ -183,20 +183,20 @@
       "idiom_category": "general-idioms",
       "excerpts": [
         "// =============================================================================",
-        "// SINGLE SOURCE OF TRUTH: Supplier list from Dealtag (confirmed up-to-date)",
-        "// Both Dealtag and Dedupe import from here. No more drift.",
+        "// SHARED SUPPLIER NORMALIZATION",
+        "// One auditable catalog feeds both Dealtag and Dedupe.",
         "// =============================================================================",
         "",
-        "// Shared vendor catalog for both tagging and dedupe; Neti flags it because the",
-        "// consuming imports live outside this file, but the runtime depends on it.",
-        "export const suppliers = [",
-        "  {name: \"Abercrombie & Kent\", url: \"abercrombie-kent\", cats: [\"tour\"]},",
-        "  {name: \"Adventures by Disney\", url: \"adventures-by-disney\", cats: [\"dis\", \"tour\"]},",
-        "  {name: \"African Travel\", url: \"african-travel\", cats: [\"tour\"]},",
-        "  {name: \"Ama Waterways\", url: \"ama\", cats: [\"riv\"]},",
-        "  {name: \"American Airline Vacations\", url: \"american-airline-vacations\", cats: [\"res\"]},",
-        "  {name: \"American Cruise Line\", url: \"american-cruise-line\", cats: [\"lux\", \"riv\"]},",
-        "  {name: \"Atlantis Paradise Island Bahamas\", url: \"atlantis\", cats: [\"res\"]},"
+        "const SUPPLIER_CATALOG = [",
+        "  { name: \"Abercrombie & Kent\", url: \"abercrombie-kent\", cats: [\"tour\"] },",
+        "  { name: \"Adventures by Disney\", url: \"adventures-by-disney\", cats: [\"dis\", \"tour\"] },",
+        "  { name: \"African Travel\", url: \"african-travel\", cats: [\"tour\"] },",
+        "  { name: \"ALG Vacations\", url: \"alg-vacations\", cats: [\"res\"] },",
+        "  { name: \"Ama Waterways\", url: \"ama\", cats: [\"riv\"] },",
+        "  { name: \"American Airline Vacations\", url: \"american-airline-vacations\", cats: [\"res\"] },",
+        "  { name: \"American Cruise Line\", url: \"american-cruise-line\", cats: [\"lux\", \"riv\"] },",
+        "  { name: \"Atlantis Paradise Island Bahamas\", url: \"atlantis\", cats: [\"res\"] },",
+        "  { name: \"Atlas Ocean Voyages\", url: \"atlas\", cats: [\"lux\"] },"
       ]
     }
   ]
