@@ -1,4 +1,4 @@
-# deal-pipeline -- Semantic Map
+# CORE-01 -- Semantic Map
 
 **Purpose:** A bespoke pipeline that takes a simple list of deals from a weekly Dream Vacations promo email, and takes them all the way to published deals with full copy.
 
@@ -178,8 +178,8 @@ Exports: ingestWebsiteJSON, runFullMatch, parseHQDates, dateFmt
 Semantic: side-effecting stateful module
 
 `src/logic/suppliers.js`
-Implements canonical vendor. [HOTSPOT] [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:undocumented,complex-flow]
-Exports: supplierNames, canonicalVendor, familyOf, vendorFamily
+Implements supplier catalog. [HOTSPOT] [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:undocumented]
+Exports: isTagEligibleSupplier, familyOf, canonicalVendor, resolveVendor
 Semantic: pure computation constant-owning module
 
 `src/main.jsx`
@@ -212,6 +212,9 @@ DependencyGraph:
   dedupe.js:
     Imports: [suppliers.js]
     ImportedBy: [DedupeStep.jsx, run-regression-fixtures.js]
+  suppliers.js:
+    Imports: []
+    ImportedBy: [dealtag.js, dedupe.js, run-regression-fixtures.js]
   # --- Layer 0 -- Config ---
   SEMMAP.md, criticism.md, package.json, vite.config.js:
     Imports: []
@@ -236,11 +239,8 @@ DependencyGraph:
     Imports: []
     ImportedBy: []
   run-regression-fixtures.js:
-    Imports: [copywriting.js, dealtag.js, dedupe.js]
+    Imports: [copywriting.js, dealtag.js, dedupe.js, suppliers.js]
     ImportedBy: []
-  suppliers.js:
-    Imports: []
-    ImportedBy: [dealtag.js, dedupe.js]
   # --- Layer 3 -- App / Entrypoints ---
   App.css:
     Imports: []

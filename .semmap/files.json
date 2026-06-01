@@ -70,33 +70,33 @@
     ],
     "hotspot": false,
     "fan_in": 0,
-    "risk_score": 2.0,
+    "risk_score": 3.0,
     "semantic_summary": "async side-effecting adapter",
     "analysis": {
       "functions": {
         "total": 4,
         "public": 0,
-        "max_cognitive_complexity": 0,
-        "avg_cognitive_complexity": 0
+        "max_cognitive_complexity": 5,
+        "avg_cognitive_complexity": 1
       },
       "calls": {
-        "total_calls": 72,
-        "resolved_calls": 8,
-        "unresolved_calls": 64,
-        "resolution_rate": 0.11111111
+        "total_calls": 87,
+        "resolved_calls": 9,
+        "unresolved_calls": 78,
+        "resolution_rate": 0.10344828
       },
       "control_flow": {
-        "max_nesting_depth": 0,
-        "cognitive_complexity": 0
+        "max_nesting_depth": 1,
+        "cognitive_complexity": 5
       },
       "concurrency": {
-        "total_sites": 5,
+        "total_sites": 6,
         "has_async": true,
         "has_locks": false,
         "has_spawn": false
       },
       "activation": {
-        "total_sites": 11,
+        "total_sites": 12,
         "kinds": [
           "callback-surface"
         ]
@@ -270,8 +270,8 @@
         "undocumented_public": 1
       },
       "syntax": {
-        "error_count": 57,
-        "missing_count": 27
+        "error_count": 49,
+        "missing_count": 22
       },
       "activation": {
         "total_sites": 6,
@@ -305,16 +305,16 @@
     "semantic_summary": "async pure computation",
     "analysis": {
       "functions": {
-        "total": 4,
+        "total": 5,
         "public": 1,
         "max_cognitive_complexity": 22,
-        "avg_cognitive_complexity": 5
+        "avg_cognitive_complexity": 4
       },
       "calls": {
-        "total_calls": 105,
-        "resolved_calls": 1,
-        "unresolved_calls": 104,
-        "resolution_rate": 0.00952381
+        "total_calls": 114,
+        "resolved_calls": 3,
+        "unresolved_calls": 111,
+        "resolution_rate": 0.02631579
       },
       "control_flow": {
         "max_nesting_depth": 2,
@@ -331,8 +331,8 @@
         "undocumented_public": 1
       },
       "syntax": {
-        "error_count": 200,
-        "missing_count": 85
+        "error_count": 226,
+        "missing_count": 95
       },
       "activation": {
         "total_sites": 20,
@@ -415,31 +415,31 @@
     ],
     "hotspot": true,
     "fan_in": 0,
-    "risk_score": 12.4,
+    "risk_score": 14.2,
     "semantic_summary": "pure computation constant-owning module",
     "analysis": {
       "functions": {
-        "total": 9,
+        "total": 7,
         "public": 1,
-        "max_cognitive_complexity": 32,
-        "avg_cognitive_complexity": 6
+        "max_cognitive_complexity": 41,
+        "avg_cognitive_complexity": 7
       },
       "calls": {
-        "total_calls": 103,
-        "resolved_calls": 11,
-        "unresolved_calls": 92,
-        "resolution_rate": 0.106796116
+        "total_calls": 73,
+        "resolved_calls": 8,
+        "unresolved_calls": 65,
+        "resolution_rate": 0.10958904
       },
       "control_flow": {
         "max_nesting_depth": 4,
-        "cognitive_complexity": 56
+        "cognitive_complexity": 53
       },
       "docs": {
         "documented_symbols": 0,
         "undocumented_public": 1
       },
       "activation": {
-        "total_sites": 30,
+        "total_sites": 20,
         "kinds": [
           "callback-surface"
         ]
@@ -467,31 +467,31 @@
     ],
     "hotspot": true,
     "fan_in": 0,
-    "risk_score": 16.8,
+    "risk_score": 13.0,
     "semantic_summary": "side-effecting stateful module",
     "analysis": {
       "functions": {
-        "total": 17,
+        "total": 26,
         "public": 7,
-        "max_cognitive_complexity": 54,
-        "avg_cognitive_complexity": 9
+        "max_cognitive_complexity": 35,
+        "avg_cognitive_complexity": 6
       },
       "calls": {
-        "total_calls": 256,
-        "resolved_calls": 24,
-        "unresolved_calls": 232,
-        "resolution_rate": 0.09375
+        "total_calls": 302,
+        "resolved_calls": 42,
+        "unresolved_calls": 260,
+        "resolution_rate": 0.13907285
       },
       "control_flow": {
         "max_nesting_depth": 4,
-        "cognitive_complexity": 157
+        "cognitive_complexity": 163
       },
       "docs": {
         "documented_symbols": 0,
         "undocumented_public": 7
       },
       "activation": {
-        "total_sites": 42,
+        "total_sites": 56,
         "kinds": [
           "callback-surface"
         ]
@@ -505,48 +505,47 @@
     "path": "src/logic/suppliers.js",
     "layer": 1,
     "file_kind": "production",
-    "description": "Implements canonical vendor.",
+    "description": "Implements supplier catalog.",
     "exports": [
-      "supplierNames",
-      "canonicalVendor",
+      "isTagEligibleSupplier",
       "familyOf",
-      "vendorFamily"
+      "canonicalVendor",
+      "resolveVendor"
     ],
     "coupling": "pure",
     "behavior_tags": [
       "owns-const-state"
     ],
     "quality_tags": [
-      "undocumented",
-      "complex-flow"
+      "undocumented"
     ],
     "hotspot": true,
     "fan_in": 0,
-    "risk_score": 8.8,
+    "risk_score": 10.4,
     "semantic_summary": "pure computation constant-owning module",
     "analysis": {
       "functions": {
-        "total": 3,
-        "public": 3,
-        "max_cognitive_complexity": 24,
-        "avg_cognitive_complexity": 8
+        "total": 9,
+        "public": 5,
+        "max_cognitive_complexity": 7,
+        "avg_cognitive_complexity": 0
       },
       "calls": {
-        "total_calls": 68,
-        "resolved_calls": 5,
-        "unresolved_calls": 63,
-        "resolution_rate": 0.073529415
+        "total_calls": 77,
+        "resolved_calls": 18,
+        "unresolved_calls": 59,
+        "resolution_rate": 0.23376623
       },
       "control_flow": {
-        "max_nesting_depth": 1,
-        "cognitive_complexity": 24
+        "max_nesting_depth": 2,
+        "cognitive_complexity": 16
       },
       "docs": {
         "documented_symbols": 0,
-        "undocumented_public": 7
+        "undocumented_public": 10
       },
       "activation": {
-        "total_sites": 24,
+        "total_sites": 20,
         "kinds": [
           "callback-surface"
         ]

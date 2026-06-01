@@ -11,6 +11,11 @@
   },
   {
     "from": "scripts/run-regression-fixtures.js",
+    "to": "src/logic/suppliers.js",
+    "kind": "import"
+  },
+  {
+    "from": "scripts/run-regression-fixtures.js",
     "to": "src/logic/copywriting.js",
     "kind": "import"
   },
@@ -81,6 +86,11 @@
   },
   {
     "from": "scripts/run-regression-fixtures.js",
+    "to": "src/logic/suppliers.js",
+    "kind": "call"
+  },
+  {
+    "from": "scripts/run-regression-fixtures.js",
     "to": "src/logic/copywriting.js",
     "kind": "call"
   },
@@ -97,6 +107,11 @@
   {
     "from": "src/components/DedupeStep.jsx",
     "to": "src/logic/dedupe.js",
+    "kind": "call"
+  },
+  {
+    "from": "src/logic/dealtag.js",
+    "to": "src/logic/suppliers.js",
     "kind": "call"
   },
   {

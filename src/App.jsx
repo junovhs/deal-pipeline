@@ -3,6 +3,7 @@ import DealtagStep from './components/DealtagStep.jsx';
 import DedupeStep from './components/DedupeStep.jsx';
 import CopywritingStep from './components/CopywritingStep.jsx';
 import { DEFAULT_HOUSE_STYLE } from './logic/copywriting.js';
+import { parseRawEmail } from './logic/dealCoreClient.ts';
 
 const STEPS = [
   { key: 'tag', label: '1. Tag', desc: 'Classify raw deals' },
@@ -82,6 +83,24 @@ export default function App() {
     },
     [],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    parseRawEmail('Carnival\nDeal line').then((result) => {
+      if (!cancelled && !result.ok) {
+        console.warn('deal-core smoke parse failed', result);
+      }
+    }).catch((error) => {
+      if (!cancelled) {
+        console.warn('deal-core smoke parse failed', error);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const setStep = useCallback((step) => {
     setSession((prev) => ({ ...prev, activeStep: step }));

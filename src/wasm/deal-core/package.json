@@ -1,0 +1,15 @@
+{
+  "name": "deal-core",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "deal_core_bg.wasm",
+    "deal_core.js",
+    "deal_core.d.ts"
+  ],
+  "main": "deal_core.js",
+  "types": "deal_core.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

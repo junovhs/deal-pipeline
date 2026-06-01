@@ -1,5 +1,39 @@
 [
   {
+    "name": "dealtag-suppliers",
+    "purpose": "Dense dependency cluster with 3 files.",
+    "files": [
+      "scripts/run-regression-fixtures.js",
+      "src/logic/dealtag.js",
+      "src/logic/suppliers.js"
+    ],
+    "interface_symbols": [
+      "transform"
+    ],
+    "hotspot_files": [
+      "src/logic/dealtag.js",
+      "src/logic/suppliers.js"
+    ],
+    "internal_edge_density": 0.5,
+    "external_callers": 6
+  },
+  {
+    "name": "dedupe-suppliers",
+    "purpose": "Dense dependency cluster with 3 files.",
+    "files": [
+      "scripts/run-regression-fixtures.js",
+      "src/logic/dedupe.js",
+      "src/logic/suppliers.js"
+    ],
+    "interface_symbols": [],
+    "hotspot_files": [
+      "src/logic/dedupe.js",
+      "src/logic/suppliers.js"
+    ],
+    "internal_edge_density": 0.5,
+    "external_callers": 4
+  },
+  {
     "name": "copywriting",
     "purpose": "Dense dependency cluster with 3 files.",
     "files": [

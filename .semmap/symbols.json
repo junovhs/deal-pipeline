@@ -1,16 +1,16 @@
 [
   {
-    "stable_id": "fn::readFixture@21",
+    "stable_id": "fn::readFixture@22",
     "name": "readFixture",
     "kind": "Function",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 21,
-    "end_line": 23,
+    "start_line": 22,
+    "end_line": 24,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [
-      "const::fixtureDir@19"
+      "const::fixtureDir@20"
     ],
     "doc_comment": null,
     "signature": "function readFixture(name)",
@@ -18,12 +18,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::findMatch@25",
+    "stable_id": "fn::findMatch@26",
     "name": "findMatch",
     "kind": "Function",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 25,
-    "end_line": 29,
+    "start_line": 26,
+    "end_line": 30,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -34,16 +34,16 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::collectWarningTypes@31",
+    "stable_id": "fn::collectWarningTypes@32",
     "name": "collectWarningTypes",
     "kind": "Function",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 31,
-    "end_line": 33,
+    "start_line": 32,
+    "end_line": 34,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::main@35"
+      "fn::main@36"
     ],
     "callees": [],
     "doc_comment": null,
@@ -52,18 +52,18 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::main@35",
+    "stable_id": "fn::main@36",
     "name": "main",
     "kind": "Function",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 35,
-    "end_line": 152,
+    "start_line": 36,
+    "end_line": 188,
     "visibility": "Private",
-    "cognitive_complexity": 0,
+    "cognitive_complexity": 5,
     "callers": [],
     "callees": [
-      "fn::resetIds@379",
-      "fn::collectWarningTypes@31"
+      "fn::resetIds@538",
+      "fn::collectWarningTypes@32"
     ],
     "doc_comment": null,
     "signature": "function main()",
@@ -71,25 +71,8 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::__dirname@18",
+    "stable_id": "const::__dirname@19",
     "name": "__dirname",
-    "kind": "Constant",
-    "file": "scripts/run-regression-fixtures.js",
-    "start_line": 18,
-    "end_line": 18,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [
-      "const::fixtureDir@19"
-    ],
-    "callees": [],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::fixtureDir@19",
-    "name": "fixtureDir",
     "kind": "Constant",
     "file": "scripts/run-regression-fixtures.js",
     "start_line": 19,
@@ -97,10 +80,27 @@
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::readFixture@21"
+      "const::fixtureDir@20"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::fixtureDir@20",
+    "name": "fixtureDir",
+    "kind": "Constant",
+    "file": "scripts/run-regression-fixtures.js",
+    "start_line": 20,
+    "end_line": 20,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::readFixture@22"
     ],
     "callees": [
-      "const::__dirname@18"
+      "const::__dirname@19"
     ],
     "doc_comment": null,
     "has_guard_coverage": false,
@@ -256,7 +256,7 @@
     "callers": [],
     "callees": [],
     "doc_comment": null,
-    "signature": "function Modal({\n  title,\n  children,\n  onConfirm,\n  onCancel,\n  confirmText = \"Confirm\",\n  wide = false,\n})",
+    "signature": "function Modal({\r\n  title,\r\n  children,\r\n  onConfirm,\r\n  onCancel,\r\n  confirmText = \"Confirm\",\r\n  wide = false,\r\n})",
     "has_guard_coverage": false,
     "panic_sites": 0
   },
@@ -363,29 +363,52 @@
     "kind": "Function",
     "file": "src/components/DedupeStep.jsx",
     "start_line": 322,
-    "end_line": 360,
+    "end_line": 371,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
-    "callees": [],
+    "callees": [
+      "fn::formatStageDelta@407"
+    ],
     "doc_comment": null,
     "signature": "function MatchCard({ r, today, onReject })",
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::UnmatchedCard@362",
+    "stable_id": "fn::UnmatchedCard@373",
     "name": "UnmatchedCard",
     "kind": "Function",
     "file": "src/components/DedupeStep.jsx",
-    "start_line": 362,
-    "end_line": 379,
+    "start_line": 373,
+    "end_line": 405,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
-    "callees": [],
+    "callees": [
+      "fn::formatStageDelta@407"
+    ],
     "doc_comment": null,
     "signature": "function UnmatchedCard({ r, today })",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::formatStageDelta@407",
+    "name": "formatStageDelta",
+    "kind": "Function",
+    "file": "src/components/DedupeStep.jsx",
+    "start_line": 407,
+    "end_line": 409,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::MatchCard@322",
+      "fn::UnmatchedCard@373"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function formatStageDelta(delta)",
     "has_guard_coverage": false,
     "panic_sites": 0
   },
@@ -449,7 +472,7 @@
     "callers": [],
     "callees": [],
     "doc_comment": null,
-    "signature": "function generateSingleDealPrompt({\n  vendorName,\n  deal,\n  note = \"\",\n  currentHeadline = \"\",\n  currentDescription = \"\",\n  houseStyle = DEFAULT_HOUSE_STYLE,\n})",
+    "signature": "function generateSingleDealPrompt({\r\n  vendorName,\r\n  deal,\r\n  note = \"\",\r\n  currentHeadline = \"\",\r\n  currentDescription = \"\",\r\n  houseStyle = DEFAULT_HOUSE_STYLE,\r\n})",
     "has_guard_coverage": true,
     "panic_sites": 0
   },
@@ -646,50 +669,16 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::jaccard@38",
-    "name": "jaccard",
-    "kind": "Function",
-    "file": "src/logic/dealtag.js",
-    "start_line": 38,
-    "end_line": 42,
-    "visibility": "Private",
-    "cognitive_complexity": 3,
-    "callers": [],
-    "callees": [],
-    "doc_comment": null,
-    "signature": "function jaccard(a, b)",
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "fn::bestSupplierMatch@50",
-    "name": "bestSupplierMatch",
-    "kind": "Function",
-    "file": "src/logic/dealtag.js",
-    "start_line": 50,
-    "end_line": 73,
-    "visibility": "Private",
-    "cognitive_complexity": 8,
-    "callers": [],
-    "callees": [
-      "fn::norm@283"
-    ],
-    "doc_comment": null,
-    "signature": "function bestSupplierMatch(name)",
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "fn::isExclusiveLine@82",
+    "stable_id": "fn::isExclusiveLine@14",
     "name": "isExclusiveLine",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 82,
-    "end_line": 84,
+    "start_line": 14,
+    "end_line": 16,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::looksLikeDeal@86"
+      "fn::looksLikeDeal@18"
     ],
     "callees": [],
     "doc_comment": null,
@@ -698,20 +687,20 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::looksLikeDeal@86",
+    "stable_id": "fn::looksLikeDeal@18",
     "name": "looksLikeDeal",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 86,
-    "end_line": 92,
+    "start_line": 18,
+    "end_line": 24,
     "visibility": "Private",
     "cognitive_complexity": 4,
     "callers": [
-      "fn::looksLikeVendorCandidate@101",
-      "fn::transform@138"
+      "fn::looksLikeVendorCandidate@32",
+      "fn::transform@61"
     ],
     "callees": [
-      "fn::isExclusiveLine@82"
+      "fn::isExclusiveLine@14"
     ],
     "doc_comment": null,
     "signature": "function looksLikeDeal(t)",
@@ -719,12 +708,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::canonicalVendorLabel@94",
+    "stable_id": "fn::canonicalVendorLabel@26",
     "name": "canonicalVendorLabel",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 94,
-    "end_line": 98,
+    "start_line": 26,
+    "end_line": 30,
     "visibility": "Private",
     "cognitive_complexity": 1,
     "callers": [],
@@ -735,19 +724,19 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::looksLikeVendorCandidate@101",
+    "stable_id": "fn::looksLikeVendorCandidate@32",
     "name": "looksLikeVendorCandidate",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 101,
-    "end_line": 121,
+    "start_line": 32,
+    "end_line": 50,
     "visibility": "Private",
     "cognitive_complexity": 7,
     "callers": [
-      "fn::transform@138"
+      "fn::transform@61"
     ],
     "callees": [
-      "fn::looksLikeDeal@86"
+      "fn::looksLikeDeal@18"
     ],
     "doc_comment": null,
     "signature": "function looksLikeVendorCandidate(t)",
@@ -755,34 +744,34 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::isKnownSupplier@123",
+    "stable_id": "fn::isKnownSupplier@52",
     "name": "isKnownSupplier",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 123,
-    "end_line": 129,
+    "start_line": 52,
+    "end_line": 55,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [
-      "fn::transform@138"
+    "callers": [],
+    "callees": [
+      "fn::isTagEligibleSupplier@397"
     ],
-    "callees": [],
     "doc_comment": null,
     "signature": "function isKnownSupplier(line)",
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::isContinuation@131",
+    "stable_id": "fn::isContinuation@57",
     "name": "isContinuation",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 131,
-    "end_line": 134,
+    "start_line": 57,
+    "end_line": 59,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::transform@138"
+      "fn::transform@61"
     ],
     "callees": [],
     "doc_comment": null,
@@ -791,20 +780,19 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::transform@138",
+    "stable_id": "fn::transform@61",
     "name": "transform",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 138,
-    "end_line": 221,
+    "start_line": 61,
+    "end_line": 148,
     "visibility": "Public",
-    "cognitive_complexity": 32,
+    "cognitive_complexity": 41,
     "callers": [],
     "callees": [
-      "fn::isContinuation@131",
-      "fn::looksLikeDeal@86",
-      "fn::looksLikeVendorCandidate@101",
-      "fn::isKnownSupplier@123"
+      "fn::isContinuation@57",
+      "fn::looksLikeDeal@18",
+      "fn::looksLikeVendorCandidate@32"
     ],
     "doc_comment": null,
     "signature": "function transform(raw, { includeUnknowns = true })",
@@ -812,149 +800,57 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::STRICT_SUPPLIERS@12",
-    "name": "STRICT_SUPPLIERS",
+    "stable_id": "const::SECTION_HEADING@9",
+    "name": "SECTION_HEADING",
+    "kind": "Constant",
+    "file": "src/logic/dealtag.js",
+    "start_line": 9,
+    "end_line": 9,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::DATE_RE@10",
+    "name": "DATE_RE",
+    "kind": "Constant",
+    "file": "src/logic/dealtag.js",
+    "start_line": 10,
+    "end_line": 10,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::DEAL_MARKER@11",
+    "name": "DEAL_MARKER",
+    "kind": "Constant",
+    "file": "src/logic/dealtag.js",
+    "start_line": 11,
+    "end_line": 11,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::DEAL_CUES@12",
+    "name": "DEAL_CUES",
     "kind": "Constant",
     "file": "src/logic/dealtag.js",
     "start_line": 12,
     "end_line": 12,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::FAMILY_ALIASES_ALLOWED@13",
-    "name": "FAMILY_ALIASES_ALLOWED",
-    "kind": "Constant",
-    "file": "src/logic/dealtag.js",
-    "start_line": 13,
-    "end_line": 13,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::familyAliases@15",
-    "name": "familyAliases",
-    "kind": "Constant",
-    "file": "src/logic/dealtag.js",
-    "start_line": 15,
-    "end_line": 15,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::STOP_TOKENS@20",
-    "name": "STOP_TOKENS",
-    "kind": "Constant",
-    "file": "src/logic/dealtag.js",
-    "start_line": 20,
-    "end_line": 24,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::supplierIndex@32",
-    "name": "supplierIndex",
-    "kind": "Constant",
-    "file": "src/logic/dealtag.js",
-    "start_line": 32,
-    "end_line": 36,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [
-      "fn::norm@283"
-    ],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::dealtagAliasMap@45",
-    "name": "dealtagAliasMap",
-    "kind": "Constant",
-    "file": "src/logic/dealtag.js",
-    "start_line": 45,
-    "end_line": 45,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::SECTION_HEADING@77",
-    "name": "SECTION_HEADING",
-    "kind": "Constant",
-    "file": "src/logic/dealtag.js",
-    "start_line": 77,
-    "end_line": 77,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::DATE_RE@78",
-    "name": "DATE_RE",
-    "kind": "Constant",
-    "file": "src/logic/dealtag.js",
-    "start_line": 78,
-    "end_line": 78,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::DEAL_MARKER@79",
-    "name": "DEAL_MARKER",
-    "kind": "Constant",
-    "file": "src/logic/dealtag.js",
-    "start_line": 79,
-    "end_line": 79,
-    "visibility": "Private",
-    "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
-    "doc_comment": null,
-    "has_guard_coverage": false,
-    "panic_sites": 0
-  },
-  {
-    "stable_id": "const::DEAL_CUES@80",
-    "name": "DEAL_CUES",
-    "kind": "Constant",
-    "file": "src/logic/dealtag.js",
-    "start_line": 80,
-    "end_line": 80,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1043,7 +939,7 @@
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::scorePair@170"
+      "fn::scoreDateStage@293"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1096,7 +992,9 @@
     "end_line": 163,
     "visibility": "Private",
     "cognitive_complexity": 3,
-    "callers": [],
+    "callers": [
+      "fn::scoreTextStage@333"
+    ],
     "callees": [],
     "doc_comment": null,
     "signature": "function textSimilarity(a, b)",
@@ -1104,19 +1002,152 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::scorePair@170",
-    "name": "scorePair",
+    "stable_id": "fn::createStage@170",
+    "name": "createStage",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
     "start_line": 170,
-    "end_line": 274,
+    "end_line": 172,
     "visibility": "Private",
-    "cognitive_complexity": 54,
+    "cognitive_complexity": 0,
     "callers": [
-      "fn::optimalMatch@356"
+      "fn::scoreFeatureStage@198",
+      "fn::scoreNumberStage@247",
+      "fn::scoreDateStage@293",
+      "fn::scoreTextStage@333",
+      "fn::runFullMatch@608"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function createStage(key, label, delta, reasons, details)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::confidenceFromScore@174",
+    "name": "confidenceFromScore",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 174,
+    "end_line": 181,
+    "visibility": "Private",
+    "cognitive_complexity": 5,
+    "callers": [
+      "fn::scorePair@364"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function confidenceFromScore(score, hasWeb, isExtension)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::buildEmptyMeta@183",
+    "name": "buildEmptyMeta",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 183,
+    "end_line": 196,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::optimalMatch@513",
+      "fn::runFullMatch@608"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function buildEmptyMeta(overrides)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::scoreFeatureStage@198",
+    "name": "scoreFeatureStage",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 198,
+    "end_line": 245,
+    "visibility": "Private",
+    "cognitive_complexity": 4,
+    "callers": [],
+    "callees": [
+      "fn::createStage@170"
+    ],
+    "doc_comment": null,
+    "signature": "function scoreFeatureStage(hq, web)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::scoreNumberStage@247",
+    "name": "scoreNumberStage",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 247,
+    "end_line": 291,
+    "visibility": "Private",
+    "cognitive_complexity": 32,
+    "callers": [],
+    "callees": [
+      "fn::createStage@170"
+    ],
+    "doc_comment": null,
+    "signature": "function scoreNumberStage(hq, web)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::scoreDateStage@293",
+    "name": "scoreDateStage",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 293,
+    "end_line": 331,
+    "visibility": "Private",
+    "cognitive_complexity": 12,
+    "callers": [],
+    "callees": [
+      "fn::sameDay@28",
+      "fn::createStage@170"
+    ],
+    "doc_comment": null,
+    "signature": "function scoreDateStage(hq, web, numbersMismatch)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::scoreTextStage@333",
+    "name": "scoreTextStage",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 333,
+    "end_line": 362,
+    "visibility": "Private",
+    "cognitive_complexity": 6,
+    "callers": [],
+    "callees": [
+      "fn::textSimilarity@156",
+      "fn::createStage@170"
+    ],
+    "doc_comment": null,
+    "signature": "function scoreTextStage(hq, web, hqFeats, webFeats)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::scorePair@364",
+    "name": "scorePair",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 364,
+    "end_line": 402,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::optimalMatch@513"
     ],
     "callees": [
-      "fn::sameDay@28"
+      "fn::confidenceFromScore@174"
     ],
     "doc_comment": null,
     "signature": "function scorePair(hq, web)",
@@ -1124,12 +1155,51 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::hungarian@278",
+    "stable_id": "fn::buildCandidateRankings@404",
+    "name": "buildCandidateRankings",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 404,
+    "end_line": 417,
+    "visibility": "Private",
+    "cognitive_complexity": 1,
+    "callers": [
+      "fn::attachCandidateRankings@419"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function buildCandidateRankings(matrixRow, webGroup)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::attachCandidateRankings@419",
+    "name": "attachCandidateRankings",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 419,
+    "end_line": 424,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::greedyMatch@475",
+      "fn::optimalMatch@513"
+    ],
+    "callees": [
+      "fn::buildCandidateRankings@404"
+    ],
+    "doc_comment": null,
+    "signature": "function attachCandidateRankings(meta, matrixRow, webGroup)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::hungarian@428",
     "name": "hungarian",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 278,
-    "end_line": 323,
+    "start_line": 428,
+    "end_line": 473,
     "visibility": "Private",
     "cognitive_complexity": 35,
     "callers": [],
@@ -1140,38 +1210,42 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::greedyMatch@325",
+    "stable_id": "fn::greedyMatch@475",
     "name": "greedyMatch",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 325,
-    "end_line": 354,
+    "start_line": 475,
+    "end_line": 511,
     "visibility": "Private",
     "cognitive_complexity": 9,
     "callers": [
-      "fn::optimalMatch@356"
+      "fn::optimalMatch@513"
     ],
-    "callees": [],
+    "callees": [
+      "fn::attachCandidateRankings@419"
+    ],
     "doc_comment": null,
     "signature": "function greedyMatch(hqGroup, webGroup, matrix)",
     "has_guard_coverage": true,
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::optimalMatch@356",
+    "stable_id": "fn::optimalMatch@513",
     "name": "optimalMatch",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 356,
-    "end_line": 374,
+    "start_line": 513,
+    "end_line": 533,
     "visibility": "Private",
     "cognitive_complexity": 4,
     "callers": [
-      "fn::runFullMatch@434"
+      "fn::runFullMatch@608"
     ],
     "callees": [
-      "fn::scorePair@170",
-      "fn::greedyMatch@325"
+      "fn::scorePair@364",
+      "fn::attachCandidateRankings@419",
+      "fn::buildEmptyMeta@183",
+      "fn::greedyMatch@475"
     ],
     "doc_comment": null,
     "signature": "function optimalMatch(hqGroup, webGroup)",
@@ -1179,16 +1253,16 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::resetIds@379",
+    "stable_id": "fn::resetIds@538",
     "name": "resetIds",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 379,
-    "end_line": 379,
+    "start_line": 538,
+    "end_line": 538,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::main@35"
+      "fn::main@36"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1197,18 +1271,18 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::parseHQ@381",
+    "stable_id": "fn::parseHQ@540",
     "name": "parseHQ",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 381,
-    "end_line": 415,
+    "start_line": 540,
+    "end_line": 578,
     "visibility": "Public",
     "cognitive_complexity": 9,
     "callers": [],
     "callees": [
-      "fn::canonicalVendor@289",
-      "fn::vendorFamily@323"
+      "fn::resolveVendor@350",
+      "fn::norm@251"
     ],
     "doc_comment": null,
     "signature": "function parseHQ(text)",
@@ -1216,12 +1290,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::ingestWebsiteJSON@419",
+    "stable_id": "fn::ingestWebsiteJSON@582",
     "name": "ingestWebsiteJSON",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 419,
-    "end_line": 430,
+    "start_line": 582,
+    "end_line": 604,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1232,18 +1306,19 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::runFullMatch@434",
+    "stable_id": "fn::runFullMatch@608",
     "name": "runFullMatch",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 434,
-    "end_line": 466,
+    "start_line": 608,
+    "end_line": 645,
     "visibility": "Public",
     "cognitive_complexity": 15,
     "callers": [],
     "callees": [
-      "fn::canonicalVendor@289",
-      "fn::optimalMatch@356"
+      "fn::buildEmptyMeta@183",
+      "fn::createStage@170",
+      "fn::optimalMatch@513"
     ],
     "doc_comment": null,
     "signature": "function runFullMatch(hqDeals, websiteDeals, { filterSupplier = '' })",
@@ -1251,12 +1326,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::exportUnmatched@470",
+    "stable_id": "fn::exportUnmatched@649",
     "name": "exportUnmatched",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 470,
-    "end_line": 485,
+    "start_line": 649,
+    "end_line": 664,
     "visibility": "Public",
     "cognitive_complexity": 1,
     "callers": [],
@@ -1342,12 +1417,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "static::nextId@378",
+    "stable_id": "static::nextId@537",
     "name": "nextId",
     "kind": "Static",
     "file": "src/logic/dedupe.js",
-    "start_line": 378,
-    "end_line": 378,
+    "start_line": 537,
+    "end_line": 537,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1357,19 +1432,21 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::norm@283",
+    "stable_id": "fn::norm@251",
     "name": "norm",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 283,
-    "end_line": 286,
+    "start_line": 251,
+    "end_line": 260,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [
-      "const::supplierIndex@32",
-      "fn::bestSupplierMatch@50",
-      "const::familyOf@262",
-      "fn::vendorFamily@323"
+      "fn::parseHQ@540",
+      "const::supplierCatalog@269",
+      "const::catalogByNormName@277",
+      "const::familyOf@289",
+      "fn::buildKnownResolution@311",
+      "fn::vendorFamily@401"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1378,38 +1455,154 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::canonicalVendor@289",
+    "stable_id": "fn::cleanVendorInput@262",
+    "name": "cleanVendorInput",
+    "kind": "Function",
+    "file": "src/logic/suppliers.js",
+    "start_line": 262,
+    "end_line": 267,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::canonicalVendor@392",
+      "fn::vendorFamily@401"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function cleanVendorInput(input)",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::buildKnownResolution@311",
+    "name": "buildKnownResolution",
+    "kind": "Function",
+    "file": "src/logic/suppliers.js",
+    "start_line": 311,
+    "end_line": 322,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::resolveVendor@350"
+    ],
+    "callees": [
+      "fn::norm@251"
+    ],
+    "doc_comment": null,
+    "signature": "function buildKnownResolution(entry, rawInput, normalizedInput, matchedBy)",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::buildAmbiguousResolution@324",
+    "name": "buildAmbiguousResolution",
+    "kind": "Function",
+    "file": "src/logic/suppliers.js",
+    "start_line": 324,
+    "end_line": 335,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::resolveVendor@350"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function buildAmbiguousResolution(ambiguity, rawInput, normalizedInput, matchedBy)",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::buildUnknownResolution@337",
+    "name": "buildUnknownResolution",
+    "kind": "Function",
+    "file": "src/logic/suppliers.js",
+    "start_line": 337,
+    "end_line": 348,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::resolveVendor@350"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function buildUnknownResolution(rawInput, normalizedInput)",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::resolveVendor@350",
+    "name": "resolveVendor",
+    "kind": "Function",
+    "file": "src/logic/suppliers.js",
+    "start_line": 350,
+    "end_line": 390,
+    "visibility": "Public",
+    "cognitive_complexity": 7,
+    "callers": [
+      "fn::parseHQ@540",
+      "fn::isTagEligibleSupplier@397"
+    ],
+    "callees": [
+      "fn::buildUnknownResolution@337",
+      "fn::buildAmbiguousResolution@324",
+      "fn::buildKnownResolution@311"
+    ],
+    "doc_comment": null,
+    "signature": "function resolveVendor(input)",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::canonicalVendor@392",
     "name": "canonicalVendor",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 289,
-    "end_line": 321,
+    "start_line": 392,
+    "end_line": 395,
     "visibility": "Public",
-    "cognitive_complexity": 24,
-    "callers": [
-      "fn::parseHQ@381",
-      "fn::runFullMatch@434"
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [
+      "fn::cleanVendorInput@262"
     ],
-    "callees": [],
     "doc_comment": null,
     "signature": "function canonicalVendor(input)",
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::vendorFamily@323",
-    "name": "vendorFamily",
+    "stable_id": "fn::isTagEligibleSupplier@397",
+    "name": "isTagEligibleSupplier",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 323,
-    "end_line": 326,
+    "start_line": 397,
+    "end_line": 399,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::parseHQ@381"
+      "fn::isKnownSupplier@52"
     ],
     "callees": [
-      "fn::norm@283"
+      "fn::resolveVendor@350"
+    ],
+    "doc_comment": null,
+    "signature": "function isTagEligibleSupplier(input)",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::vendorFamily@401",
+    "name": "vendorFamily",
+    "kind": "Function",
+    "file": "src/logic/suppliers.js",
+    "start_line": 401,
+    "end_line": 404,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [
+      "fn::norm@251",
+      "fn::cleanVendorInput@262"
     ],
     "doc_comment": null,
     "signature": "function vendorFamily(name)",
@@ -1417,13 +1610,13 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::suppliers@8",
-    "name": "suppliers",
+    "stable_id": "const::SUPPLIER_CATALOG@6",
+    "name": "SUPPLIER_CATALOG",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 8,
-    "end_line": 90,
-    "visibility": "Public",
+    "start_line": 6,
+    "end_line": 96,
+    "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [],
@@ -1432,13 +1625,13 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::aliases@96",
-    "name": "aliases",
+    "stable_id": "const::SUPPLIER_ALIASES@98",
+    "name": "SUPPLIER_ALIASES",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 96,
-    "end_line": 257,
-    "visibility": "Public",
+    "start_line": 98,
+    "end_line": 192,
+    "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [],
@@ -1447,29 +1640,183 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::familyOf@262",
-    "name": "familyOf",
+    "stable_id": "const::SUPPLIER_FAMILIES@194",
+    "name": "SUPPLIER_FAMILIES",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 262,
-    "end_line": 279,
+    "start_line": 194,
+    "end_line": 199,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::SUPPLIER_AMBIGUITIES@201",
+    "name": "SUPPLIER_AMBIGUITIES",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 201,
+    "end_line": 233,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::SUPPLIER_KEYWORD_RULES@235",
+    "name": "SUPPLIER_KEYWORD_RULES",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 235,
+    "end_line": 240,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::TAG_INELIGIBLE_SUPPLIERS@242",
+    "name": "TAG_INELIGIBLE_SUPPLIERS",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 242,
+    "end_line": 249,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::supplierCatalog@269",
+    "name": "supplierCatalog",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 269,
+    "end_line": 272,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [
-      "fn::norm@283"
+      "fn::norm@251"
     ],
     "doc_comment": null,
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "const::supplierNames@329",
+    "stable_id": "const::suppliers@274",
+    "name": "suppliers",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 274,
+    "end_line": 274,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::catalogByName@276",
+    "name": "catalogByName",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 276,
+    "end_line": 276,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::catalogByNormName@277",
+    "name": "catalogByNormName",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 277,
+    "end_line": 277,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [
+      "fn::norm@251"
+    ],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::aliases@279",
+    "name": "aliases",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 279,
+    "end_line": 279,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::familyOf@289",
+    "name": "familyOf",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 289,
+    "end_line": 291,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [
+      "fn::norm@251"
+    ],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::ambiguousByLabel@298",
+    "name": "ambiguousByLabel",
+    "kind": "Constant",
+    "file": "src/logic/suppliers.js",
+    "start_line": 298,
+    "end_line": 298,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::supplierNames@406",
     "name": "supplierNames",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 329,
-    "end_line": 329,
+    "start_line": 406,
+    "end_line": 406,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [],
