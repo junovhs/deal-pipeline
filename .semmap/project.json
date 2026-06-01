@@ -1,13 +1,13 @@
 {
-  "name": "deal-pipeline",
+  "name": "CORE-01",
   "one_liner": "A bespoke pipeline that takes a simple list of deals from a weekly Dream Vacations promo email, and takes them all the way to published deals with full copy.",
   "language_primary": "typescript",
   "languages": [
     "typescript",
     "javascript"
   ],
-  "total_files": 18,
-  "total_lines": 7502,
+  "total_files": 17,
+  "total_lines": 6952,
   "subsystems": [
     "dealtag-suppliers",
     "dedupe-suppliers",
@@ -16,17 +16,16 @@
   "entry_points": [
     "index.html"
   ],
-  "generated_at": "2026-06-01T17:48:01Z",
+  "generated_at": "2026-06-01T17:57:12Z",
   "omni_ast_version": "0.4.27",
   "file_hashes": {
     "SEMMAP.md": "0dde4dbb65039ec8336bd5941d3f706a7dc452cc842f36be5bac8a71e238d245",
-    "criticism.md": "75c8e37068eddda887202da7d3f9baf080d5714e0e54bc870dac67b1c9287151",
-    "index.html": "ce2d84e1ef625260b6fb9b3c58a6b8d0fafea6065e7b4d830a64602db8c0f208",
-    "north-star.md": "dc5e57e8d9a3f7dc63d4287f0ee05fb29697dc6193aa11b9b869394639d62b15",
-    "package-lock.json": "80292aa74be2afdbfabeb2dddb3e63269f147f04354580341039af89300eb722",
+    "criticism.md": "61897a027ce6d59585357855f58306ec628c517057f8df35b0351da9e3c4add0",
+    "index.html": "cfd368804e91ccfbca444d62a40acb73e6e8d71ffb4c558c09e891b2ac1bfbb7",
+    "package-lock.json": "37ad412dcdd5906dc19d4d85c3d68d3bd5489a798c4ff04d65b60783f411f3e8",
     "package.json": "f34b7de5d62c7f1eab59e5565acfe86f3deff4a7fbb4d9ae4cca380dc63029ee",
     "scripts/run-regression-fixtures.js": "0d30db4e57a082efa05aa537a4cc21c6ebce7d3fd88c5326a0ab902e24abaf87",
-    "src/App.css": "94fd3ebd1bf631ac623b438e87e76be938b098c0f013df90d95ebc42bdc6f059",
+    "src/App.css": "c82e2c8bab6b1f13f6a9fd608799597ec7b9f3a38cc0ad5adf6ac8a1eca0332b",
     "src/App.jsx": "ddf240efcd39a3c945e003e39cb24b451e083ccde1d7ea6d34d5ab780842af80",
     "src/components/CopywritingStep.jsx": "e61a691a397644db6c2b91da7df096f0d1ff34cfd9638c1d49f5a757e87d7505",
     "src/components/DealtagStep.jsx": "88be5f4169d19d0a2bd66abb6734725c70ba42a3365d21adfc0e0ad38104bfc3",
@@ -36,7 +35,7 @@
     "src/logic/dedupe.js": "7498866834355c9320ccd151c7a25a85fb0599727f74498082c8b7442621b04a",
     "src/logic/suppliers.js": "8f8b07f9853e201b063211e9a41cdd19791d5cffa3da192f37a4eb5534f8dbfd",
     "src/main.jsx": "cc2ebc90bfa1f959bd340fa493e1a47029e9cb9b86b3282a0e3bee6040fcd6a5",
-    "vite.config.js": "6dc0ce25c4170ac9fbadb4dbd19ca5c2ceb57b9c5efc5090b82e2923f53dd679"
+    "vite.config.js": "537bcf934522a5030ec0d25e9957be60e5489bfb40d25b31033ef97618bd1bb1"
   },
   "generated_at_commit": "86f95d985a613f626c569a093cadfffdb0b20dc5"
 }

@@ -1,4 +1,4 @@
-# deal-pipeline -- Semantic Map
+# CORE-01 -- Semantic Map
 
 **Purpose:** A bespoke pipeline that takes a simple list of deals from a weekly Dream Vacations promo email, and takes them all the way to published deals with full copy.
 
