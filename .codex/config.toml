@@ -1,0 +1,10 @@
+[mcp_servers.ishoo]
+command = "ishoo"
+args = ["mcp"]
+
+[mcp_servers.semmap]
+command = "semmap"
+args = ["mcp"]
+
+[mcp_servers.semmap.tools.semmap_generate]
+approval_mode = "approve"

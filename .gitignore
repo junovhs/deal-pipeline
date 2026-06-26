@@ -3,3 +3,4 @@ deal-core/target/
 **/.ishoo/*.local.toml
 **/.ishoo/cache/
 **/.ishoo/worktrees/
+.ishoo/
