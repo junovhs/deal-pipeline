@@ -240,7 +240,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
                 onChange={(event) => updateSession({ supplierFilter: event.target.value })}
               >
                 <option value="">All suppliers</option>
-                {webSuppliers.map((supplier) => <option key={supplier}>{supplier}</option>)}
+                {webSuppliers.map((supplier) => <option key={String(supplier)}>{String(supplier)}</option>)}
               </select>
               <select
                 value={viewFilter}

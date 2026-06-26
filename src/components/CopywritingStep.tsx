@@ -137,7 +137,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
     }));
   }, [updateSession]);
 
-  const handleCopy = useCallback((text, key, isComplete, vIdx, dIdx) => {
+  const handleCopy = useCallback((text, key, isComplete = false, vIdx = 0, dIdx = 0) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopySuccess((prev) => ({ ...prev, [key]: true }));
       if (isComplete) toggleCheck(vIdx, dIdx, true);
@@ -209,7 +209,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
         dealText: quickAddDealText,
         isExclusive: quickAddExclusive,
       });
-      const nextSessionPatch = { rawInput: nextRaw };
+      const nextSessionPatch: { rawInput: string; finalGroups?: any } = { rawInput: nextRaw };
 
       if (view === "work") {
         const groups = parseRawToGroups(nextRaw);
@@ -831,6 +831,13 @@ function Modal({
   onCancel,
   confirmText = "Confirm",
   wide = false,
+}: {
+  title?: any;
+  children?: any;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  confirmText?: string;
+  wide?: boolean;
 }) {
   return (
     <div className="modal-overlay">

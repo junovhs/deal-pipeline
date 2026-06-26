@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import DealtagStep from './components/DealtagStep.jsx';
-import DedupeStep from './components/DedupeStep.jsx';
-import CopywritingStep from './components/CopywritingStep.jsx';
+import DealtagStep from './components/DealtagStep';
+import DedupeStep from './components/DedupeStep';
+import CopywritingStep from './components/CopywritingStep';
 import { DEFAULT_HOUSE_STYLE } from './logic/copywriting.js';
-import { parseRawEmail } from './logic/dealCoreClient.ts';
+import { parseRawEmail } from './logic/dealCoreClient';
 
 const STEPS = [
   { key: 'tag', label: '1. Tag', desc: 'Classify raw deals' },
