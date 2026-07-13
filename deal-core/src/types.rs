@@ -55,6 +55,7 @@ pub struct CoreDiagnostic {
 pub enum CoreDiagnosticKind {
     ParserSmoke,
     UnsupportedOptions,
+    WebsiteExportSchema,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -2,13 +2,31 @@ use wasm_bindgen::prelude::*;
 
 mod fixtures;
 mod types;
+mod website;
 
 pub use fixtures::*;
 pub use types::*;
+pub use website::*;
 
 #[wasm_bindgen(js_name = parseRawEmail)]
 pub fn parse_raw_email(raw_text: &str) -> JsValue {
     let result = parse_raw_email_core(raw_text);
+    serde_wasm_bindgen::to_value(&result).unwrap_or(JsValue::NULL)
+}
+
+#[wasm_bindgen(js_name = validateWebsiteExport)]
+pub fn validate_website_export(rows: JsValue) -> JsValue {
+    let result = match serde_wasm_bindgen::from_value(rows) {
+        Ok(rows) => validate_website_export_core(rows),
+        Err(error) => CoreResult::failure(
+            CoreError {
+                code: "invalid_website_export_json".to_string(),
+                message: format!("Website export must be a JSON array of records: {error}"),
+            },
+            Vec::new(),
+        ),
+    };
+
     serde_wasm_bindgen::to_value(&result).unwrap_or(JsValue::NULL)
 }
 

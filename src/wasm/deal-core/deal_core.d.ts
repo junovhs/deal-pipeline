@@ -3,14 +3,19 @@
 
 export function parseRawEmail(raw_text: string): any;
 
+export function validateWebsiteExport(rows: any): any;
+
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
     readonly parseRawEmail: (a: number, b: number) => any;
-    readonly __wbindgen_externrefs: WebAssembly.Table;
+    readonly validateWebsiteExport: (a: any) => any;
     readonly __wbindgen_malloc: (a: number, b: number) => number;
     readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+    readonly __wbindgen_exn_store: (a: number) => void;
+    readonly __externref_table_alloc: () => number;
+    readonly __wbindgen_externrefs: WebAssembly.Table;
     readonly __wbindgen_start: () => void;
 }
 
