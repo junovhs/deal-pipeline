@@ -6,9 +6,9 @@ import { DEFAULT_HOUSE_STYLE } from './logic/copywriting.js';
 import { parseRawEmail } from './logic/dealCoreClient';
 
 const STEPS = [
-  { key: 'tag', label: '1. Tag', desc: 'Classify raw deals' },
-  { key: 'dedupe', label: '2. Dedupe', desc: 'Match against website' },
-  { key: 'copy', label: '3. Copy', desc: 'Write & track' },
+  { key: 'tag', label: 'Tag', desc: 'Shape the source', intro: 'Turn the weekly source into clean, structured deal lines.' },
+  { key: 'dedupe', label: 'Dedupe', desc: 'Compare the site', intro: 'Compare the new batch with the live website export.' },
+  { key: 'copy', label: 'Copy', desc: 'Finish the batch', intro: 'Write, review, and track the website-ready deal copy.' },
 ];
 
 const STORAGE_KEY = 'deal-pipeline-session';
@@ -167,24 +167,46 @@ export default function App() {
     setResetVersion((version) => version + 1);
   }, []);
 
+  const stepStates = {
+    tag: session.tag.output?.trim() ? 'complete' : 'current',
+    dedupe: session.dedupe.lastRun ? 'complete' : session.dedupe.hqText?.trim() ? 'ready' : 'waiting',
+    copy: session.copy.finalGroups?.length ? 'complete' : session.copy.rawInput?.trim() ? 'ready' : 'waiting',
+  };
+  const activeStepIndex = STEPS.findIndex((step) => step.key === session.activeStep);
+  const activeStep = STEPS[activeStepIndex] || STEPS[0];
+  const activeState = stepStates[activeStep.key];
+
   return (
     <div className="app">
       <header className="app-header">
-        <h1 className="app-title">Deal Pipeline</h1>
-        <nav className="step-nav">
-          {STEPS.map((step) => (
+        <a className="app-brand" href="/" aria-label="Deal Pipeline home">
+          <span className="brand-mark" aria-hidden="true">DP</span>
+          <span>
+            <span className="brand-eyebrow">AI-assisted deal ops</span>
+            <span className="app-title">Deal Pipeline</span>
+          </span>
+        </a>
+        <nav className="step-nav" aria-label="Deal workflow">
+          {STEPS.map((step, index) => (
             <button
               key={step.key}
-              className={`step-tab ${session.activeStep === step.key ? 'active' : ''}`}
+              className={`step-tab ${session.activeStep === step.key ? 'active' : ''} state-${stepStates[step.key]}`}
               onClick={() => setStep(step.key)}
+              aria-current={session.activeStep === step.key ? 'step' : undefined}
             >
-              <span className="step-label">{step.label}</span>
-              <span className="step-desc">{step.desc}</span>
+              <span className="step-number" aria-hidden="true">{index + 1}</span>
+              <span className="step-copy">
+                <span className="step-label">{step.label}</span>
+                <span className="step-desc">{step.desc}</span>
+              </span>
+              <span className="step-state" aria-label={stepStates[step.key]}>
+                {stepStates[step.key] === 'complete' ? '✓' : stepStates[step.key] === 'ready' ? '•' : ''}
+              </span>
             </button>
           ))}
         </nav>
-        <button className="btn btn-reset-global" onClick={() => setShowGlobalReset(true)}>
-          Reset All
+        <button className="btn btn-reset-global" onClick={() => setShowGlobalReset(true)} title="Clear this saved session">
+          Start over
         </button>
       </header>
 
@@ -211,7 +233,18 @@ export default function App() {
       )}
 
       <main className="app-main">
-        <div style={{ display: session.activeStep === 'tag' ? 'block' : 'none' }}>
+        <section className="workspace-heading" aria-labelledby="current-step-title">
+          <div>
+            <span className="workspace-eyebrow">Step {activeStepIndex + 1} of {STEPS.length}</span>
+            <h2 id="current-step-title">{activeStep.label}</h2>
+            <p>{activeStep.intro}</p>
+          </div>
+          <span className={`status-chip status-${activeState}`}>
+            {activeState === 'complete' ? 'Complete' : activeState === 'ready' ? 'Ready to continue' : 'Current step'}
+          </span>
+        </section>
+        <div className="workspace-surface">
+        <div className="step-stage" style={{ display: session.activeStep === 'tag' ? 'block' : 'none' }}>
           <DealtagStep
             key={`tag-${resetVersion}`}
             session={session.tag}
@@ -220,7 +253,7 @@ export default function App() {
             showToast={showToast}
           />
         </div>
-        <div style={{ display: session.activeStep === 'dedupe' ? 'block' : 'none' }}>
+        <div className="step-stage" style={{ display: session.activeStep === 'dedupe' ? 'block' : 'none' }}>
           <DedupeStep
             key={`dedupe-${resetVersion}`}
             session={session.dedupe}
@@ -229,13 +262,14 @@ export default function App() {
             showToast={showToast}
           />
         </div>
-        <div style={{ display: session.activeStep === 'copy' ? 'block' : 'none' }}>
+        <div className="step-stage" style={{ display: session.activeStep === 'copy' ? 'block' : 'none' }}>
           <CopywritingStep
             key={`copy-${resetVersion}`}
             session={session.copy}
             onSessionChange={(updater) => updateStepState('copy', updater)}
             showToast={showToast}
           />
+        </div>
         </div>
       </main>
     </div>
