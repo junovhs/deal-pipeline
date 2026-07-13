@@ -1,5 +1,6 @@
 import initDealCore, {
   parseRawEmail as parseRawEmailWasm,
+  validateWebsiteExport as validateWebsiteExportWasm,
 } from '../wasm/deal-core/deal_core.js';
 
 export type CoreResult<T> =
@@ -79,4 +80,18 @@ export async function parseRawEmail(
       };
     }>;
   }>;
+}
+
+export type WebsiteExportBatch = {
+  inspectedCount: number;
+  recognizedCount: number;
+  ignoredCount: number;
+  rows: Record<string, unknown>[];
+};
+
+export async function validateWebsiteExport(
+  rows: Record<string, unknown>[],
+): Promise<CoreResult<WebsiteExportBatch>> {
+  await loadDealCore();
+  return validateWebsiteExportWasm(rows) as CoreResult<WebsiteExportBatch>;
 }

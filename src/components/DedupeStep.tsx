@@ -1,8 +1,9 @@
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useMemo, useCallback, useRef, useState } from 'react';
 import {
   parseHQ, resetIds, ingestWebsiteJSON, runFullMatch,
   exportUnmatched, sameDay, dateFmt,
 } from '../logic/dedupe.js';
+import { validateWebsiteExport } from '../logic/dealCoreClient';
 
 function parseWebsiteRows(text) {
   const data = JSON.parse(text);
@@ -11,6 +12,7 @@ function parseWebsiteRows(text) {
 
 export default function DedupeStep({ session, onSessionChange, onComplete, showToast }) {
   const fileRef = useRef(null);
+  const [importError, setImportError] = useState('');
 
   const {
     hqText,
@@ -112,10 +114,28 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
     try {
       const text = await file.text();
       const rows = parseWebsiteRows(text);
-      updateSession({ websiteRows: rows, lastRun: null, rejectedHQIds: [] });
-      showToast(`${rows.length} website deals loaded`, 'success');
+      const validation = await validateWebsiteExport(rows);
+
+      if ('error' in validation) {
+        setImportError(validation.error.message);
+        updateSession({ websiteRows: [], lastRun: null, rejectedHQIds: [] });
+        showToast('Website export not recognized', 'error');
+        return;
+      }
+
+      setImportError('');
+      updateSession({ websiteRows: validation.data.rows, lastRun: null, rejectedHQIds: [] });
+      showToast(
+        `${validation.data.recognizedCount} website deals loaded`,
+        'success',
+      );
     } catch (error) {
-      showToast(`Failed to parse JSON: ${error.message}`, 'error');
+      const message = error instanceof Error ? error.message : String(error);
+      setImportError(`Could not read this JSON file: ${message}`);
+      updateSession({ websiteRows: [], lastRun: null, rejectedHQIds: [] });
+      showToast('Failed to parse website JSON', 'error');
+    } finally {
+      event.target.value = '';
     }
   }, [showToast, updateSession]);
 
@@ -217,6 +237,12 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
               onChange={handleFileLoad}
             />
             <span className="pill">{websiteDeals.length} loaded</span>
+            {importError && (
+              <div className="gate-warning gate-warning-error" role="alert">
+                <strong>Website export not recognized.</strong>
+                <div>{importError}</div>
+              </div>
+            )}
           </div>
 
           <div className="section">
