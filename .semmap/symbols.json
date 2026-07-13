@@ -1,16 +1,16 @@
 [
   {
-    "stable_id": "fn::readFixture@22",
+    "stable_id": "fn::readFixture@28",
     "name": "readFixture",
     "kind": "Function",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 22,
-    "end_line": 24,
+    "start_line": 28,
+    "end_line": 30,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [
-      "const::fixtureDir@20"
+      "const::fixtureDir@24"
     ],
     "doc_comment": null,
     "signature": "function readFixture(name)",
@@ -18,12 +18,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::findMatch@26",
+    "stable_id": "fn::findMatch@32",
     "name": "findMatch",
     "kind": "Function",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 26,
-    "end_line": 30,
+    "start_line": 32,
+    "end_line": 36,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -34,16 +34,16 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::collectWarningTypes@32",
+    "stable_id": "fn::collectWarningTypes@38",
     "name": "collectWarningTypes",
     "kind": "Function",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 32,
-    "end_line": 34,
+    "start_line": 38,
+    "end_line": 40,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::main@36"
+      "fn::main@42"
     ],
     "callees": [],
     "doc_comment": null,
@@ -52,18 +52,19 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::main@36",
+    "stable_id": "fn::main@42",
     "name": "main",
     "kind": "Function",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 36,
-    "end_line": 188,
+    "start_line": 42,
+    "end_line": 295,
     "visibility": "Private",
-    "cognitive_complexity": 5,
+    "cognitive_complexity": 6,
     "callers": [],
     "callees": [
       "fn::resetIds@538",
-      "fn::collectWarningTypes@32"
+      "fn::vendorFamily@407",
+      "fn::collectWarningTypes@38"
     ],
     "doc_comment": null,
     "signature": "function main()",
@@ -71,16 +72,16 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::__dirname@19",
+    "stable_id": "const::__dirname@23",
     "name": "__dirname",
     "kind": "Constant",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 19,
-    "end_line": 19,
+    "start_line": 23,
+    "end_line": 23,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "const::fixtureDir@20"
+      "const::fixtureDir@24"
     ],
     "callees": [],
     "doc_comment": null,
@@ -88,47 +89,49 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::fixtureDir@20",
+    "stable_id": "const::fixtureDir@24",
     "name": "fixtureDir",
     "kind": "Constant",
     "file": "scripts/run-regression-fixtures.js",
-    "start_line": 20,
-    "end_line": 20,
+    "start_line": 24,
+    "end_line": 26,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::readFixture@22"
+      "fn::readFixture@28"
     ],
     "callees": [
-      "const::__dirname@19"
+      "const::__dirname@23"
     ],
     "doc_comment": null,
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::createDefaultSession@15",
+    "stable_id": "fn::createDefaultSession@16",
     "name": "createDefaultSession",
     "kind": "Function",
-    "file": "src/App.jsx",
-    "start_line": 15,
-    "end_line": 43,
+    "file": "src/App.tsx",
+    "start_line": 16,
+    "end_line": 44,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
-    "callees": [],
+    "callees": [
+      "const::DEFAULT_HOUSE_STYLE@11"
+    ],
     "doc_comment": null,
     "signature": "function createDefaultSession()",
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::loadSession@45",
+    "stable_id": "fn::loadSession@46",
     "name": "loadSession",
     "kind": "Function",
-    "file": "src/App.jsx",
-    "start_line": 45,
-    "end_line": 62,
+    "file": "src/App.tsx",
+    "start_line": 46,
+    "end_line": 63,
     "visibility": "Private",
     "cognitive_complexity": 5,
     "callers": [],
@@ -139,17 +142,19 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::App@64",
+    "stable_id": "fn::App@65",
     "name": "App",
     "kind": "Function",
-    "file": "src/App.jsx",
-    "start_line": 64,
-    "end_line": 224,
+    "file": "src/App.tsx",
+    "start_line": 65,
+    "end_line": 277,
     "visibility": "Public",
-    "cognitive_complexity": 8,
+    "cognitive_complexity": 10,
     "callers": [],
     "callees": [
-      "const::STORAGE_KEY@13"
+      "const::STORAGE_KEY@14",
+      "fn::parseRawEmail@37",
+      "const::STEPS@8"
     ],
     "doc_comment": null,
     "signature": "function App()",
@@ -157,31 +162,33 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::STEPS@7",
+    "stable_id": "const::STEPS@8",
     "name": "STEPS",
     "kind": "Constant",
-    "file": "src/App.jsx",
-    "start_line": 7,
-    "end_line": 11,
+    "file": "src/App.tsx",
+    "start_line": 8,
+    "end_line": 12,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::App@65"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "const::STORAGE_KEY@13",
+    "stable_id": "const::STORAGE_KEY@14",
     "name": "STORAGE_KEY",
     "kind": "Constant",
-    "file": "src/App.jsx",
-    "start_line": 13,
-    "end_line": 13,
+    "file": "src/App.tsx",
+    "start_line": 14,
+    "end_line": 14,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::App@64"
+      "fn::App@65"
     ],
     "callees": [],
     "doc_comment": null,
@@ -192,7 +199,7 @@
     "stable_id": "fn::loadConfetti@15",
     "name": "loadConfetti",
     "kind": "Function",
-    "file": "src/components/CopywritingStep.jsx",
+    "file": "src/components/CopywritingStep.tsx",
     "start_line": 15,
     "end_line": 24,
     "visibility": "Private",
@@ -212,7 +219,7 @@
     "stable_id": "fn::fireConfetti@26",
     "name": "fireConfetti",
     "kind": "Function",
-    "file": "src/components/CopywritingStep.jsx",
+    "file": "src/components/CopywritingStep.tsx",
     "start_line": 26,
     "end_line": 37,
     "visibility": "Private",
@@ -230,7 +237,7 @@
     "stable_id": "fn::CopywritingStep@39",
     "name": "CopywritingStep",
     "kind": "Function",
-    "file": "src/components/CopywritingStep.jsx",
+    "file": "src/components/CopywritingStep.tsx",
     "start_line": 39,
     "end_line": 825,
     "visibility": "Public",
@@ -248,15 +255,15 @@
     "stable_id": "fn::Modal@827",
     "name": "Modal",
     "kind": "Function",
-    "file": "src/components/CopywritingStep.jsx",
+    "file": "src/components/CopywritingStep.tsx",
     "start_line": 827,
-    "end_line": 855,
+    "end_line": 862,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [],
     "doc_comment": null,
-    "signature": "function Modal({\r\n  title,\r\n  children,\r\n  onConfirm,\r\n  onCancel,\r\n  confirmText = \"Confirm\",\r\n  wide = false,\r\n})",
+    "signature": "function Modal({\n  title,\n  children,\n  onConfirm,\n  onCancel,\n  confirmText = \"Confirm\",\n  wide = false,\n}: {\n  title?: any;\n  children?: any;\n  onConfirm?: () => void;\n  onCancel?: () => void;\n  confirmText?: string;\n  wide?: boolean;\n})",
     "has_guard_coverage": false,
     "panic_sites": 0
   },
@@ -264,7 +271,7 @@
     "stable_id": "static::confettiLoaded@12",
     "name": "confettiLoaded",
     "kind": "Static",
-    "file": "src/components/CopywritingStep.jsx",
+    "file": "src/components/CopywritingStep.tsx",
     "start_line": 12,
     "end_line": 12,
     "visibility": "Private",
@@ -279,7 +286,7 @@
     "stable_id": "static::confettiFn@13",
     "name": "confettiFn",
     "kind": "Static",
-    "file": "src/components/CopywritingStep.jsx",
+    "file": "src/components/CopywritingStep.tsx",
     "start_line": 13,
     "end_line": 13,
     "visibility": "Private",
@@ -297,7 +304,7 @@
     "stable_id": "fn::parseLines@4",
     "name": "parseLines",
     "kind": "Function",
-    "file": "src/components/DealtagStep.jsx",
+    "file": "src/components/DealtagStep.tsx",
     "start_line": 4,
     "end_line": 10,
     "visibility": "Private",
@@ -313,7 +320,7 @@
     "stable_id": "fn::DealtagStep@12",
     "name": "DealtagStep",
     "kind": "Function",
-    "file": "src/components/DealtagStep.jsx",
+    "file": "src/components/DealtagStep.tsx",
     "start_line": 12,
     "end_line": 126,
     "visibility": "Public",
@@ -326,12 +333,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::parseWebsiteRows@7",
+    "stable_id": "fn::parseWebsiteRows@8",
     "name": "parseWebsiteRows",
     "kind": "Function",
-    "file": "src/components/DedupeStep.jsx",
-    "start_line": 7,
-    "end_line": 10,
+    "file": "src/components/DedupeStep.tsx",
+    "start_line": 8,
+    "end_line": 11,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -342,14 +349,14 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::DedupeStep@12",
+    "stable_id": "fn::DedupeStep@13",
     "name": "DedupeStep",
     "kind": "Function",
-    "file": "src/components/DedupeStep.jsx",
-    "start_line": 12,
-    "end_line": 320,
+    "file": "src/components/DedupeStep.tsx",
+    "start_line": 13,
+    "end_line": 394,
     "visibility": "Public",
-    "cognitive_complexity": 22,
+    "cognitive_complexity": 24,
     "callers": [],
     "callees": [],
     "doc_comment": null,
@@ -358,17 +365,18 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::MatchCard@322",
+    "stable_id": "fn::MatchCard@396",
     "name": "MatchCard",
     "kind": "Function",
-    "file": "src/components/DedupeStep.jsx",
-    "start_line": 322,
-    "end_line": 371,
+    "file": "src/components/DedupeStep.tsx",
+    "start_line": 396,
+    "end_line": 445,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [
-      "fn::formatStageDelta@407"
+      "const::dateFmt@165",
+      "fn::formatStageDelta@490"
     ],
     "doc_comment": null,
     "signature": "function MatchCard({ r, today, onReject })",
@@ -376,17 +384,18 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::UnmatchedCard@373",
+    "stable_id": "fn::UnmatchedCard@447",
     "name": "UnmatchedCard",
     "kind": "Function",
-    "file": "src/components/DedupeStep.jsx",
-    "start_line": 373,
-    "end_line": 405,
+    "file": "src/components/DedupeStep.tsx",
+    "start_line": 447,
+    "end_line": 488,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [
-      "fn::formatStageDelta@407"
+      "const::dateFmt@165",
+      "fn::formatStageDelta@490"
     ],
     "doc_comment": null,
     "signature": "function UnmatchedCard({ r, today })",
@@ -394,17 +403,17 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::formatStageDelta@407",
+    "stable_id": "fn::formatStageDelta@490",
     "name": "formatStageDelta",
     "kind": "Function",
-    "file": "src/components/DedupeStep.jsx",
-    "start_line": 407,
-    "end_line": 409,
+    "file": "src/components/DedupeStep.tsx",
+    "start_line": 490,
+    "end_line": 492,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::MatchCard@322",
-      "fn::UnmatchedCard@373"
+      "fn::MatchCard@396",
+      "fn::UnmatchedCard@447"
     ],
     "callees": [],
     "doc_comment": null,
@@ -472,7 +481,7 @@
     "callers": [],
     "callees": [],
     "doc_comment": null,
-    "signature": "function generateSingleDealPrompt({\r\n  vendorName,\r\n  deal,\r\n  note = \"\",\r\n  currentHeadline = \"\",\r\n  currentDescription = \"\",\r\n  houseStyle = DEFAULT_HOUSE_STYLE,\r\n})",
+    "signature": "function generateSingleDealPrompt({\n  vendorName,\n  deal,\n  note = \"\",\n  currentHeadline = \"\",\n  currentDescription = \"\",\n  houseStyle = DEFAULT_HOUSE_STYLE,\n})",
     "has_guard_coverage": true,
     "panic_sites": 0
   },
@@ -504,7 +513,11 @@
     "callers": [
       "fn::applyDealPatch@545"
     ],
-    "callees": [],
+    "callees": [
+      "const::ALLOWED_AI_WORDS@202",
+      "const::CODE_PATTERN@284",
+      "const::RATE_CODE_PATTERN@286"
+    ],
     "doc_comment": null,
     "signature": "function validateDeal(aiDeal, rawDeal)",
     "has_guard_coverage": true,
@@ -617,7 +630,9 @@
     "end_line": 54,
     "visibility": "Public",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::createDefaultSession@16"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": true,
@@ -632,7 +647,9 @@
     "end_line": 282,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::validateDeal@288"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": true,
@@ -647,7 +664,9 @@
     "end_line": 285,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::validateDeal@288"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": true,
@@ -662,23 +681,117 @@
     "end_line": 286,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::validateDeal@288"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": true,
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::isExclusiveLine@14",
+    "stable_id": "fn::loadDealCore@33",
+    "name": "loadDealCore",
+    "kind": "Function",
+    "file": "src/logic/dealCoreClient.ts",
+    "start_line": 33,
+    "end_line": 35,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::parseRawEmail@37",
+      "fn::validateWebsiteExport@92"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function loadDealCore(): Promise<void>",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::parseRawEmail@37",
+    "name": "parseRawEmail",
+    "kind": "Function",
+    "file": "src/logic/dealCoreClient.ts",
+    "start_line": 37,
+    "end_line": 83,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::App@65"
+    ],
+    "callees": [
+      "type::CoreResult@6",
+      "fn::loadDealCore@33"
+    ],
+    "doc_comment": null,
+    "signature": "function parseRawEmail(rawText: string, _options: Record<string, unknown>): Promise<CoreResult<{\n  sourceLineCount: number;\n  records: Array<{\n    id: string;\n    lineNumber: number;\n    rawText: string;\n    normalizedText: string;\n    tag: string;\n    section?: string;\n    supplier:\n      | { status: 'known'; canonical: string }\n      | { status: 'ambiguous'; candidates: string[]; preferred?: string }\n      | { status: 'recognizedButIneligible'; canonical: string }\n      | { status: 'unresolved'; raw?: string }\n      | { status: 'unknown' };\n    provenance: {\n      source: string;\n      lineNumber: number;\n    };\n  }>;\n}>>",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::validateWebsiteExport@92",
+    "name": "validateWebsiteExport",
+    "kind": "Function",
+    "file": "src/logic/dealCoreClient.ts",
+    "start_line": 92,
+    "end_line": 97,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [
+      "type::CoreResult@6",
+      "fn::loadDealCore@33"
+    ],
+    "doc_comment": null,
+    "signature": "function validateWebsiteExport(rows: Record<string, unknown>[]): Promise<CoreResult<WebsiteExportBatch>>",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "type::CoreResult@6",
+    "name": "CoreResult",
+    "kind": "Type",
+    "file": "src/logic/dealCoreClient.ts",
+    "start_line": 6,
+    "end_line": 31,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::parseRawEmail@37",
+      "fn::validateWebsiteExport@92"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "type::WebsiteExportBatch@85",
+    "name": "WebsiteExportBatch",
+    "kind": "Type",
+    "file": "src/logic/dealCoreClient.ts",
+    "start_line": 85,
+    "end_line": 90,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::isExclusiveLine@15",
     "name": "isExclusiveLine",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 14,
-    "end_line": 16,
+    "start_line": 15,
+    "end_line": 17,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::looksLikeDeal@18"
+      "fn::looksLikeDeal@19"
     ],
     "callees": [],
     "doc_comment": null,
@@ -687,20 +800,24 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::looksLikeDeal@18",
+    "stable_id": "fn::looksLikeDeal@19",
     "name": "looksLikeDeal",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 18,
-    "end_line": 24,
+    "start_line": 19,
+    "end_line": 25,
     "visibility": "Private",
     "cognitive_complexity": 4,
     "callers": [
-      "fn::looksLikeVendorCandidate@32",
-      "fn::transform@61"
+      "fn::looksLikeVendorCandidate@37",
+      "fn::transform@71"
     ],
     "callees": [
-      "fn::isExclusiveLine@14"
+      "const::SECTION_HEADING@9",
+      "fn::isExclusiveLine@15",
+      "const::DEAL_MARKER@11",
+      "const::DATE_RE@10",
+      "const::DEAL_CUES@12"
     ],
     "doc_comment": null,
     "signature": "function looksLikeDeal(t)",
@@ -708,12 +825,30 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::canonicalVendorLabel@26",
+    "stable_id": "fn::cleanLineText@27",
+    "name": "cleanLineText",
+    "kind": "Function",
+    "file": "src/logic/dealtag.js",
+    "start_line": 27,
+    "end_line": 29,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [
+      "const::BULLET_PREFIX@13"
+    ],
+    "doc_comment": null,
+    "signature": "function cleanLineText(line)",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::canonicalVendorLabel@31",
     "name": "canonicalVendorLabel",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 26,
-    "end_line": 30,
+    "start_line": 31,
+    "end_line": 35,
     "visibility": "Private",
     "cognitive_complexity": 1,
     "callers": [],
@@ -724,19 +859,21 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::looksLikeVendorCandidate@32",
+    "stable_id": "fn::looksLikeVendorCandidate@37",
     "name": "looksLikeVendorCandidate",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 32,
-    "end_line": 50,
+    "start_line": 37,
+    "end_line": 56,
     "visibility": "Private",
     "cognitive_complexity": 7,
     "callers": [
-      "fn::transform@61"
+      "fn::transform@71"
     ],
     "callees": [
-      "fn::looksLikeDeal@18"
+      "const::BULLET_PREFIX@13",
+      "const::SECTION_HEADING@9",
+      "fn::looksLikeDeal@19"
     ],
     "doc_comment": null,
     "signature": "function looksLikeVendorCandidate(t)",
@@ -744,17 +881,17 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::isKnownSupplier@52",
+    "stable_id": "fn::isKnownSupplier@58",
     "name": "isKnownSupplier",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 52,
-    "end_line": 55,
+    "start_line": 58,
+    "end_line": 61,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [
-      "fn::isTagEligibleSupplier@397"
+      "fn::isTagEligibleSupplier@403"
     ],
     "doc_comment": null,
     "signature": "function isKnownSupplier(line)",
@@ -762,16 +899,16 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::isContinuation@57",
+    "stable_id": "fn::isContinuation@63",
     "name": "isContinuation",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 57,
-    "end_line": 59,
+    "start_line": 63,
+    "end_line": 65,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::transform@61"
+      "fn::transform@71"
     ],
     "callees": [],
     "doc_comment": null,
@@ -780,19 +917,41 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::transform@61",
+    "stable_id": "fn::isIndentedChildDeal@67",
+    "name": "isIndentedChildDeal",
+    "kind": "Function",
+    "file": "src/logic/dealtag.js",
+    "start_line": 67,
+    "end_line": 69,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::transform@71"
+    ],
+    "callees": [
+      "const::BULLET_PREFIX@13"
+    ],
+    "doc_comment": null,
+    "signature": "function isIndentedChildDeal(line, currentKnown)",
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::transform@71",
     "name": "transform",
     "kind": "Function",
     "file": "src/logic/dealtag.js",
-    "start_line": 61,
-    "end_line": 148,
+    "start_line": 71,
+    "end_line": 158,
     "visibility": "Public",
     "cognitive_complexity": 41,
     "callers": [],
     "callees": [
-      "fn::isContinuation@57",
-      "fn::looksLikeDeal@18",
-      "fn::looksLikeVendorCandidate@32"
+      "const::SECTION_HEADING@9",
+      "fn::isContinuation@63",
+      "fn::looksLikeDeal@19",
+      "fn::isIndentedChildDeal@67",
+      "fn::looksLikeVendorCandidate@37"
     ],
     "doc_comment": null,
     "signature": "function transform(raw, { includeUnknowns = true })",
@@ -808,7 +967,11 @@
     "end_line": 9,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::looksLikeDeal@19",
+      "fn::looksLikeVendorCandidate@37",
+      "fn::transform@71"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": false,
@@ -823,7 +986,9 @@
     "end_line": 10,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::looksLikeDeal@19"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": false,
@@ -838,7 +1003,9 @@
     "end_line": 11,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::looksLikeDeal@19"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": false,
@@ -853,7 +1020,28 @@
     "end_line": 12,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::looksLikeDeal@19"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::BULLET_PREFIX@13",
+    "name": "BULLET_PREFIX",
+    "kind": "Constant",
+    "file": "src/logic/dealtag.js",
+    "start_line": 13,
+    "end_line": 13,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::cleanLineText@27",
+      "fn::looksLikeVendorCandidate@37",
+      "fn::isIndentedChildDeal@67"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": false,
@@ -1015,7 +1203,7 @@
       "fn::scoreNumberStage@247",
       "fn::scoreDateStage@293",
       "fn::scoreTextStage@333",
-      "fn::runFullMatch@608"
+      "fn::runFullMatch@622"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1052,7 +1240,7 @@
     "cognitive_complexity": 0,
     "callers": [
       "fn::optimalMatch@513",
-      "fn::runFullMatch@608"
+      "fn::runFullMatch@622"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1239,7 +1427,7 @@
     "visibility": "Private",
     "cognitive_complexity": 4,
     "callers": [
-      "fn::runFullMatch@608"
+      "fn::runFullMatch@622"
     ],
     "callees": [
       "fn::scorePair@364",
@@ -1262,7 +1450,7 @@
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::main@36"
+      "fn::main@42"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1271,18 +1459,53 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::parseHQ@540",
-    "name": "parseHQ",
+    "stable_id": "fn::cleanTaggedContent@540",
+    "name": "cleanTaggedContent",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
     "start_line": 540,
-    "end_line": 578,
+    "end_line": 545,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function cleanTaggedContent(value)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::looksLikeDealContent@547",
+    "name": "looksLikeDealContent",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 547,
+    "end_line": 549,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::parseHQ@551"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function looksLikeDealContent(value)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::parseHQ@551",
+    "name": "parseHQ",
+    "kind": "Function",
+    "file": "src/logic/dedupe.js",
+    "start_line": 551,
+    "end_line": 592,
     "visibility": "Public",
-    "cognitive_complexity": 9,
+    "cognitive_complexity": 10,
     "callers": [],
     "callees": [
-      "fn::resolveVendor@350",
-      "fn::norm@251"
+      "fn::resolveVendor@356",
+      "fn::looksLikeDealContent@547",
+      "fn::norm@256"
     ],
     "doc_comment": null,
     "signature": "function parseHQ(text)",
@@ -1290,12 +1513,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::ingestWebsiteJSON@582",
+    "stable_id": "fn::ingestWebsiteJSON@596",
     "name": "ingestWebsiteJSON",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 582,
-    "end_line": 604,
+    "start_line": 596,
+    "end_line": 618,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1306,12 +1529,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::runFullMatch@608",
+    "stable_id": "fn::runFullMatch@622",
     "name": "runFullMatch",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 608,
-    "end_line": 645,
+    "start_line": 622,
+    "end_line": 659,
     "visibility": "Public",
     "cognitive_complexity": 15,
     "callers": [],
@@ -1326,12 +1549,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::exportUnmatched@649",
+    "stable_id": "fn::exportUnmatched@663",
     "name": "exportUnmatched",
     "kind": "Function",
     "file": "src/logic/dedupe.js",
-    "start_line": 649,
-    "end_line": 664,
+    "start_line": 663,
+    "end_line": 678,
     "visibility": "Public",
     "cognitive_complexity": 1,
     "callers": [],
@@ -1410,7 +1633,10 @@
     "end_line": 167,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::MatchCard@396",
+      "fn::UnmatchedCard@447"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": true,
@@ -1432,21 +1658,21 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::norm@251",
+    "stable_id": "fn::norm@256",
     "name": "norm",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 251,
-    "end_line": 260,
+    "start_line": 256,
+    "end_line": 265,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::parseHQ@540",
-      "const::supplierCatalog@269",
-      "const::catalogByNormName@277",
-      "const::familyOf@289",
-      "fn::buildKnownResolution@311",
-      "fn::vendorFamily@401"
+      "fn::parseHQ@551",
+      "const::supplierCatalog@275",
+      "const::catalogByNormName@283",
+      "const::familyOf@295",
+      "fn::buildKnownResolution@317",
+      "fn::vendorFamily@407"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1455,17 +1681,17 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::cleanVendorInput@262",
+    "stable_id": "fn::cleanVendorInput@267",
     "name": "cleanVendorInput",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 262,
-    "end_line": 267,
+    "start_line": 267,
+    "end_line": 273,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::canonicalVendor@392",
-      "fn::vendorFamily@401"
+      "fn::canonicalVendor@398",
+      "fn::vendorFamily@407"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1474,19 +1700,21 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::buildKnownResolution@311",
+    "stable_id": "fn::buildKnownResolution@317",
     "name": "buildKnownResolution",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 311,
-    "end_line": 322,
+    "start_line": 317,
+    "end_line": 328,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::resolveVendor@350"
+      "fn::resolveVendor@356"
     ],
     "callees": [
-      "fn::norm@251"
+      "const::familyOf@295",
+      "fn::norm@256",
+      "const::TAG_INELIGIBLE_SUPPLIERS@244"
     ],
     "doc_comment": null,
     "signature": "function buildKnownResolution(entry, rawInput, normalizedInput, matchedBy)",
@@ -1494,16 +1722,16 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::buildAmbiguousResolution@324",
+    "stable_id": "fn::buildAmbiguousResolution@330",
     "name": "buildAmbiguousResolution",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 324,
-    "end_line": 335,
+    "start_line": 330,
+    "end_line": 341,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::resolveVendor@350"
+      "fn::resolveVendor@356"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1512,16 +1740,16 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::buildUnknownResolution@337",
+    "stable_id": "fn::buildUnknownResolution@343",
     "name": "buildUnknownResolution",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 337,
-    "end_line": 348,
+    "start_line": 343,
+    "end_line": 354,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::resolveVendor@350"
+      "fn::resolveVendor@356"
     ],
     "callees": [],
     "doc_comment": null,
@@ -1530,22 +1758,23 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::resolveVendor@350",
+    "stable_id": "fn::resolveVendor@356",
     "name": "resolveVendor",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 350,
-    "end_line": 390,
+    "start_line": 356,
+    "end_line": 396,
     "visibility": "Public",
     "cognitive_complexity": 7,
     "callers": [
-      "fn::parseHQ@540",
-      "fn::isTagEligibleSupplier@397"
+      "fn::parseHQ@551",
+      "fn::isTagEligibleSupplier@403"
     ],
     "callees": [
-      "fn::buildUnknownResolution@337",
-      "fn::buildAmbiguousResolution@324",
-      "fn::buildKnownResolution@311"
+      "fn::buildUnknownResolution@343",
+      "fn::buildAmbiguousResolution@330",
+      "fn::buildKnownResolution@317",
+      "const::catalogByName@282"
     ],
     "doc_comment": null,
     "signature": "function resolveVendor(input)",
@@ -1553,17 +1782,17 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::canonicalVendor@392",
+    "stable_id": "fn::canonicalVendor@398",
     "name": "canonicalVendor",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 392,
-    "end_line": 395,
+    "start_line": 398,
+    "end_line": 401,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [
-      "fn::cleanVendorInput@262"
+      "fn::cleanVendorInput@267"
     ],
     "doc_comment": null,
     "signature": "function canonicalVendor(input)",
@@ -1571,19 +1800,19 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::isTagEligibleSupplier@397",
+    "stable_id": "fn::isTagEligibleSupplier@403",
     "name": "isTagEligibleSupplier",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 397,
-    "end_line": 399,
+    "start_line": 403,
+    "end_line": 405,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [
-      "fn::isKnownSupplier@52"
+      "fn::isKnownSupplier@58"
     ],
     "callees": [
-      "fn::resolveVendor@350"
+      "fn::resolveVendor@356"
     ],
     "doc_comment": null,
     "signature": "function isTagEligibleSupplier(input)",
@@ -1591,18 +1820,20 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "fn::vendorFamily@401",
+    "stable_id": "fn::vendorFamily@407",
     "name": "vendorFamily",
     "kind": "Function",
     "file": "src/logic/suppliers.js",
-    "start_line": 401,
-    "end_line": 404,
+    "start_line": 407,
+    "end_line": 410,
     "visibility": "Public",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::main@42"
+    ],
     "callees": [
-      "fn::norm@251",
-      "fn::cleanVendorInput@262"
+      "fn::norm@256",
+      "fn::cleanVendorInput@267"
     ],
     "doc_comment": null,
     "signature": "function vendorFamily(name)",
@@ -1618,7 +1849,9 @@
     "end_line": 96,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "const::supplierCatalog@275"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": false,
@@ -1630,7 +1863,7 @@
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
     "start_line": 98,
-    "end_line": 192,
+    "end_line": 194,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1640,12 +1873,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::SUPPLIER_FAMILIES@194",
+    "stable_id": "const::SUPPLIER_FAMILIES@196",
     "name": "SUPPLIER_FAMILIES",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 194,
-    "end_line": 199,
+    "start_line": 196,
+    "end_line": 201,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1655,12 +1888,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::SUPPLIER_AMBIGUITIES@201",
+    "stable_id": "const::SUPPLIER_AMBIGUITIES@203",
     "name": "SUPPLIER_AMBIGUITIES",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 201,
-    "end_line": 233,
+    "start_line": 203,
+    "end_line": 235,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1670,12 +1903,12 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::SUPPLIER_KEYWORD_RULES@235",
+    "stable_id": "const::SUPPLIER_KEYWORD_RULES@237",
     "name": "SUPPLIER_KEYWORD_RULES",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 235,
-    "end_line": 240,
+    "start_line": 237,
+    "end_line": 242,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1685,91 +1918,108 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::TAG_INELIGIBLE_SUPPLIERS@242",
+    "stable_id": "const::TAG_INELIGIBLE_SUPPLIERS@244",
     "name": "TAG_INELIGIBLE_SUPPLIERS",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 242,
-    "end_line": 249,
+    "start_line": 244,
+    "end_line": 254,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::buildKnownResolution@317"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "const::supplierCatalog@269",
+    "stable_id": "const::supplierCatalog@275",
     "name": "supplierCatalog",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 269,
-    "end_line": 272,
+    "start_line": 275,
+    "end_line": 278,
     "visibility": "Public",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "const::suppliers@280",
+      "const::catalogByName@282",
+      "const::catalogByNormName@283",
+      "const::familyOf@295"
+    ],
     "callees": [
-      "fn::norm@251"
+      "const::SUPPLIER_CATALOG@6",
+      "fn::norm@256"
     ],
     "doc_comment": null,
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "const::suppliers@274",
+    "stable_id": "const::suppliers@280",
     "name": "suppliers",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 274,
-    "end_line": 274,
+    "start_line": 280,
+    "end_line": 280,
     "visibility": "Public",
     "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
+    "callers": [
+      "const::supplierNames@412"
+    ],
+    "callees": [
+      "const::supplierCatalog@275"
+    ],
     "doc_comment": null,
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "const::catalogByName@276",
+    "stable_id": "const::catalogByName@282",
     "name": "catalogByName",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 276,
-    "end_line": 276,
+    "start_line": 282,
+    "end_line": 282,
     "visibility": "Private",
     "cognitive_complexity": 0,
-    "callers": [],
-    "callees": [],
+    "callers": [
+      "fn::resolveVendor@356"
+    ],
+    "callees": [
+      "const::supplierCatalog@275"
+    ],
     "doc_comment": null,
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "const::catalogByNormName@277",
+    "stable_id": "const::catalogByNormName@283",
     "name": "catalogByNormName",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 277,
-    "end_line": 277,
+    "start_line": 283,
+    "end_line": 283,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
     "callees": [
-      "fn::norm@251"
+      "const::supplierCatalog@275",
+      "fn::norm@256"
     ],
     "doc_comment": null,
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "const::aliases@279",
+    "stable_id": "const::aliases@285",
     "name": "aliases",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 279,
-    "end_line": 279,
+    "start_line": 285,
+    "end_line": 285,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1779,29 +2029,32 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::familyOf@289",
+    "stable_id": "const::familyOf@295",
     "name": "familyOf",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 289,
-    "end_line": 291,
+    "start_line": 295,
+    "end_line": 297,
     "visibility": "Public",
     "cognitive_complexity": 0,
-    "callers": [],
+    "callers": [
+      "fn::buildKnownResolution@317"
+    ],
     "callees": [
-      "fn::norm@251"
+      "const::supplierCatalog@275",
+      "fn::norm@256"
     ],
     "doc_comment": null,
     "has_guard_coverage": false,
     "panic_sites": 0
   },
   {
-    "stable_id": "const::ambiguousByLabel@298",
+    "stable_id": "const::ambiguousByLabel@304",
     "name": "ambiguousByLabel",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 298,
-    "end_line": 298,
+    "start_line": 304,
+    "end_line": 304,
     "visibility": "Private",
     "cognitive_complexity": 0,
     "callers": [],
@@ -1811,15 +2064,689 @@
     "panic_sites": 0
   },
   {
-    "stable_id": "const::supplierNames@406",
+    "stable_id": "const::supplierNames@412",
     "name": "supplierNames",
     "kind": "Constant",
     "file": "src/logic/suppliers.js",
-    "start_line": 406,
-    "end_line": 406,
+    "start_line": 412,
+    "end_line": 412,
     "visibility": "Public",
     "cognitive_complexity": 0,
     "callers": [],
+    "callees": [
+      "const::suppliers@280"
+    ],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "type::InitInput@8",
+    "name": "InitInput",
+    "kind": "Type",
+    "file": "src/wasm/deal-core/deal_core.d.ts",
+    "start_line": 8,
+    "end_line": 8,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "interface::InitOutput@10",
+    "name": "InitOutput",
+    "kind": "Interface",
+    "file": "src/wasm/deal-core/deal_core.d.ts",
+    "start_line": 10,
+    "end_line": 20,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "type::SyncInitInput@22",
+    "name": "SyncInitInput",
+    "kind": "Type",
+    "file": "src/wasm/deal-core/deal_core.d.ts",
+    "start_line": 22,
+    "end_line": 22,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::parseRawEmail@7",
+    "name": "parseRawEmail",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 7,
+    "end_line": 12,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": "@param {string} raw_text\n@returns {any}",
+    "signature": "function parseRawEmail(raw_text)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::validateWebsiteExport@18",
+    "name": "validateWebsiteExport",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 18,
+    "end_line": 21,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": "@param {any} rows\n@returns {any}",
+    "signature": "function validateWebsiteExport(rows)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::__wbg_get_imports@22",
+    "name": "__wbg_get_imports",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 22,
+    "end_line": 249,
+    "visibility": "Private",
+    "cognitive_complexity": 9,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function __wbg_get_imports()",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::addToExternrefTable0@251",
+    "name": "addToExternrefTable0",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 251,
+    "end_line": 255,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [
+      "static::wasm@426",
+      "const::__wbindgen_externrefs@10"
+    ],
+    "doc_comment": null,
+    "signature": "function addToExternrefTable0(obj)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::debugString@257",
+    "name": "debugString",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 257,
+    "end_line": 320,
+    "visibility": "Private",
+    "cognitive_complexity": 24,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function debugString(val)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::getArrayU8FromWasm0@322",
+    "name": "getArrayU8FromWasm0",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 322,
+    "end_line": 325,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [
+      "fn::getUint8ArrayMemory0@340"
+    ],
+    "doc_comment": null,
+    "signature": "function getArrayU8FromWasm0(ptr, len)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::getDataViewMemory0@328",
+    "name": "getDataViewMemory0",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 328,
+    "end_line": 333,
+    "visibility": "Private",
+    "cognitive_complexity": 1,
+    "callers": [],
+    "callees": [
+      "static::cachedDataViewMemory0@327",
+      "static::wasm@426",
+      "const::memory@3"
+    ],
+    "doc_comment": null,
+    "signature": "function getDataViewMemory0()",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::getStringFromWasm0@335",
+    "name": "getStringFromWasm0",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 335,
+    "end_line": 337,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [
+      "fn::decodeText@401"
+    ],
+    "doc_comment": null,
+    "signature": "function getStringFromWasm0(ptr, len)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::getUint8ArrayMemory0@340",
+    "name": "getUint8ArrayMemory0",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 340,
+    "end_line": 345,
+    "visibility": "Private",
+    "cognitive_complexity": 1,
+    "callers": [
+      "fn::getArrayU8FromWasm0@322",
+      "fn::passStringToWasm0@360",
+      "fn::decodeText@401"
+    ],
+    "callees": [
+      "static::cachedUint8ArrayMemory0@339",
+      "static::wasm@426",
+      "const::memory@3"
+    ],
+    "doc_comment": null,
+    "signature": "function getUint8ArrayMemory0()",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::handleError@347",
+    "name": "handleError",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 347,
+    "end_line": 354,
+    "visibility": "Private",
+    "cognitive_complexity": 3,
+    "callers": [],
+    "callees": [
+      "const::__wbindgen_exn_store@8",
+      "static::wasm@426"
+    ],
+    "doc_comment": null,
+    "signature": "function handleError(f, args)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::isLikeNone@356",
+    "name": "isLikeNone",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 356,
+    "end_line": 358,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function isLikeNone(x)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::passStringToWasm0@360",
+    "name": "passStringToWasm0",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 360,
+    "end_line": 395,
+    "visibility": "Private",
+    "cognitive_complexity": 7,
+    "callers": [],
+    "callees": [
+      "fn::getUint8ArrayMemory0@340"
+    ],
+    "doc_comment": null,
+    "signature": "function passStringToWasm0(arg, malloc, realloc)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::decodeText@401",
+    "name": "decodeText",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 401,
+    "end_line": 409,
+    "visibility": "Private",
+    "cognitive_complexity": 1,
+    "callers": [
+      "fn::getStringFromWasm0@335"
+    ],
+    "callees": [
+      "static::numBytesDecoded@400",
+      "const::MAX_SAFARI_DECODE_BYTES@399",
+      "static::cachedTextDecoder@397",
+      "fn::getUint8ArrayMemory0@340"
+    ],
+    "doc_comment": null,
+    "signature": "function decodeText(ptr, len)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::__wbg_finalize_init@427",
+    "name": "__wbg_finalize_init",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 427,
+    "end_line": 435,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::initSync@472",
+      "fn::__wbg_init@492"
+    ],
+    "callees": [
+      "const::__wbindgen_start@11",
+      "static::wasm@426"
+    ],
+    "doc_comment": null,
+    "signature": "function __wbg_finalize_init(instance, module)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::__wbg_load@437",
+    "name": "__wbg_load",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 437,
+    "end_line": 470,
+    "visibility": "Private",
+    "cognitive_complexity": 21,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "signature": "function __wbg_load(module, imports)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::initSync@472",
+    "name": "initSync",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 472,
+    "end_line": 490,
+    "visibility": "Private",
+    "cognitive_complexity": 6,
+    "callers": [],
+    "callees": [
+      "static::wasm@426",
+      "fn::__wbg_finalize_init@427"
+    ],
+    "doc_comment": null,
+    "signature": "function initSync(module)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "fn::__wbg_init@492",
+    "name": "__wbg_init",
+    "kind": "Function",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 492,
+    "end_line": 516,
+    "visibility": "Private",
+    "cognitive_complexity": 7,
+    "callers": [],
+    "callees": [
+      "static::wasm@426",
+      "fn::__wbg_finalize_init@427"
+    ],
+    "doc_comment": null,
+    "signature": "function __wbg_init(module_or_path)",
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "static::cachedDataViewMemory0@327",
+    "name": "cachedDataViewMemory0",
+    "kind": "Static",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 327,
+    "end_line": 327,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::getDataViewMemory0@328"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "static::cachedUint8ArrayMemory0@339",
+    "name": "cachedUint8ArrayMemory0",
+    "kind": "Static",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 339,
+    "end_line": 339,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::getUint8ArrayMemory0@340"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "static::cachedTextDecoder@397",
+    "name": "cachedTextDecoder",
+    "kind": "Static",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 397,
+    "end_line": 397,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::decodeText@401"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::MAX_SAFARI_DECODE_BYTES@399",
+    "name": "MAX_SAFARI_DECODE_BYTES",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 399,
+    "end_line": 399,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::decodeText@401"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "static::numBytesDecoded@400",
+    "name": "numBytesDecoded",
+    "kind": "Static",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 400,
+    "end_line": 400,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::decodeText@401"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::cachedTextEncoder@411",
+    "name": "cachedTextEncoder",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 411,
+    "end_line": 411,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "static::WASM_VECTOR_LEN@424",
+    "name": "WASM_VECTOR_LEN",
+    "kind": "Static",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 424,
+    "end_line": 424,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "static::wasmModule@426",
+    "name": "wasmModule",
+    "kind": "Static",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 426,
+    "end_line": 426,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "static::wasmInstance@426",
+    "name": "wasmInstance",
+    "kind": "Static",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 426,
+    "end_line": 426,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "static::wasm@426",
+    "name": "wasm",
+    "kind": "Static",
+    "file": "src/wasm/deal-core/deal_core.js",
+    "start_line": 426,
+    "end_line": 426,
+    "visibility": "Private",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::addToExternrefTable0@251",
+      "fn::getDataViewMemory0@328",
+      "fn::getUint8ArrayMemory0@340",
+      "fn::handleError@347",
+      "fn::__wbg_finalize_init@427",
+      "fn::initSync@472",
+      "fn::__wbg_init@492"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": true,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::memory@3",
+    "name": "memory",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "start_line": 3,
+    "end_line": 3,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::getDataViewMemory0@328",
+      "fn::getUint8ArrayMemory0@340"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::parseRawEmail@4",
+    "name": "parseRawEmail",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "start_line": 4,
+    "end_line": 4,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::validateWebsiteExport@5",
+    "name": "validateWebsiteExport",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "start_line": 5,
+    "end_line": 5,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::__wbindgen_malloc@6",
+    "name": "__wbindgen_malloc",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "start_line": 6,
+    "end_line": 6,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::__wbindgen_realloc@7",
+    "name": "__wbindgen_realloc",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "start_line": 7,
+    "end_line": 7,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::__wbindgen_exn_store@8",
+    "name": "__wbindgen_exn_store",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "start_line": 8,
+    "end_line": 8,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::handleError@347"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::__externref_table_alloc@9",
+    "name": "__externref_table_alloc",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "start_line": 9,
+    "end_line": 9,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::__wbindgen_externrefs@10",
+    "name": "__wbindgen_externrefs",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "start_line": 10,
+    "end_line": 10,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::addToExternrefTable0@251"
+    ],
+    "callees": [],
+    "doc_comment": null,
+    "has_guard_coverage": false,
+    "panic_sites": 0
+  },
+  {
+    "stable_id": "const::__wbindgen_start@11",
+    "name": "__wbindgen_start",
+    "kind": "Constant",
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "start_line": 11,
+    "end_line": 11,
+    "visibility": "Public",
+    "cognitive_complexity": 0,
+    "callers": [
+      "fn::__wbg_finalize_init@427"
+    ],
     "callees": [],
     "doc_comment": null,
     "has_guard_coverage": false,

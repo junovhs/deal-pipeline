@@ -111,7 +111,7 @@ const SUPPLIER_ALIASES = {
   Azamara: ["azamara"],
   Beaches: ["beaches"],
   Bedsonline: ["bedsonline"],
-  "BlueSky Tours": ["bluesky"],
+  "BlueSky Tours": ["bluesky", "blue sky tours"],
   Breathless: ["breathless"],
   Brightline: ["brightline"],
   Carnival: ["carnival", "carnival cruise", "carnival cruises", "carnival cruise line"],
@@ -146,6 +146,8 @@ const SUPPLIER_ALIASES = {
   "Lindblad Expeditions & National Geographic": [
     "lindblad",
     "lindblad expeditions",
+    "lindblad national geographic expeditions",
+    "lindblad expeditions and national geographic",
     "national geographic",
   ],
   "Margaritaville at Sea": ["margaritaville at sea"],
@@ -155,7 +157,7 @@ const SUPPLIER_ALIASES = {
   Norwegian: ["ncl", "norwegian", "norwegian cruise", "norwegian cruise line"],
   "Oceania Cruises": ["oceania", "oceania cruises"],
   "Outrigger Hotels & Resorts": ["outrigger"],
-  "Palace Resorts": ["palace", "palace resorts"],
+  "Palace Resorts": ["palace", "palace resorts", "the palace company"],
   "Paul Gauguin Cruises": ["paul gauguin", "paul gauguin cruises"],
   "Pleasant Holidays": ["pleasant holidays"],
   Ponant: ["ponant"],
@@ -240,10 +242,13 @@ const SUPPLIER_KEYWORD_RULES = [
 ];
 
 const TAG_INELIGIBLE_SUPPLIERS = new Set([
+  "ALG Vacations",
   "Avanti",
   "Bedsonline",
+  "BlueSky Tours",
   "Brightline",
   "Classic Vacations",
+  "Margaritaville at Sea",
   "Pleasant Holidays",
   "Viator",
 ]);
@@ -261,6 +266,7 @@ export function norm(s) {
 
 function cleanVendorInput(input) {
   return (input || "")
+    .replace(/^\s*(?:\u00e2\u20ac\u00a2|\u2022)\s*/, "")
     .replace(/^•\s*/, "")
     .replace(/:$/, "")
     .trim();

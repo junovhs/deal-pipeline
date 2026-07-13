@@ -13,7 +13,7 @@
     "canonicalName": "Margaritaville at Sea",
     "familyKey": "margaritaville at sea",
     "matchedBy": "canonical",
-    "tagEligible": true
+    "tagEligible": false
   },
   {
     "label": "ALGV",
@@ -21,7 +21,7 @@
     "canonicalName": "ALG Vacations",
     "familyKey": "alg vacations",
     "matchedBy": "alias",
-    "tagEligible": true
+    "tagEligible": false
   },
   {
     "label": "Avanti Insider Tours",

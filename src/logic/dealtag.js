@@ -10,6 +10,7 @@ const SECTION_HEADING = /(offers?)\s*:?\s*$/i;
 const DATE_RE = /(?:\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)[a-z]*\b\s*\d{1,2},?\s*\d{2,4})/i;
 const DEAL_MARKER = /(ends?\b|ongoing\b|end\s*date\b|valid\s*(?:through|until)\b|expires?\b)/i;
 const DEAL_CUES = /\b(save|savings?|off|deposit|gratuities|obc|upgrade|kids\s+sail\s+free|reduced)\b/i;
+const BULLET_PREFIX = /^\s*(?:\u00e2\u20ac\u00a2|\u2022)\s*/;
 
 function isExclusiveLine(t) {
   return /\bTLN\b/i.test(t) || /\bEXCLUSIVE\b/.test(t) || /^\s*(?:•\s*)?Exclusive\s*[:\-]/i.test(t);
@@ -23,6 +24,10 @@ function looksLikeDeal(t) {
   return false;
 }
 
+function cleanLineText(line) {
+  return line.replace(BULLET_PREFIX, '').trim().replace(/\s+/g, ' ');
+}
+
 function canonicalVendorLabel(line) {
   let stripped = line.replace(/^•\s*/, '').trim();
   if (/^TTC\s+Tour\s+Brands\b/i.test(stripped)) return 'Trafalgar';
@@ -30,6 +35,7 @@ function canonicalVendorLabel(line) {
 }
 
 function looksLikeVendorCandidate(t) {
+  t = t.replace(BULLET_PREFIX, '');
   if (!t.trim() || SECTION_HEADING.test(t)) return false;
   if (looksLikeDeal(t)) return false;
   if (/\b(sale|offer|offers|promo|promotion|deal|special)\b/i.test(t)) return false;
@@ -56,6 +62,10 @@ function isKnownSupplier(line) {
 
 function isContinuation(line) {
   return /^\s*(\(|│|-)/.test(line);
+}
+
+function isIndentedChildDeal(line, currentKnown) {
+  return currentKnown !== null && /^\s+\S/.test(line) && !BULLET_PREFIX.test(line);
 }
 
 export function transform(raw, { includeUnknowns = true } = {}) {
@@ -86,7 +96,7 @@ export function transform(raw, { includeUnknowns = true } = {}) {
       continue;
     }
 
-    if (looksLikeDeal(orig)) {
+    if (looksLikeDeal(orig) || isIndentedChildDeal(orig, currentKnown)) {
       const ex = isExclusiveLine(orig);
       let tag = ex ? 'ed' : 'd';
 
@@ -97,7 +107,7 @@ export function transform(raw, { includeUnknowns = true } = {}) {
         dealCount++;
       }
 
-      const lineText = `${tag}\t${orig}`;
+      const lineText = `${tag}\t${cleanLineText(orig)}`;
       if (tag !== 'X' || includeUnknowns) {
         out.push(lineText);
         lastWasDeal = true;
@@ -110,7 +120,7 @@ export function transform(raw, { includeUnknowns = true } = {}) {
     }
 
     if (looksLikeVendorCandidate(orig)) {
-      const label = canonicalVendorLabel(orig);
+      const label = canonicalVendorLabel(cleanLineText(orig)).replace(/:$/, '').trim();
       const resolution = resolveVendor(label.trim());
       if (resolution.tagEligible) {
         vendorCount++;
@@ -125,7 +135,7 @@ export function transform(raw, { includeUnknowns = true } = {}) {
         currentKnown = false;
         lastWasDeal = false;
         if (includeUnknowns) {
-          out.push(`X\t${orig}`);
+          out.push(`X\t${label}`);
           lastIndex = out.length - 1;
         } else {
           lastIndex = -1;

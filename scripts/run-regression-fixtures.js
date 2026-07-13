@@ -85,13 +85,79 @@ async function main() {
 
   const weeklyTagged = transform(weeklyRawPromo, { includeUnknowns: true });
   assert.deepEqual(weeklyTagged.stats, {
-    vendors: 31,
-    deals: 97,
-    excl: 40,
+    vendors: 29,
+    deals: 89,
+    excl: 39,
     ambiguousSuppliers: 2,
-    unknownSuppliers: 6,
+    unknownSuppliers: 8,
     lines: 276,
   });
+
+  const supplierStructureRaw = `
+Margaritaville at Sea
+America's Summer Sale 50% off Select Sailings: Ends 8/25/2026
+Lindblad/National Geographic Expeditions:
+50% Reduced Deposit on Select Sailings: Ends 8/18/2026
+Top Land Offers
+AIC Hotel Group
+â€¢            Hard Rock
+              Up to 55% and $200 Resort Credit at Hard Rock Hotels. Ends 7/31/26
+              Hard Rock Groups - Complimentary Rooms, Private Functions & Upgrades
+â€¢            UNICO
+              Summer Instant Savings - Save $100 per night. Ends 8/15/26
+ALGV
+â€¢            Luxe by ALG Vacations - Save up to 50%. End date varies by resort.
+â€¢            Blue Sky Tours
+              Save Up to $700 on Hawaii Vacation Packages. Ends 7/30/26
+The Palace Company
+â€¢            Up to 35% Off at Palace Resorts. Ends 7/31/26
+â€¢            Baglioni
+              Up to 25% Off at Baglioni Maldives. Ends 7/31/26
+â€¢            Le Blanc
+              Up to 20% Off. Ends 7/31/26
+Railbookers
+â€¢            Up to $500 Off. Ends 7/18/26
+Sandals
+â€¢            Black Friday in July - Up to 65% Off. Ends 7/27/26`;
+  const supplierStructureTagged = transform(supplierStructureRaw, { includeUnknowns: true });
+  assert.deepEqual(supplierStructureTagged.text.split("\n"), [
+    "X\tMargaritaville at Sea",
+    "X\tAmerica's Summer Sale 50% off Select Sailings: Ends 8/25/2026",
+    "v\tLindblad/National Geographic Expeditions",
+    "d\t50% Reduced Deposit on Select Sailings: Ends 8/18/2026",
+    "X\tAIC Hotel Group",
+    "v\tHard Rock",
+    "d\tUp to 55% and $200 Resort Credit at Hard Rock Hotels. Ends 7/31/26",
+    "d\tHard Rock Groups - Complimentary Rooms, Private Functions & Upgrades",
+    "X\tUNICO",
+    "X\tSummer Instant Savings - Save $100 per night. Ends 8/15/26",
+    "X\tALGV",
+    "X\tLuxe by ALG Vacations - Save up to 50%. End date varies by resort.",
+    "X\tBlue Sky Tours",
+    "X\tSave Up to $700 on Hawaii Vacation Packages. Ends 7/30/26",
+    "v\tThe Palace Company",
+    "d\tUp to 35% Off at Palace Resorts. Ends 7/31/26",
+    "X\tBaglioni",
+    "X\tUp to 25% Off at Baglioni Maldives. Ends 7/31/26",
+    "X\tLe Blanc",
+    "X\tUp to 20% Off. Ends 7/31/26",
+    "X\tRailbookers",
+    "X\tUp to $500 Off. Ends 7/18/26",
+    "v\tSandals",
+    "d\tBlack Friday in July - Up to 65% Off. Ends 7/27/26",
+  ]);
+
+  for (const [label, canonicalName, tagEligible] of [
+    ["ALGV", "ALG Vacations", false],
+    ["Blue Sky Tours", "BlueSky Tours", false],
+    ["Lindblad/National Geographic Expeditions:", "Lindblad Expeditions & National Geographic", true],
+    ["Margaritaville at Sea", "Margaritaville at Sea", false],
+    ["The Palace Company", "Palace Resorts", true],
+  ]) {
+    const resolution = resolveVendor(label);
+    assert.equal(resolution.canonicalName, canonicalName, `Unexpected canonical supplier for ${label}`);
+    assert.equal(resolution.tagEligible, tagEligible, `Unexpected tag eligibility for ${label}`);
+  }
 
   resetIds();
   const hqDeals = parseHQ(tagged.text);
