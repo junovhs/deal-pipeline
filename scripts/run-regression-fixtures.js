@@ -17,7 +17,9 @@ import {
 } from "../src/logic/copywriting.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const fixtureDir = path.join(__dirname, "..", "fixtures", "regression");
+const fixtureDir = process.env.FIXTURE_DIR
+  ? path.resolve(process.env.FIXTURE_DIR)
+  : path.join(__dirname, "..", "fixtures", "regression");
 
 async function readFixture(name) {
   return readFile(path.join(fixtureDir, name), "utf8");
@@ -35,6 +37,7 @@ function collectWarningTypes(warnings) {
 
 async function main() {
   const rawPromo = await readFixture("raw-promo-email-sample.txt");
+  const weeklyRawPromo = await readFixture("raw-promo-email.txt");
   const websiteRows = JSON.parse(await readFixture("website-deals.json"));
   const aiResponse = await readFixture("ai-response.txt");
   const supplierResolutions = JSON.parse(await readFixture("supplier-resolution.json"));
@@ -59,6 +62,16 @@ async function main() {
     "X\tMystery Escapes",
     "X\tSave $200 on select sailings ends 08/01/26",
   ]);
+
+  const weeklyTagged = transform(weeklyRawPromo, { includeUnknowns: true });
+  assert.deepEqual(weeklyTagged.stats, {
+    vendors: 31,
+    deals: 97,
+    excl: 40,
+    ambiguousSuppliers: 2,
+    unknownSuppliers: 6,
+    lines: 276,
+  });
 
   resetIds();
   const hqDeals = parseHQ(tagged.text);
@@ -181,6 +194,9 @@ async function main() {
   );
 
   console.log("Tag fixture: PASS");
+  console.log(
+    `Weekly raw-email fixture: PASS (${weeklyTagged.stats.deals} deals across ${weeklyTagged.stats.vendors} vendors)`,
+  );
   console.log("Dedupe fixture: PASS");
   console.log("Supplier resolution fixture: PASS");
   console.log("Copy validation fixture: PASS");

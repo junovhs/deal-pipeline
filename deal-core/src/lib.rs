@@ -1,7 +1,9 @@
 use wasm_bindgen::prelude::*;
 
+mod fixtures;
 mod types;
 
+pub use fixtures::*;
 pub use types::*;
 
 #[wasm_bindgen(js_name = parseRawEmail)]

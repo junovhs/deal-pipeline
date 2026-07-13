@@ -4,3 +4,7 @@ deal-core/target/
 **/.ishoo/cache/
 **/.ishoo/worktrees/
 .ishoo/
+
+# semmap artifacts (regenerable, not committed - DEC-10)
+SEMMAP.md
+.semmap/

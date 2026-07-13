@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "core:test": "cargo test --manifest-path deal-core/Cargo.toml",
     "core:wasm": "wasm-pack build deal-core --target web --out-dir ../src/wasm/deal-core && node -e \"require('fs').rmSync('src/wasm/deal-core/.gitignore', { force: true })\"",
-    "test:fixtures": "node scripts/run-regression-fixtures.js"
+    "test:fixtures": "node scripts/run-regression-fixtures.js",
+    "test": "npm run core:test && npm run test:fixtures"
   },
   "dependencies": {
     "react": "^18.2.0",
