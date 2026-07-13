@@ -1,4 +1,4 @@
-# deal-pipeline -- Semantic Map
+# CORE-01 -- Semantic Map
 
 **Purpose:** A bespoke pipeline that takes a simple list of deals from a weekly Dream Vacations promo email, and takes them all the way to published deals with full copy.
 
@@ -38,35 +38,73 @@
 
 `[ROLE:build-only]` Supports the build toolchain rather than runtime behavior.
 
-`[EVIDENCE]` Located detector facts listed under file entries; these are observations, not verdicts.
+`[COUPLING:pure]` Logic stays within the language/runtime without external surface coupling.
+
+`[COUPLING:mixed]` Blends pure logic with side effects or boundary interactions.
+
+`[COUPLING:ui-coupled]` Depends directly on UI framework, rendering, or windowing APIs.
+
+`[COUPLING:os-coupled]` Depends directly on operating-system services or platform APIs.
+
+`[COUPLING:build-only]` Only relevant during build, generation, or compilation steps.
+
+`[BEHAVIOR:owns-state]` Maintains durable in-memory state for a subsystem.
+
+`[BEHAVIOR:owns-const-state]` Owns immutable module-level constants without implying mutable runtime state.
+
+`[BEHAVIOR:mutates]` Changes application or model state in response to work.
+
+`[BEHAVIOR:renders]` Produces rendered output, drawing commands, or visual layout.
+
+`[BEHAVIOR:dispatches]` Routes commands, events, or control flow to other units.
+
+`[BEHAVIOR:observes]` Listens to callbacks, notifications, or external signals.
+
+`[BEHAVIOR:persists]` Reads from or writes to durable storage.
+
+`[BEHAVIOR:spawns-worker]` Creates background workers, threads, or async jobs.
+
+`[BEHAVIOR:sync-primitives]` Coordinates execution with locks, channels, or wait primitives.
 
 `[SURFACE:filesystem]` Touches filesystem paths, files, or directory traversal.
+
+`[SURFACE:ntfs]` Uses NTFS-specific filesystem semantics or metadata.
+
+`[SURFACE:win32]` Touches Win32 platform APIs or Windows-native handles.
 
 `[SURFACE:shell]` Integrates with shell commands, shell UX, or command launch surfaces.
 
 `[SURFACE:clipboard]` Reads from or writes to the system clipboard.
+
+`[SURFACE:gdi]` Uses GDI drawing primitives or related graphics APIs.
+
+`[SURFACE:control]` Represents or manipulates widget/control surfaces.
+
+`[SURFACE:view]` Represents a view-level presentation surface.
+
+`[SURFACE:dialog]` Represents a dialog/window interaction surface.
+
+`[SURFACE:document]` Represents document-oriented editing or display surfaces.
+
+`[SURFACE:frame]` Represents application frame/window chrome surfaces.
+
+`[BEHAVIOR:async]` Uses async/await patterns for concurrent execution.
+
+`[BEHAVIOR:panics-on-error]` Contains unwrap/expect/panic patterns that abort on failure.
+
+`[BEHAVIOR:logs-and-continues]` Logs errors and continues without propagating or aborting.
+
+`[BEHAVIOR:returns-nil-on-error]` Returns nil/null/None on error instead of propagating.
+
+`[BEHAVIOR:swallows-errors]` Catches errors without re-raising or propagating them.
+
+`[BEHAVIOR:propagates-errors]` Propagates errors to callers via Result, throw, or raise.
 
 `[SURFACE:http-handler]` Implements HTTP request handling or web endpoint logic.
 
 `[SURFACE:database]` Interacts with database services or ORMs.
 
 `[SURFACE:external-api]` Makes outbound calls to external HTTP APIs or services.
-
-`[SURFACE:cpp:ntfs]` C++/Win32 corpus: uses NTFS-specific filesystem semantics or metadata.
-
-`[SURFACE:cpp:win32]` C++/Win32 corpus: touches Win32 platform APIs or Windows-native handles.
-
-`[SURFACE:cpp:gdi]` C++/Win32 corpus: uses GDI drawing primitives or related graphics APIs.
-
-`[SURFACE:cpp:control]` C++/MFC corpus: represents or manipulates MFC widget/control surfaces.
-
-`[SURFACE:cpp:view]` C++/MFC corpus: represents an MFC CView-level presentation surface.
-
-`[SURFACE:cpp:dialog]` C++/MFC corpus: represents an MFC CDialog interaction surface.
-
-`[SURFACE:cpp:document]` C++/MFC corpus: represents an MFC CDocument editing surface.
-
-`[SURFACE:cpp:frame]` C++/MFC corpus: represents an MFC CFrameWnd application chrome surface.
 
 `[SURFACE:template]` Uses template engines for rendering output.
 
@@ -82,12 +120,6 @@
 
 ## Layer 0 -- Config
 
-`AGENTS.md`
-Support file for AGENTS.
-
-`CLAUDE.md`
-Support file for CLAUDE.
-
 `SEMMAP.md`
 Generated semantic map.
 
@@ -100,12 +132,6 @@ Support file for north-star.
 `package.json`
 Node.js package manifest.
 
-`src/wasm/deal-core/package.json`
-Node.js package manifest.
-
-`tsconfig.json`
-Configuration for tsconfig.
-
 `vite.config.js`
 Implements vite.config functionality.
 Exports: default
@@ -116,125 +142,51 @@ Exports: default
 Implements package-lock functionality. data.
 
 `scripts/run-regression-fixtures.js`
-Implements run-regression-fixtures functionality.
-Semantic: async
-Evidence:
-- async/await usage in `main` (L38-L204)
-- async/await usage in `readFixture` (L24-L26)
-- module-level const `__dirname` (L19)
-- module-level const `fixtureDir` (L20-L22)
-- persistence pattern in `readFixture` (L24-L26)
+Implements run-regression-fixtures functionality. [COUPLING:mixed] [BEHAVIOR:owns-const-state,persists,async]
+Semantic: async side-effecting adapter
 
-`src/App.tsx`
-Support file for the src subsystem.
-Semantic: error-swallowing
-Evidence:
-- module-level const `STEPS` (L8-L12)
-- module-level const `STORAGE_KEY` (L14)
-- swallowed-error site in `App` (L65-L243)
+`src/App.jsx`
+Implements App functionality. [COUPLING:mixed] [BEHAVIOR:owns-const-state,swallows-errors] [QUALITY:syntax-degraded]
+Exports: App, default
+Semantic: side-effecting constant-owning module that swallows errors
 
-`src/components/CopywritingStep.tsx`
-Support file for the components subsystem. [QUALITY:complex-flow,syntax-degraded]
-Evidence:
-- module-level mutable static `confettiFn` (L13)
-- module-level mutable static `confettiLoaded` (L12)
+`src/components/CopywritingStep.jsx`
+Implements copywriting step. [COUPLING:mixed] [BEHAVIOR:owns-state] [QUALITY:complex-flow,syntax-degraded]
+Exports: CopywritingStep, default
+Semantic: side-effecting stateful module
 
-`src/components/DealtagStep.tsx`
-Implements dealtag step.
+`src/components/DealtagStep.jsx`
+Implements dealtag step. [COUPLING:pure] [QUALITY:syntax-degraded]
 Exports: DealtagStep, default
+Semantic: pure computation
 
-`src/components/DedupeStep.tsx`
-Support file for the components subsystem. [QUALITY:complex-flow]
-Semantic: async
-Evidence:
-- async/await usage in `DedupeStep` (L12-L320)
+`src/components/DedupeStep.jsx`
+Implements dedupe step. [COUPLING:pure] [BEHAVIOR:async] [QUALITY:complex-flow,syntax-degraded]
+Exports: DedupeStep, default
+Semantic: async pure computation
 
 `src/logic/copywriting.js`
-Validates and merge. [HOTSPOT] [QUALITY:undocumented]
+Validates and merge. [HOTSPOT] [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:undocumented]
 Exports: appendDealToRawInput, cleanAndParsePatchJSON, parseRawToGroups, cleanAndParseJSON
-Evidence:
-- module-level const `ALLOWED_AI_WORDS` (L202-L282)
-- module-level const `CODE_PATTERN` (L284-L285)
-- module-level const `DEFAULT_HOUSE_STYLE` (L11-L54)
-- module-level const `RATE_CODE_PATTERN` (L286)
-
-`src/logic/dealCoreClient.ts`
-Parses raw email. [QUALITY:undocumented]
-Exports: parseRawEmail, loadDealCore, CoreResult
-Semantic: async
-Evidence:
-- async/await usage in `loadDealCore` (L32-L34)
-- async/await usage in `parseRawEmail` (L36-L82)
+Semantic: pure computation constant-owning module
 
 `src/logic/dealtag.js`
-Implements transform functionality. [HOTSPOT] [QUALITY:complex-flow]
+Implements transform functionality. [HOTSPOT] [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:complex-flow]
 Exports: transform
-Evidence:
-- module-level const `DATE_RE` (L10)
-- module-level const `DEAL_CUES` (L12)
-- module-level const `DEAL_MARKER` (L11)
-- module-level const `SECTION_HEADING` (L9)
+Semantic: pure computation constant-owning module
 
 `src/logic/dedupe.js`
-Parses hq dates. [HOTSPOT] [QUALITY:undocumented,complex-flow]
+Parses hq dates. [HOTSPOT] [COUPLING:mixed] [BEHAVIOR:owns-state] [QUALITY:undocumented,complex-flow]
 Exports: ingestWebsiteJSON, runFullMatch, parseHQDates, dateFmt
-Evidence:
-- module-level const `FEATURE_PATTERNS` (L89-L113)
-- module-level const `FEATURE_WEIGHTS` (L142-L148)
-- module-level const `IGNORE_FEATURES` (L140)
-- module-level const `TEXT_STOPS` (L150-L154)
-- module-level const `dateFmt` (L165-L167)
-- module-level mutable static `nextId` (L537)
+Semantic: side-effecting stateful module
 
 `src/logic/suppliers.js`
-Implements supplier catalog. [HOTSPOT] [QUALITY:undocumented]
+Implements supplier catalog. [HOTSPOT] [COUPLING:pure] [BEHAVIOR:owns-const-state] [QUALITY:undocumented]
 Exports: isTagEligibleSupplier, familyOf, canonicalVendor, resolveVendor
-Evidence:
-- module-level const `SUPPLIER_ALIASES` (L98-L192)
-- module-level const `SUPPLIER_AMBIGUITIES` (L201-L233)
-- module-level const `SUPPLIER_CATALOG` (L6-L96)
-- module-level const `SUPPLIER_FAMILIES` (L194-L199)
-- module-level const `SUPPLIER_KEYWORD_RULES` (L235-L240)
-- module-level const `TAG_INELIGIBLE_SUPPLIERS` (L242-L249)
-- module-level const `aliases` (L279)
-- module-level const `ambiguousByLabel` (L298)
-- 6 more detector facts omitted from SEMMAP.md
+Semantic: pure computation constant-owning module
 
-`src/main.tsx`
-Support file for the src subsystem.
-
-`src/vite-env.d.ts`
-Placeholder file.
-
-`src/wasm/deal-core/deal_core.d.ts`
-Creates output. [QUALITY:undocumented]
-Exports: parseRawEmail, SyncInitInput, InitOutput, __wbg_init
-
-`src/wasm/deal-core/deal_core.js`
-Parses raw email. [SURFACE:external-api] [QUALITY:complex-flow]
-Exports: parseRawEmail, initSync
-Semantic: async with external API surface
-Evidence:
-- async/await usage in `__wbg_init` (L202-L226)
-- async/await usage in `__wbg_load` (L147-L180)
-- external API surface in `__wbg_init` (L202-L226)
-- module-level const `MAX_SAFARI_DECODE_BYTES` (L110)
-- module-level const `cachedTextEncoder` (L122)
-- module-level mutable static `WASM_VECTOR_LEN` (L135)
-- module-level mutable static `cachedTextDecoder` (L108)
-- module-level mutable static `cachedUint8ArrayMemory0` (L63)
-- 4 more detector facts omitted from SEMMAP.md
-
-`src/wasm/deal-core/deal_core_bg.wasm.d.ts`
-Implements wbindgen externrefs. [HOTSPOT] [QUALITY:undocumented]
-Exports: parseRawEmail, __wbindgen_externrefs, __wbindgen_malloc, __wbindgen_realloc
-Evidence:
-- module-level const `__wbindgen_externrefs` (L5)
-- module-level const `__wbindgen_malloc` (L6)
-- module-level const `__wbindgen_realloc` (L7)
-- module-level const `__wbindgen_start` (L8)
-- module-level const `memory` (L3)
-- module-level const `parseRawEmail` (L4)
+`src/main.jsx`
+Support file for the src subsystem. [QUALITY:syntax-degraded]
 
 ## Layer 3 -- App / Entrypoints
 
@@ -256,40 +208,37 @@ DependencyGraph:
   # --- High Fan-In Hotspots ---
   copywriting.js:
     Imports: []
-    ImportedBy: [App.tsx, CopywritingStep.tsx, run-regression-fixtures.js]
+    ImportedBy: [App.jsx, CopywritingStep.jsx, run-regression-fixtures.js]
   dealtag.js:
     Imports: [suppliers.js]
-    ImportedBy: [DealtagStep.tsx, run-regression-fixtures.js]
+    ImportedBy: [DealtagStep.jsx, run-regression-fixtures.js]
   dedupe.js:
     Imports: [suppliers.js]
-    ImportedBy: [DedupeStep.tsx, run-regression-fixtures.js]
+    ImportedBy: [DedupeStep.jsx, run-regression-fixtures.js]
   suppliers.js:
     Imports: []
     ImportedBy: [dealtag.js, dedupe.js, run-regression-fixtures.js]
   # --- Layer 0 -- Config ---
-  AGENTS.md, CLAUDE.md, SEMMAP.md, criticism.md, north-star.md, package.json, tsconfig.json, vite.config.js:
+  SEMMAP.md, criticism.md, north-star.md, package.json, vite.config.js:
     Imports: []
     ImportedBy: []
   # --- Layer 1 -- Domain (Engine) ---
-  App.tsx:
-    Imports: [CopywritingStep.tsx, DealtagStep.tsx, DedupeStep.tsx, copywriting.js, dealCoreClient.ts, deal_core_bg.wasm.d.ts]
-    ImportedBy: [main.tsx]
-  CopywritingStep.tsx:
-    Imports: [DealtagStep.tsx, copywriting.js]
-    ImportedBy: [App.tsx]
-  DealtagStep.tsx:
+  App.jsx:
+    Imports: [CopywritingStep.jsx, DealtagStep.jsx, DedupeStep.jsx, copywriting.js]
+    ImportedBy: [main.jsx]
+  CopywritingStep.jsx:
+    Imports: [copywriting.js]
+    ImportedBy: [App.jsx]
+  DealtagStep.jsx:
     Imports: [dealtag.js]
-    ImportedBy: [App.tsx, CopywritingStep.tsx]
-  DedupeStep.tsx:
+    ImportedBy: [App.jsx]
+  DedupeStep.jsx:
     Imports: [dedupe.js]
-    ImportedBy: [App.tsx]
-  dealCoreClient.ts:
-    Imports: [deal_core.js]
-    ImportedBy: [App.tsx]
-  main.tsx:
-    Imports: [App.css, App.tsx]
+    ImportedBy: [App.jsx]
+  main.jsx:
+    Imports: [App.css, App.jsx]
     ImportedBy: []
-  package-lock.json, vite-env.d.ts:
+  package-lock.json:
     Imports: []
     ImportedBy: []
   run-regression-fixtures.js:
@@ -298,15 +247,5 @@ DependencyGraph:
   # --- Layer 3 -- App / Entrypoints ---
   App.css:
     Imports: []
-    ImportedBy: [main.tsx]
-  # --- Subproject -- src/wasm/deal-core ---
-  deal_core.d.ts, src/wasm/deal-core/package.json:
-    Imports: []
-    ImportedBy: []
-  deal_core.js:
-    Imports: [deal_core_bg.wasm.d.ts]
-    ImportedBy: [dealCoreClient.ts]
-  deal_core_bg.wasm.d.ts:
-    Imports: []
-    ImportedBy: [App.tsx, deal_core.js]
+    ImportedBy: [main.jsx]
 ```
