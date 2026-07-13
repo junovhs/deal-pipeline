@@ -20,58 +20,38 @@
     "kind": "import"
   },
   {
-    "from": "scripts/run-regression-fixtures.js",
-    "to": "src/wasm/deal-core/deal_core.js",
+    "from": "src/App.jsx",
+    "to": "src/components/DealtagStep.jsx",
     "kind": "import"
   },
   {
-    "from": "src/App.tsx",
-    "to": "src/components/DealtagStep.tsx",
+    "from": "src/App.jsx",
+    "to": "src/components/DedupeStep.jsx",
     "kind": "import"
   },
   {
-    "from": "src/App.tsx",
-    "to": "src/components/DedupeStep.tsx",
+    "from": "src/App.jsx",
+    "to": "src/components/CopywritingStep.jsx",
     "kind": "import"
   },
   {
-    "from": "src/App.tsx",
-    "to": "src/components/CopywritingStep.tsx",
-    "kind": "import"
-  },
-  {
-    "from": "src/App.tsx",
+    "from": "src/App.jsx",
     "to": "src/logic/copywriting.js",
     "kind": "import"
   },
   {
-    "from": "src/App.tsx",
-    "to": "src/logic/dealCoreClient.ts",
-    "kind": "import"
-  },
-  {
-    "from": "src/components/CopywritingStep.tsx",
+    "from": "src/components/CopywritingStep.jsx",
     "to": "src/logic/copywriting.js",
     "kind": "import"
   },
   {
-    "from": "src/components/DealtagStep.tsx",
+    "from": "src/components/DealtagStep.jsx",
     "to": "src/logic/dealtag.js",
     "kind": "import"
   },
   {
-    "from": "src/components/DedupeStep.tsx",
+    "from": "src/components/DedupeStep.jsx",
     "to": "src/logic/dedupe.js",
-    "kind": "import"
-  },
-  {
-    "from": "src/components/DedupeStep.tsx",
-    "to": "src/logic/dealCoreClient.ts",
-    "kind": "import"
-  },
-  {
-    "from": "src/logic/dealCoreClient.ts",
-    "to": "src/wasm/deal-core/deal_core.js",
     "kind": "import"
   },
   {
@@ -85,8 +65,23 @@
     "kind": "import"
   },
   {
+    "from": "src/main.jsx",
+    "to": "src/App.jsx",
+    "kind": "import"
+  },
+  {
+    "from": "src/main.jsx",
+    "to": "src/App.css",
+    "kind": "import"
+  },
+  {
     "from": "scripts/run-regression-fixtures.js",
     "to": "src/logic/dealtag.js",
+    "kind": "call"
+  },
+  {
+    "from": "scripts/run-regression-fixtures.js",
+    "to": "src/logic/dedupe.js",
     "kind": "call"
   },
   {
@@ -96,42 +91,22 @@
   },
   {
     "from": "scripts/run-regression-fixtures.js",
-    "to": "src/logic/dedupe.js",
-    "kind": "call"
-  },
-  {
-    "from": "scripts/run-regression-fixtures.js",
     "to": "src/logic/copywriting.js",
     "kind": "call"
   },
   {
-    "from": "src/App.tsx",
-    "to": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
-    "kind": "call"
-  },
-  {
-    "from": "src/components/CopywritingStep.tsx",
-    "to": "src/components/DedupeStep.tsx",
-    "kind": "call"
-  },
-  {
-    "from": "src/components/CopywritingStep.tsx",
+    "from": "src/components/CopywritingStep.jsx",
     "to": "src/logic/copywriting.js",
     "kind": "call"
   },
   {
-    "from": "src/components/DealtagStep.tsx",
+    "from": "src/components/DealtagStep.jsx",
     "to": "src/logic/dealtag.js",
     "kind": "call"
   },
   {
-    "from": "src/components/DedupeStep.tsx",
+    "from": "src/components/DedupeStep.jsx",
     "to": "src/logic/dedupe.js",
-    "kind": "call"
-  },
-  {
-    "from": "src/components/DedupeStep.tsx",
-    "to": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
     "kind": "call"
   },
   {
@@ -142,11 +117,6 @@
   {
     "from": "src/logic/dedupe.js",
     "to": "src/logic/suppliers.js",
-    "kind": "call"
-  },
-  {
-    "from": "src/wasm/deal-core/deal_core.js",
-    "to": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
     "kind": "call"
   }
 ]
