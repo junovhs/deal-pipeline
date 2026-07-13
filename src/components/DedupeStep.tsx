@@ -189,10 +189,57 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
     onComplete(exportUnmatched(deals));
   }, [categorized, onComplete, showToast]);
 
+  const canCompare = hqDeals.length > 0 && websiteDeals.length > 0;
+  const sourceVendorCount = new Set(hqDeals.map((deal) => deal.vendor)).size;
+
   return (
-    <div className="dedupe-step">
-      <div className="dedupe-layout">
-        <div className="dedupe-sidebar">
+    <div className="dedupe-step dedupe-workflow">
+      <section className="dedupe-setup">
+        <div className="dedupe-section-heading">
+          <div><span className="workspace-eyebrow">Prepare the comparison</span><h3>Two inputs. One clean decision.</h3></div>
+          {lastRun && <span className="status-chip status-complete">Comparison ready</span>}
+        </div>
+        <div className="dedupe-setup-grid">
+          <article className={`setup-card ${hqDeals.length ? 'is-ready' : ''}`}>
+            <span className="setup-index">1</span>
+            <div className="setup-card-copy"><span className="setup-label">New deal batch</span><strong>{hqDeals.length ? `${hqDeals.length} deals from ${sourceVendorCount} suppliers` : 'No deals loaded'}</strong><span>{hqDeals.length ? 'Carried forward from Tag' : 'Complete the Tag step first'}</span></div>
+            <span className="setup-check">{hqDeals.length ? '✓' : ''}</span>
+          </article>
+          <article className={`setup-card ${websiteDeals.length ? 'is-ready' : ''}`}>
+            <span className="setup-index">2</span>
+            <div className="setup-card-copy"><span className="setup-label">Current website</span><strong>{websiteDeals.length ? `${websiteDeals.length} live deals loaded` : 'Load the website export'}</strong><button className="setup-link" onClick={() => fileRef.current?.click()}>{websiteDeals.length ? 'Replace JSON export' : 'Choose true_entries.json'}</button></div>
+            <span className="setup-check">{websiteDeals.length ? '✓' : ''}</span>
+            <input ref={fileRef} type="file" accept=".json" className="visually-hidden" onChange={handleFileLoad} />
+          </article>
+          <article className={`setup-card setup-action ${canCompare ? 'is-ready' : ''}`}>
+            <span className="setup-index">3</span>
+            <div className="setup-card-copy"><span className="setup-label">Compare</span><strong>{canCompare ? 'Find what is already live' : 'Waiting for both inputs'}</strong><span>Keep only genuinely new work.</span></div>
+            <button className="btn btn-accent compare-button" onClick={runMatcher} disabled={!canCompare}>{lastRun ? 'Compare again' : 'Compare deals'}</button>
+          </article>
+        </div>
+        {importError && <div className="gate-warning gate-warning-error import-blocker" role="alert"><strong>That website export could not be used.</strong><div>{importError}</div></div>}
+        <details className="dedupe-disclosure">
+          <summary>Review source text and advanced matching options</summary>
+          <div className="advanced-grid">
+            <label className="advanced-source"><span>Tagged source</span><textarea value={hqText} onChange={(event) => updateSession({ hqText: event.target.value, lastRun: null, rejectedHQIds: [] })} spellCheck={false} /></label>
+            <div className="advanced-controls">
+              <label className="mini-label">Minimum score <input type="number" value={threshold} min={1} max={40} onChange={(event) => updateSession({ threshold: +event.target.value })} /></label>
+              <label className="mini-label">Supplier <select value={supplierFilter} onChange={(event) => updateSession({ supplierFilter: event.target.value })}><option value="">All suppliers</option>{webSuppliers.map((supplier) => <option key={String(supplier)}>{String(supplier)}</option>)}</select></label>
+              <button className={`btn ${restrictToday ? 'btn-danger' : ''}`} onClick={() => updateSession({ restrictToday: !restrictToday })}>Exclude ending today: {restrictToday ? 'On' : 'Off'}</button>
+              {rejectedHQIds.length > 0 && <button className="btn" onClick={() => updateSession({ rejectedHQIds: [] })}>Restore rejected matches ({rejectedHQIds.length})</button>}
+            </div>
+          </div>
+        </details>
+      </section>
+
+      {dateWarnings.length > 0 && (
+        <details className="dedupe-disclosure warning-disclosure">
+          <summary>{dateWarnings.length} date {dateWarnings.length === 1 ? 'warning' : 'warnings'} need review</summary>
+          {dateWarnings.map((deal, index) => <div key={index} className="date-warning"><strong>{deal.vendor}:</strong> {deal.dateWarning}<div className="mini">{deal.text}</div></div>)}
+        </details>
+      )}
+
+      <div className="legacy-dedupe-inputs visually-hidden" aria-hidden="true">
           <div className="section">
             <h3>HQ Paste (v/d/ed format)</h3>
             <textarea
@@ -230,7 +277,6 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
               Choose entries JSON...
             </button>
             <input
-              ref={fileRef}
               type="file"
               accept=".json"
               style={{ display: 'none' }}
@@ -297,50 +343,52 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
 
         <div className="dedupe-results">
           {categorized && (
-            <div className="stats-bar">
-              <div className="stat-box"><div className="stat-n stat-good">{categorized.matched.length}</div><div className="stat-l">Matched</div></div>
-              <div className="stat-box"><div className="stat-n stat-purple">{categorized.extensions.length}</div><div className="stat-l">Extended</div></div>
-              <div className="stat-box"><div className="stat-n stat-bad">{categorized.unmatched.length}</div><div className="stat-l">Unmatched</div></div>
-              <div className="stat-box"><div className="stat-n">{categorized.total}</div><div className="stat-l">Total HQ</div></div>
-              <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-                <button className="btn" onClick={handleExportUnmatched}>Copy Unmatched</button>
-                <button className="btn btn-forward" onClick={handleSendToCopy}>Send to Copy -&gt;</button>
+            <>
+              <div className="results-hero">
+                <div>
+                  <span className="workspace-eyebrow">Comparison complete</span>
+                  <h3>{categorized.matched.length + categorized.extensions.length} already covered. {categorized.unmatched.length} to move forward.</h3>
+                  <p>Existing deals are set aside so you can focus on genuinely new work.</p>
+                </div>
+                <div className="results-actions">
+                  <button className="btn" onClick={handleExportUnmatched}>Copy new deals</button>
+                  <button className="btn btn-forward results-primary" onClick={handleSendToCopy} disabled={!categorized.unmatched.length}>Send {categorized.unmatched.length} to Copy →</button>
+                </div>
               </div>
-            </div>
+              <div className="decision-metrics">
+                <button className={`decision-metric metric-good ${viewFilter === 'matched' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'matched' })}><strong>{categorized.matched.length}</strong><span>Existing matches</span></button>
+                <button className={`decision-metric metric-purple ${viewFilter === 'updates' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'updates' })}><strong>{categorized.extensions.length}</strong><span>Extensions</span></button>
+                <button className={`decision-metric metric-new ${viewFilter === 'unmatched' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'unmatched' })}><strong>{categorized.unmatched.length}</strong><span>Needs copy</span></button>
+                <button className={`decision-metric metric-total ${viewFilter === 'all' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'all' })}><strong>{categorized.total}</strong><span>Source total</span></button>
+              </div>
+            </>
           )}
 
-          {!results && <div className="empty-state">Paste HQ deals, load website JSON, then run the matcher</div>}
+          {!results && <div className="dedupe-empty"><span className="empty-orbit">↗</span><h3>Ready when both inputs are green</h3><p>The comparison will separate existing website deals from the deals that need copy.</p></div>}
 
           {visible && (
-            <div className="match-list">
+            <div className="match-list focused-results">
+              {visible.unmatched.length > 0 && (
+                <section className="result-group result-group-new">
+                  <div className="result-group-heading"><div><span className="result-kicker">Next action</span><h4>New deals to prepare ({visible.unmatched.length})</h4></div><p>These did not clear the match threshold.</p></div>
+                  <div className="compact-card-list">{visible.unmatched.map((result) => <UnmatchedCard key={result.hq.id} r={result} today={categorized.today} />)}</div>
+                </section>
+              )}
               {visible.extensions.length > 0 && (
-                <>
-                  <h4 className="section-heading heading-purple">Possible Extensions ({visible.extensions.length})</h4>
-                  {visible.extensions.map((result) => (
-                    <MatchCard key={result.hq.id} r={result} today={categorized.today} onReject={handleReject} />
-                  ))}
-                </>
+                <details className="result-group result-group-collapsible" open={viewFilter === 'updates'}>
+                  <summary>Possible extensions <span>{visible.extensions.length}</span></summary>
+                  <div className="compact-card-list">{visible.extensions.map((result) => <MatchCard key={result.hq.id} r={result} today={categorized.today} onReject={handleReject} />)}</div>
+                </details>
               )}
               {visible.matched.length > 0 && (
-                <>
-                  <h4 className="section-heading heading-good">Matched ({visible.matched.length})</h4>
-                  {visible.matched.map((result) => (
-                    <MatchCard key={result.hq.id} r={result} today={categorized.today} onReject={handleReject} />
-                  ))}
-                </>
-              )}
-              {visible.unmatched.length > 0 && (
-                <>
-                  <h4 className="section-heading heading-bad">Unmatched ({visible.unmatched.length})</h4>
-                  {visible.unmatched.map((result) => (
-                    <UnmatchedCard key={result.hq.id} r={result} today={categorized.today} />
-                  ))}
-                </>
+                <details className="result-group result-group-collapsible" open={viewFilter === 'matched'}>
+                  <summary>Existing website matches <span>{visible.matched.length}</span><small>Hidden by default so you can focus on new work</small></summary>
+                  <div className="compact-card-list">{visible.matched.map((result) => <MatchCard key={result.hq.id} r={result} today={categorized.today} onReject={handleReject} />)}</div>
+                </details>
               )}
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }
@@ -399,6 +447,9 @@ function MatchCard({ r, today, onReject }) {
 function UnmatchedCard({ r, today }) {
   const endsToday = sameDay(r.hq.end, today);
   const topCandidates = (r.meta?.candidateRankings || []).filter((candidate) => candidate.score > 0);
+  const closestCandidate = r.web
+    ? { title: r.web.raw?.title || r.web.text, supplier: r.web.supplier, score: r.meta?.score ?? 0 }
+    : topCandidates[0];
   return (
     <div className={`match-card card-unmatched ${endsToday ? 'card-today' : ''}`}>
       <div className="match-header">
@@ -409,6 +460,12 @@ function UnmatchedCard({ r, today }) {
       </div>
       <div className="match-text">{r.hq.text}</div>
       <div className="match-meta">{r.hq.ongoing ? 'Ongoing' : r.hq.end ? `Ends: ${dateFmt.format(r.hq.end)}` : ''}</div>
+      {closestCandidate && (
+        <div className="closest-candidate">
+          <span>Closest website candidate · score {closestCandidate.score}</span>
+          <strong>{closestCandidate.title || closestCandidate.supplier}</strong>
+        </div>
+      )}
       {(r.meta?.stages || []).map((stage) => (
         <div key={stage.key} className="match-meta">
           <strong>{stage.label}:</strong> {formatStageDelta(stage.delta)} {stage.reasons.length ? `· ${stage.reasons.join(', ')}` : '· no signal'}
