@@ -4,3 +4,4 @@ deal-core/target/
 **/.ishoo/cache/
 **/.ishoo/worktrees/
 .ishoo/
+.astro/
