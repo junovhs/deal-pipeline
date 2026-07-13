@@ -15,6 +15,10 @@ import {
   parseRawToGroups,
   validateAndMerge,
 } from "../src/logic/copywriting.js";
+import {
+  initSync as initDealCoreSync,
+  validateWebsiteExport as validateWebsiteExportWasm,
+} from "../src/wasm/deal-core/deal_core.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixtureDir = process.env.FIXTURE_DIR
@@ -41,6 +45,22 @@ async function main() {
   const websiteRows = JSON.parse(await readFixture("website-deals.json"));
   const aiResponse = await readFixture("ai-response.txt");
   const supplierResolutions = JSON.parse(await readFixture("supplier-resolution.json"));
+
+  const wasmBytes = await readFile(path.join(
+    __dirname,
+    "..",
+    "src",
+    "wasm",
+    "deal-core",
+    "deal_core_bg.wasm",
+  ));
+  initDealCoreSync({ module: wasmBytes });
+  const validatedWebsite = validateWebsiteExportWasm(websiteRows);
+  assert.equal(validatedWebsite.ok, true);
+  assert.equal(validatedWebsite.data.recognizedCount, websiteRows.length);
+  assert.equal(validatedWebsite.data.rows[0].shopOverline, "Norwegian Cruise Line");
+  assert.equal(validatedWebsite.data.rows[0].title, "Free Gratuities for 2");
+  assert.equal(validatedWebsite.data.rows[0] instanceof Map, false);
 
   const tagged = transform(rawPromo, { includeUnknowns: true });
   const taggedLines = tagged.text.split("\n");
@@ -75,7 +95,7 @@ async function main() {
 
   resetIds();
   const hqDeals = parseHQ(tagged.text);
-  assert.equal(hqDeals.length, 3);
+  assert.equal(hqDeals.length, 4);
   assert.deepEqual(
     hqDeals.map((deal) => ({
       vendor: deal.vendor,
@@ -86,6 +106,7 @@ async function main() {
       { vendor: "Norwegian", type: "exclusive", hasEndDate: true },
       { vendor: "Royal Caribbean", type: "deal", hasEndDate: true },
       { vendor: "Carnival", type: "deal", hasEndDate: true },
+      { vendor: "Mystery Escapes", type: "deal", hasEndDate: true },
     ],
   );
 
@@ -129,7 +150,7 @@ async function main() {
   }
 
   const matches = runFullMatch(hqDeals, websiteDeals);
-  assert.equal(matches.length, 3);
+  assert.equal(matches.length, 4);
 
   const norwegianMatch = findMatch(matches, "Norwegian");
   assert.equal(norwegianMatch.web?.supplier, "Norwegian");
@@ -158,6 +179,10 @@ async function main() {
   assert.deepEqual(collectWarningTypes(carnivalMatch.meta.why), ["neg"]);
   assert.equal(carnivalMatch.meta.why[0].text, "no web deals");
   assert.deepEqual(carnivalMatch.meta.candidateRankings, []);
+
+  const unknownSupplierMatch = findMatch(matches, "Mystery Escapes");
+  assert.equal(unknownSupplierMatch.web, null);
+  assert.equal(unknownSupplierMatch.hq.text, "Save $200 on select sailings ends 08/01/26");
 
   const rawGroups = parseRawToGroups(tagged.text);
   assert.deepEqual(

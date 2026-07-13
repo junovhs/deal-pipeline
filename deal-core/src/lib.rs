@@ -1,3 +1,4 @@
+use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
 mod fixtures;
@@ -11,7 +12,7 @@ pub use website::*;
 #[wasm_bindgen(js_name = parseRawEmail)]
 pub fn parse_raw_email(raw_text: &str) -> JsValue {
     let result = parse_raw_email_core(raw_text);
-    serde_wasm_bindgen::to_value(&result).unwrap_or(JsValue::NULL)
+    to_json_compatible_value(&result)
 }
 
 #[wasm_bindgen(js_name = validateWebsiteExport)]
@@ -27,7 +28,13 @@ pub fn validate_website_export(rows: JsValue) -> JsValue {
         ),
     };
 
-    serde_wasm_bindgen::to_value(&result).unwrap_or(JsValue::NULL)
+    to_json_compatible_value(&result)
+}
+
+fn to_json_compatible_value<T: Serialize>(value: &T) -> JsValue {
+    value
+        .serialize(&serde_wasm_bindgen::Serializer::json_compatible())
+        .unwrap_or(JsValue::NULL)
 }
 
 pub fn parse_raw_email_core(raw_text: &str) -> CoreResult<ParsedBatch> {

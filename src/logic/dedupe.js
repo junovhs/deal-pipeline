@@ -537,6 +537,17 @@ function optimalMatch(hqGroup, webGroup) {
 let nextId = 0;
 export function resetIds() { nextId = 0; }
 
+function cleanTaggedContent(value) {
+  return value
+    .replace(/^(?:â€¢|•|\u2022)\s*/, '')
+    .replace(/[ \t]+/g, ' ')
+    .trim();
+}
+
+function looksLikeDealContent(value) {
+  return /\$|\d\s*%|\b(?:ends?|ongoing|sale|save|savings|off|free|credit|deposit|rates?|package|promo|upgrade|groups?)\b/i.test(value);
+}
+
 export function parseHQ(text) {
   const lines = (text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const items = [];
@@ -544,12 +555,15 @@ export function parseHQ(text) {
   let currentVendorResolution = null;
 
   for (const line of lines) {
-    const m = line.match(/^([ve]d?|V|D|ED)\s*\t\s*(.+)$/i);
+    const m = line.match(/^([ve]d?|V|D|ED|X)\s*\t\s*(.+)$/i);
     if (!m) continue;
     const tag = m[1].toLowerCase();
-    const content = m[2].trim();
+    const content = cleanTaggedContent(m[2]);
 
     if (tag === 'v') {
+      currentVendorResolution = resolveVendor(content.replace(/:$/, ''));
+      currentVendor = currentVendorResolution.canonicalName || content.replace(/:$/, '').trim();
+    } else if (tag === 'x' && !looksLikeDealContent(content)) {
       currentVendorResolution = resolveVendor(content.replace(/:$/, ''));
       currentVendor = currentVendorResolution.canonicalName || content.replace(/:$/, '').trim();
     } else {
