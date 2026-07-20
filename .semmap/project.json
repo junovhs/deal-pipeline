@@ -1,41 +1,49 @@
 {
-  "name": "CORE-01",
+  "name": "deal-pipeline",
   "one_liner": "A bespoke pipeline that takes a simple list of deals from a weekly Dream Vacations promo email, and takes them all the way to published deals with full copy.",
   "language_primary": "typescript",
   "languages": [
     "typescript",
     "javascript"
   ],
-  "total_files": 17,
-  "total_lines": 6952,
+  "total_files": 27,
+  "total_lines": 34373,
   "subsystems": [
-    "dealtag-suppliers",
-    "dedupe-suppliers",
-    "copywriting"
+    "logic-dealtag",
+    "components-step",
+    "bg-core"
   ],
-  "entry_points": [
-    "index.html"
-  ],
-  "generated_at": "2026-06-01T17:57:12Z",
+  "entry_points": [],
+  "generated_at": "2026-07-13T19:14:04Z",
   "omni_ast_version": "0.4.27",
   "file_hashes": {
-    "SEMMAP.md": "0dde4dbb65039ec8336bd5941d3f706a7dc452cc842f36be5bac8a71e238d245",
-    "criticism.md": "61897a027ce6d59585357855f58306ec628c517057f8df35b0351da9e3c4add0",
-    "index.html": "cfd368804e91ccfbca444d62a40acb73e6e8d71ffb4c558c09e891b2ac1bfbb7",
-    "package-lock.json": "37ad412dcdd5906dc19d4d85c3d68d3bd5489a798c4ff04d65b60783f411f3e8",
-    "package.json": "f34b7de5d62c7f1eab59e5565acfe86f3deff4a7fbb4d9ae4cca380dc63029ee",
-    "scripts/run-regression-fixtures.js": "0d30db4e57a082efa05aa537a4cc21c6ebce7d3fd88c5326a0ab902e24abaf87",
-    "src/App.css": "c82e2c8bab6b1f13f6a9fd608799597ec7b9f3a38cc0ad5adf6ac8a1eca0332b",
-    "src/App.jsx": "ddf240efcd39a3c945e003e39cb24b451e083ccde1d7ea6d34d5ab780842af80",
-    "src/components/CopywritingStep.jsx": "e61a691a397644db6c2b91da7df096f0d1ff34cfd9638c1d49f5a757e87d7505",
-    "src/components/DealtagStep.jsx": "88be5f4169d19d0a2bd66abb6734725c70ba42a3365d21adfc0e0ad38104bfc3",
-    "src/components/DedupeStep.jsx": "3c9591331a60bbcf2338b304713eb6c3841919b796de39442293d048a557e1c3",
+    "AGENTS.md": "6ab4f48402516da894be43e6912546567db35f5e8499759dd577a9d89fa75cca",
+    "CLAUDE.md": "2ca99993a90eec084af9484fbee7654d308333eb631d520b70e1296feeba8e0a",
+    "SEMMAP.md": "53175303e69d490fa33090ec0496768e93a291f9eadb5e4de507b2a300b1a61b",
+    "criticism.md": "75c8e37068eddda887202da7d3f9baf080d5714e0e54bc870dac67b1c9287151",
+    "example_export.json": "a34d6228bc3547539243c48ecc54a13e660f400b5d4ed4fc01273c725205f509",
+    "north-star.md": "062dcb2760153828d4516427acc863e9c22dd555add8c38664e8b289f1e8d3d0",
+    "package-lock.json": "de9356bbe6dcb9d53fbe43b8c280de7cfe313cf493f6225c3948d9c8bc507d30",
+    "package.json": "b9d7fae09bebcd8fc1364e040ffe607e865508220ca5e2a801ce68d000521a89",
+    "scripts/run-regression-fixtures.js": "33c0b0df9b991bcd97f3e6cd973ad2636d492add7782891afebe01904a414c03",
+    "src/App.css": "0086a8b8c44ae906e8522b8657af8f9a8eacab55c9b8b8de5fe3c6418f8985e1",
+    "src/App.tsx": "838efdbf82f87c0c62dc1f4862de550cb4db1dd481b9f6b4413e25df7d55840b",
+    "src/components/CopywritingStep.tsx": "718f75b82eba7e11ebf87c8976765b07ddd05f4a58de4b72bee3f4f1f0cd80f2",
+    "src/components/DealtagStep.tsx": "88be5f4169d19d0a2bd66abb6734725c70ba42a3365d21adfc0e0ad38104bfc3",
+    "src/components/DedupeStep.tsx": "cf7110295eedf56f7605f731fd5bcac7125f23b7985df5dc37061d73078e10f5",
     "src/logic/copywriting.js": "87bb7a8b747e2e2f249a75bb4943ff3704e6ec22f07de0841bf1cffd832d8d7d",
-    "src/logic/dealtag.js": "8eca892e8bc5ac97faab00a1331fc7af9392c50c36a397a3cc8534bbc0248ad9",
-    "src/logic/dedupe.js": "7498866834355c9320ccd151c7a25a85fb0599727f74498082c8b7442621b04a",
-    "src/logic/suppliers.js": "8f8b07f9853e201b063211e9a41cdd19791d5cffa3da192f37a4eb5534f8dbfd",
-    "src/main.jsx": "cc2ebc90bfa1f959bd340fa493e1a47029e9cb9b86b3282a0e3bee6040fcd6a5",
-    "vite.config.js": "537bcf934522a5030ec0d25e9957be60e5489bfb40d25b31033ef97618bd1bb1"
+    "src/logic/dealCoreClient.ts": "8f430a313b71a3d670334241aab22402065673a74edb55af8367e44aa7ff499b",
+    "src/logic/dealtag.js": "57ad15e9a0ea8ae7d0ac3990fcef9d1565d64c322d1d6af3997cf52b53eae1be",
+    "src/logic/dedupe.js": "f8104aa0c185c8a2733b922098f544490aaacde10fc66210e535cc7a300ff130",
+    "src/logic/suppliers.js": "a00a35d5a9cabc8c8a4a1f504263085bb846be6093f015531dc4be94b2751160",
+    "src/vite-env.d.ts": "424faf9241dd699dda995b367ed36665732da1e6ec1f33b2fd40394488ecac92",
+    "src/wasm/deal-core/deal_core.d.ts": "c19258f9927c06671f6074084a5246d1dab97faaab1f73d372820a634bd41a9a",
+    "src/wasm/deal-core/deal_core.js": "0e30447a181d858df73a66b55d4d0f9722ee8d0bf1ed73045dc331123f3e660e",
+    "src/wasm/deal-core/deal_core_bg.wasm.d.ts": "4565b3a5534dff97143e49829105002ad772a5c017d46105790bbf0c1ab1a707",
+    "src/wasm/deal-core/package.json": "a45a2d3963277358ab27cf8e48da9490a9813c81856bc50f3fa67042bd6945a0",
+    "true_entries.json": "00c3bb212f2055fcc0951d989285f7ad825371a9c5df484ef315c62c532dab3b",
+    "tsconfig.json": "5da3c9892486a1849b6f4123addf604aa8b883e4e52a8318f91bc2ad873b223b",
+    "vite.config.js": "6dc0ce25c4170ac9fbadb4dbd19ca5c2ceb57b9c5efc5090b82e2923f53dd679"
   },
-  "generated_at_commit": "86f95d985a613f626c569a093cadfffdb0b20dc5"
+  "generated_at_commit": "d45ba4009bb4c6d7ddb57b5bceb676a9c8a698ac"
 }

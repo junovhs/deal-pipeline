@@ -1,127 +1,190 @@
 [
   {
+    "file": "AGENTS.md",
+    "quality_score": 0.0,
+    "import_fan_in": 0,
+    "cognitive_complexity_max": 0,
+    "doc_coverage": 1.0
+  },
+  {
+    "file": "CLAUDE.md",
+    "quality_score": 0.0,
+    "import_fan_in": 0,
+    "cognitive_complexity_max": 0,
+    "doc_coverage": 1.0
+  },
+  {
     "file": "SEMMAP.md",
-    "hotspot_score": 0.0,
-    "fan_in": 0,
+    "quality_score": 0.0,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 0,
     "doc_coverage": 1.0
   },
   {
     "file": "criticism.md",
-    "hotspot_score": 0.0,
-    "fan_in": 0,
+    "quality_score": 0.0,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 0,
     "doc_coverage": 1.0
   },
   {
     "file": "north-star.md",
-    "hotspot_score": 0.0,
-    "fan_in": 0,
+    "quality_score": 0.0,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 0,
     "doc_coverage": 1.0
   },
   {
     "file": "package.json",
-    "hotspot_score": 0.0,
-    "fan_in": 0,
+    "quality_score": 0.0,
+    "import_fan_in": 0,
+    "cognitive_complexity_max": 0,
+    "doc_coverage": 1.0
+  },
+  {
+    "file": "src/wasm/deal-core/package.json",
+    "quality_score": 0.0,
+    "import_fan_in": 0,
+    "cognitive_complexity_max": 0,
+    "doc_coverage": 1.0
+  },
+  {
+    "file": "tsconfig.json",
+    "quality_score": 0.0,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 0,
     "doc_coverage": 1.0
   },
   {
     "file": "vite.config.js",
-    "hotspot_score": 0.0,
-    "fan_in": 0,
+    "quality_score": 0.0,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 0,
     "doc_coverage": 1.0
   },
   {
     "file": "package-lock.json",
-    "hotspot_score": 0.0,
-    "fan_in": 0,
+    "quality_score": 0.0,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 0,
     "doc_coverage": 1.0
   },
   {
     "file": "scripts/run-regression-fixtures.js",
-    "hotspot_score": 0.06666667,
-    "fan_in": 0,
+    "quality_score": 0.06666667,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 5,
     "doc_coverage": 1.0
   },
   {
-    "file": "src/App.jsx",
-    "hotspot_score": 0.3066667,
-    "fan_in": 1,
-    "cognitive_complexity_max": 8,
+    "file": "src/App.tsx",
+    "quality_score": 0.13333334,
+    "import_fan_in": 0,
+    "cognitive_complexity_max": 10,
     "doc_coverage": 0.0
   },
   {
-    "file": "src/components/CopywritingStep.jsx",
-    "hotspot_score": 0.5733334,
-    "fan_in": 1,
+    "file": "src/components/CopywritingStep.tsx",
+    "quality_score": 0.5733334,
+    "import_fan_in": 1,
     "cognitive_complexity_max": 28,
     "doc_coverage": 0.0
   },
   {
-    "file": "src/components/DealtagStep.jsx",
-    "hotspot_score": 0.22666669,
-    "fan_in": 1,
+    "file": "src/components/DealtagStep.tsx",
+    "quality_score": 0.22666669,
+    "import_fan_in": 1,
     "cognitive_complexity_max": 2,
     "doc_coverage": 0.0
   },
   {
-    "file": "src/components/DedupeStep.jsx",
-    "hotspot_score": 0.49333337,
-    "fan_in": 1,
-    "cognitive_complexity_max": 22,
+    "file": "src/components/DedupeStep.tsx",
+    "quality_score": 0.52000004,
+    "import_fan_in": 1,
+    "cognitive_complexity_max": 24,
     "doc_coverage": 0.0
   },
   {
     "file": "src/logic/copywriting.js",
-    "hotspot_score": 0.76000005,
-    "fan_in": 3,
+    "quality_score": 0.76000005,
+    "import_fan_in": 3,
     "cognitive_complexity_max": 12,
     "doc_coverage": 0.0
   },
   {
+    "file": "src/logic/dealCoreClient.ts",
+    "quality_score": 0.40000004,
+    "import_fan_in": 2,
+    "cognitive_complexity_max": 0,
+    "doc_coverage": 0.0
+  },
+  {
     "file": "src/logic/dealtag.js",
-    "hotspot_score": 0.8000001,
-    "fan_in": 2,
+    "quality_score": 0.8000001,
+    "import_fan_in": 2,
     "cognitive_complexity_max": 41,
     "doc_coverage": 0.0
   },
   {
     "file": "src/logic/dedupe.js",
-    "hotspot_score": 0.8000001,
-    "fan_in": 2,
+    "quality_score": 0.8000001,
+    "import_fan_in": 2,
     "cognitive_complexity_max": 35,
     "doc_coverage": 0.0
   },
   {
     "file": "src/logic/suppliers.js",
-    "hotspot_score": 0.6933334,
-    "fan_in": 3,
+    "quality_score": 0.6933334,
+    "import_fan_in": 3,
     "cognitive_complexity_max": 7,
     "doc_coverage": 0.0
   },
   {
-    "file": "src/main.jsx",
-    "hotspot_score": 0.0,
-    "fan_in": 0,
+    "file": "src/vite-env.d.ts",
+    "quality_score": 0.0,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 0,
     "doc_coverage": 1.0
   },
   {
-    "file": "index.html",
-    "hotspot_score": 0.0,
-    "fan_in": 0,
+    "file": "src/wasm/deal-core/deal_core.d.ts",
+    "quality_score": 0.0,
+    "import_fan_in": 0,
+    "cognitive_complexity_max": 0,
+    "doc_coverage": 0.0
+  },
+  {
+    "file": "src/wasm/deal-core/deal_core.js",
+    "quality_score": 0.52000004,
+    "import_fan_in": 1,
+    "cognitive_complexity_max": 24,
+    "doc_coverage": 1.0
+  },
+  {
+    "file": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "quality_score": 0.0,
+    "import_fan_in": 0,
+    "cognitive_complexity_max": 0,
+    "doc_coverage": 0.0
+  },
+  {
+    "file": "true_entries.json",
+    "quality_score": 0.0,
+    "import_fan_in": 0,
+    "cognitive_complexity_max": 0,
+    "doc_coverage": 1.0
+  },
+  {
+    "file": "example_export.json",
+    "quality_score": 0.0,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 0,
     "doc_coverage": 1.0
   },
   {
     "file": "src/App.css",
-    "hotspot_score": 0.20000002,
-    "fan_in": 1,
+    "quality_score": 0.0,
+    "import_fan_in": 0,
     "cognitive_complexity_max": 0,
     "doc_coverage": 1.0
   }

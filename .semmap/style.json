@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-01T17:57:12Z",
+  "generated_at": "2026-07-13T19:14:06Z",
   "entries": [
     {
       "file": "scripts/run-regression-fixtures.js",
@@ -24,31 +24,31 @@
       ]
     },
     {
-      "file": "src/App.jsx",
-      "language": "javascript",
+      "file": "src/App.tsx",
+      "language": "typescript",
       "idiom_category": "error-propagation",
       "excerpts": [
         "import React, { useCallback, useEffect, useRef, useState } from 'react';",
-        "import DealtagStep from './components/DealtagStep.jsx';",
-        "import DedupeStep from './components/DedupeStep.jsx';",
-        "import CopywritingStep from './components/CopywritingStep.jsx';",
+        "import DealtagStep from './components/DealtagStep';",
+        "import DedupeStep from './components/DedupeStep';",
+        "import CopywritingStep from './components/CopywritingStep';",
         "import { DEFAULT_HOUSE_STYLE } from './logic/copywriting.js';",
+        "import { parseRawEmail } from './logic/dealCoreClient';",
         "",
         "const STEPS = [",
-        "  { key: 'tag', label: '1. Tag', desc: 'Classify raw deals' },",
-        "  { key: 'dedupe', label: '2. Dedupe', desc: 'Match against website' },",
-        "  { key: 'copy', label: '3. Copy', desc: 'Write & track' },",
+        "  { key: 'tag', label: 'Tag', desc: 'Shape the source', intro: 'Turn the weekly source into clean, structured deal lines.' },",
+        "  { key: 'dedupe', label: 'Dedupe', desc: 'Compare the site', intro: 'Compare the new batch with the live website export.' },",
+        "  { key: 'copy', label: 'Copy', desc: 'Finish the batch', intro: 'Write, review, and track the website-ready deal copy.' },",
         "];",
         "",
         "const STORAGE_KEY = 'deal-pipeline-session';",
-        "",
-        "function createDefaultSession() {"
+        ""
       ]
     },
     {
-      "file": "src/components/CopywritingStep.jsx",
-      "language": "javascript",
-      "idiom_category": "state-management",
+      "file": "src/components/CopywritingStep.tsx",
+      "language": "typescript",
+      "idiom_category": "general-idioms",
       "excerpts": [
         "import React, { useState, useEffect, useCallback, useMemo } from \"react\";",
         "import {",
@@ -68,8 +68,8 @@
       ]
     },
     {
-      "file": "src/components/DealtagStep.jsx",
-      "language": "javascript",
+      "file": "src/components/DealtagStep.tsx",
+      "language": "typescript",
       "idiom_category": "general-idioms",
       "excerpts": [
         "import React, { useMemo, useRef, useCallback } from 'react';",
@@ -90,15 +90,16 @@
       ]
     },
     {
-      "file": "src/components/DedupeStep.jsx",
-      "language": "javascript",
+      "file": "src/components/DedupeStep.tsx",
+      "language": "typescript",
       "idiom_category": "concurrency-pattern",
       "excerpts": [
-        "import React, { useMemo, useCallback, useRef } from 'react';",
+        "import React, { useMemo, useCallback, useRef, useState } from 'react';",
         "import {",
         "  parseHQ, resetIds, ingestWebsiteJSON, runFullMatch,",
         "  exportUnmatched, sameDay, dateFmt,",
         "} from '../logic/dedupe.js';",
+        "import { validateWebsiteExport } from '../logic/dealCoreClient';",
         "",
         "function parseWebsiteRows(text) {",
         "  const data = JSON.parse(text);",
@@ -107,8 +108,7 @@
         "",
         "export default function DedupeStep({ session, onSessionChange, onComplete, showToast }) {",
         "  const fileRef = useRef(null);",
-        "",
-        "  const {"
+        "  const [importError, setImportError] = useState('');"
       ]
     },
     {
@@ -131,6 +131,28 @@
         "1. NEVER ADD FACTUAL CLAIMS that are not in the source.",
         "- If the source says \"$100 OBC\", do NOT add \"per stateroom\", \"per person\", \"per cabin\", or any other qualifier that isn't explicitly stated.",
         "- If the source says \"PPGs for 2\", that means \"Free Gratuities for 2\" — do NOT change the meaning."
+      ]
+    },
+    {
+      "file": "src/logic/dealCoreClient.ts",
+      "language": "typescript",
+      "idiom_category": "concurrency-pattern",
+      "excerpts": [
+        "import initDealCore, {",
+        "  parseRawEmail as parseRawEmailWasm,",
+        "  validateWebsiteExport as validateWebsiteExportWasm,",
+        "} from '../wasm/deal-core/deal_core.js';",
+        "",
+        "export type CoreResult<T> =",
+        "  | {",
+        "      ok: true;",
+        "      data: T;",
+        "      diagnostics: Array<{",
+        "        kind: string;",
+        "        severity: string;",
+        "        message: string;",
+        "        lineNumber?: number;",
+        "        rawText?: string;"
       ]
     },
     {
@@ -158,7 +180,7 @@
     {
       "file": "src/logic/dedupe.js",
       "language": "javascript",
-      "idiom_category": "state-management",
+      "idiom_category": "general-idioms",
       "excerpts": [
         "// =============================================================================",
         "// DEDUPE LOGIC — ported from dedupe/index.html",
@@ -197,6 +219,28 @@
         "  { name: \"American Cruise Line\", url: \"american-cruise-line\", cats: [\"lux\", \"riv\"] },",
         "  { name: \"Atlantis Paradise Island Bahamas\", url: \"atlantis\", cats: [\"res\"] },",
         "  { name: \"Atlas Ocean Voyages\", url: \"atlas\", cats: [\"lux\"] },"
+      ]
+    },
+    {
+      "file": "src/wasm/deal-core/deal_core.js",
+      "language": "javascript",
+      "idiom_category": "concurrency-pattern",
+      "excerpts": [
+        "/* @ts-self-types=\"./deal_core.d.ts\" */",
+        "",
+        "/**",
+        " * @param {string} raw_text",
+        " * @returns {any}",
+        " */",
+        "export function parseRawEmail(raw_text) {",
+        "    const ptr0 = passStringToWasm0(raw_text, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);",
+        "    const len0 = WASM_VECTOR_LEN;",
+        "    const ret = wasm.parseRawEmail(ptr0, len0);",
+        "    return ret;",
+        "}",
+        "",
+        "/**",
+        " * @param {any} rows"
       ]
     }
   ]
