@@ -7,6 +7,7 @@ import {
   cleanAndParsePatchJSON,
   applyDealPatch,
   appendDealToRawInput,
+  createDealSlug,
 } from "../logic/copywriting.js";
 
 let confettiLoaded = false;
@@ -64,6 +65,24 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
     },
     [onSessionChange],
   );
+
+  useEffect(() => {
+    if (
+      view !== "work" ||
+      !finalGroups.some((group) => group.deals.some((deal) => !deal.urlSlug))
+    ) return;
+
+    updateSession((prev) => ({
+      ...prev,
+      finalGroups: prev.finalGroups.map((group) => ({
+        ...group,
+        deals: group.deals.map((deal) => ({
+          ...deal,
+          urlSlug: deal.urlSlug || createDealSlug(deal.headline || deal.originalText),
+        })),
+      })),
+    }));
+  }, [view, finalGroups, updateSession]);
 
   const handleGeneratePrompt = useCallback(() => {
     const groups = parseRawToGroups(rawInput);
@@ -224,6 +243,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
               deals: rawGroup.deals.map((d) => ({
                 dealId: d.dealId,
                 dealIndex: d.dealIndex,
+                urlSlug: createDealSlug(d.originalText),
                 headline: "MISSING HEADLINE",
                 description: "Needs copy. Call to speak with an agent!",
                 startDate: null,
@@ -250,6 +270,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
               existingDeal || {
                 dealId: rawDeal.dealId,
                 dealIndex: rawDeal.dealIndex,
+                urlSlug: createDealSlug(rawDeal.originalText),
                 headline: "MISSING HEADLINE",
                 description: "Needs copy. Call to speak with an agent!",
                 startDate: null,
@@ -514,6 +535,22 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                           {deal.headline}
                         </span>
                         {copySuccess[`h${vIdx}${dIdx}`] && (
+                          <span className="copied-badge">Copied</span>
+                        )}
+                      </div>
+
+                      <div className="deal-line deal-slug-line">
+                        <span className="deal-field-label">URL slug</span>
+                        <span
+                          className="copy-text deal-slug"
+                          title="Click to copy URL slug"
+                          onClick={() =>
+                            handleCopy(deal.urlSlug, `slug${vIdx}${dIdx}`)
+                          }
+                        >
+                          {deal.urlSlug}
+                        </span>
+                        {copySuccess[`slug${vIdx}${dIdx}`] && (
                           <span className="copied-badge">Copied</span>
                         )}
                       </div>

@@ -12,6 +12,7 @@ import {
 } from "../src/logic/dedupe.js";
 import { resolveVendor } from "../src/logic/suppliers.js";
 import {
+  createDealSlug,
   parseRawToGroups,
   validateDeal,
   validateAndMerge,
@@ -289,6 +290,19 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
   assert.ok(!merged.error, `Unexpected copy validation error: ${merged.error?.title}`);
   assert.equal(merged.data.length, 3);
   assert.equal(merged.warnings.length, 2);
+  const generatedSlugs = merged.data.flatMap((group) =>
+    group.deals.map((deal) => deal.urlSlug),
+  );
+  assert.equal(new Set(generatedSlugs).size, generatedSlugs.length);
+  assert.ok(
+    generatedSlugs.every((slug) =>
+      /^[a-z0-9]+(?:-[a-z0-9]+)?-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(slug)),
+    "Expected every deal to receive a readable UUID-backed URL slug.",
+  );
+  assert.match(
+    createDealSlug("EXCLUSIVE: Receive $300 Shipboard Credit"),
+    /^shipboard-credit-/,
+  );
 
   const [exclusiveDeal] = merged.data[0].deals;
   assert.deepEqual(collectWarningTypes(exclusiveDeal.warnings), [

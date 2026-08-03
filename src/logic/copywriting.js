@@ -280,6 +280,37 @@ const CODE_PATTERN =
   /\b[A-Z]{2,}\d{1,}[A-Z]*\b|\b[A-Z]\d[A-Z]\b|\bpromo\s*code\b/i;
 const RATE_CODE_PATTERN = /\([A-Z0-9]{2,6}\)/;
 
+const SLUG_STOP_WORDS = new Set([
+  "exclusive", "save", "get", "receive", "enjoy", "with", "your", "the",
+  "for", "and", "plus", "up", "to", "on", "a", "an",
+]);
+
+function randomUuid() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  if (!globalThis.crypto?.getRandomValues) {
+    throw new Error("Secure random slug generation is unavailable in this browser.");
+  }
+
+  const bytes = new Uint8Array(16);
+  globalThis.crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((value) => value.toString(16).padStart(2, "0"));
+  return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10).join("")}`;
+}
+
+export function createDealSlug(text) {
+  const words = (text || "")
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/[\s-]+/)
+    .filter((word) => /[a-z]/.test(word) && !SLUG_STOP_WORDS.has(word))
+    .slice(0, 2);
+  const readablePrefix = words.length > 0 ? words.join("-") : "deal";
+  return `${readablePrefix}-${randomUuid()}`;
+}
+
 export function validateDeal(aiDeal, rawDeal) {
   const warnings = [];
   const headline = aiDeal.headline || "";
@@ -478,6 +509,7 @@ export function validateAndMerge(rawGroups, jsonInput) {
   const errors = [];
   const allWarnings = [];
 
+  const generatedSlugs = new Set();
   const mergedData = rawGroups.map((rawGroup, idx) => {
     const aiGroup = aiGroups[idx];
 
@@ -490,6 +522,11 @@ export function validateAndMerge(rawGroups, jsonInput) {
     const mergedDeals = rawGroup.deals.map((rawDeal, dealIdx) => {
       const aiDeal = aiGroup.deals[dealIdx] || {};
       const warnings = validateDeal(aiDeal, rawDeal);
+      let urlSlug;
+      do {
+        urlSlug = createDealSlug(aiDeal.headline || rawDeal.originalText);
+      } while (generatedSlugs.has(urlSlug));
+      generatedSlugs.add(urlSlug);
 
       if (warnings.length > 0) {
         allWarnings.push({
@@ -510,6 +547,7 @@ export function validateAndMerge(rawGroups, jsonInput) {
       return {
         dealId: rawDeal.dealId,
         dealIndex: rawDeal.dealIndex,
+        urlSlug,
         headline: aiDeal.headline || "MISSING HEADLINE",
         description: finalDescription,
         startDate: aiDeal.startDate ?? null,
