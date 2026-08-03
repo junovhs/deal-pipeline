@@ -453,7 +453,17 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
 
         {finalGroups.map((group, vIdx) => (
           <div key={group.vendorIndex || vIdx} className="vendor-block">
-            <h2 className="vendor-block-title">{group.name}</h2>
+            <h2 className="vendor-block-title">
+              <a
+                className="vendor-block-link"
+                href={`https://travelperks.com/admin/entries/deals?search=${encodeURIComponent(group.name)}`}
+                target="travelperks-admin"
+                rel="noreferrer"
+                title={`Search "${group.name}" in TravelPerks admin`}
+              >
+                {group.name}
+              </a>
+            </h2>
             <div className="deal-list">
               {group.deals.map((deal, dIdx) => {
                 const noteKey = deal.dealId || `${vIdx}-${dIdx}`;
