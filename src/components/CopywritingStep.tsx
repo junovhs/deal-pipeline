@@ -539,22 +539,6 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                         )}
                       </div>
 
-                      <div className="deal-line deal-slug-line">
-                        <span className="deal-field-label">URL slug</span>
-                        <span
-                          className="copy-text deal-slug"
-                          title="Click to copy URL slug"
-                          onClick={() =>
-                            handleCopy(deal.urlSlug, `slug${vIdx}${dIdx}`)
-                          }
-                        >
-                          {deal.urlSlug}
-                        </span>
-                        {copySuccess[`slug${vIdx}${dIdx}`] && (
-                          <span className="copied-badge">Copied</span>
-                        )}
-                      </div>
-
                       <div className="deal-line">
                         <span
                           className="copy-text deal-desc"
@@ -601,8 +585,18 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                             Ends: {deal.endDate}
                           </span>
                         )}
+                        <span
+                          className="date-pill slug-pill"
+                          title="Click to copy URL slug"
+                          onClick={() =>
+                            handleCopy(deal.urlSlug, `slug${vIdx}${dIdx}`)
+                          }
+                        >
+                          {deal.urlSlug}
+                        </span>
                         {(copySuccess[`sd${vIdx}${dIdx}`] ||
-                          copySuccess[`ed${vIdx}${dIdx}`]) && (
+                          copySuccess[`ed${vIdx}${dIdx}`] ||
+                          copySuccess[`slug${vIdx}${dIdx}`]) && (
                           <span className="copied-badge">Copied</span>
                         )}
                       </div>

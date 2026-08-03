@@ -1043,22 +1043,6 @@ select {
     align-items: center;
     gap: 8px;
 }
-.deal-slug-line {
-    margin: 2px 0 10px;
-}
-.deal-field-label {
-    color: var(--ink-muted);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-.deal-slug {
-    color: var(--accent, #4d9fff);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12px;
-    overflow-wrap: anywhere;
-}
 .deal-meta-row {
     display: flex;
     gap: 6px;
@@ -1145,6 +1129,12 @@ select {
 .date-end {
     background: var(--purple-dim);
     color: var(--purple);
+}
+.slug-pill {
+    background: var(--good-dim);
+    color: var(--good);
+    font-family: var(--font-mono);
+    overflow-wrap: anywhere;
 }
 
 .deal-actions {
