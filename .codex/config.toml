@@ -8,3 +8,6 @@ args = ["mcp"]
 
 [mcp_servers.semmap.tools.semmap_generate]
 approval_mode = "approve"
+
+[mcp_servers.ishoo.tools.ishoo_candidates]
+approval_mode = "approve"
