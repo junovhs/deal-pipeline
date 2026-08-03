@@ -147,6 +147,26 @@ Sandals
     "d\tBlack Friday in July - Up to 65% Off. Ends 7/27/26",
   ]);
 
+  const regentRaw = `Regent
+Covert Exclusive Access Rates: Capacity Controlled
+EXCLUSIVE up to $2,000 Savings: Ends 8/14/2026
+Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
+  const regentTagged = transform(regentRaw, { includeUnknowns: true });
+  assert.deepEqual(regentTagged.text.split("\n"), [
+    "v\tRegent",
+    "ed\tCovert Exclusive Access Rates: Capacity Controlled",
+    "ed\tEXCLUSIVE up to $2,000 Savings: Ends 8/14/2026",
+    "d\tUp to 35% Savings & up to $250 OBC: Ends 8/31/2026",
+  ]);
+  assert.deepEqual(regentTagged.stats, {
+    vendors: 1,
+    deals: 3,
+    excl: 2,
+    ambiguousSuppliers: 0,
+    unknownSuppliers: 0,
+    lines: 4,
+  });
+
   for (const [label, canonicalName, tagEligible] of [
     ["ALGV", "ALG Vacations", false],
     ["Blue Sky Tours", "BlueSky Tours", false],

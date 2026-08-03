@@ -8,12 +8,12 @@ import { resolveVendor, isTagEligibleSupplier } from './suppliers.js';
 
 const SECTION_HEADING = /(offers?)\s*:?\s*$/i;
 const DATE_RE = /(?:\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)[a-z]*\b\s*\d{1,2},?\s*\d{2,4})/i;
-const DEAL_MARKER = /(ends?\b|ongoing\b|end\s*date\b|valid\s*(?:through|until)\b|expires?\b)/i;
+const DEAL_MARKER = /(ends?\b|ongoing\b|end\s*date\b|valid\s*(?:through|until)\b|expires?\b|capacity\s+controlled\b|limited\s+availability\b)/i;
 const DEAL_CUES = /\b(save|savings?|off|deposit|gratuities|obc|upgrade|kids\s+sail\s+free|reduced)\b/i;
 const BULLET_PREFIX = /^\s*(?:\u00e2\u20ac\u00a2|\u2022)\s*/;
 
 function isExclusiveLine(t) {
-  return /\bTLN\b/i.test(t) || /\bEXCLUSIVE\b/.test(t) || /^\s*(?:•\s*)?Exclusive\s*[:\-]/i.test(t);
+  return /\bTLN\b/i.test(t) || /\bEXCLUSIVE\b/i.test(t) || /^\s*(?:•\s*)?Exclusive\s*[:\-]/i.test(t);
 }
 
 function looksLikeDeal(t) {
