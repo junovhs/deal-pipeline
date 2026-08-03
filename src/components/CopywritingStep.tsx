@@ -458,7 +458,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                 className="vendor-block-link"
                 href={`https://travelperks.com/admin/entries/deals?search=${encodeURIComponent(group.name)}`}
                 target="travelperks-admin"
-                rel="noreferrer"
+                referrerPolicy="no-referrer"
                 title={`Search "${group.name}" in TravelPerks admin`}
               >
                 {group.name}
