@@ -186,100 +186,95 @@ JSON FORMAT:
 }`;
 }
 
-function extractWords(text) {
-  return new Set(
-    (text || "")
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, " ")
-      .split(/\s+/)
-      .filter((w) => w.length > 2),
-  );
+// Only claims that can change the substance or scope of an offer belong in the
+// review gate. Ordinary word novelty is expected when terse source copy is
+// rewritten as customer-facing prose.
+const MATERIAL_CLAIM_GROUPS = [
+  ["upgrade", "upgrades"],
+  ["onboard credit", "shipboard credit", "obc"],
+  ["resort credit"],
+  ["bar tab"],
+  ["gratuities", "tipping"],
+  ["transfer", "transfers"],
+  ["dining", "dinner", "meal", "meals"],
+  ["wifi", "wi-fi", "internet"],
+  ["drink", "drinks", "beverage", "beverages"],
+  ["mile", "miles"],
+  ["night", "nights"],
+  ["kids sail free", "kids stay free", "children sail free", "children stay free"],
+];
+
+const MATERIAL_SCOPE_GROUPS = [
+  ["shore excursion", "shore excursions"],
+  ["spa", "spa service", "spa services", "spa treatment", "spa treatments"],
+  ["specialty dining", "specialty dinner"],
+  ["flight and hotel", "flight and resort", "bundle"],
+];
+
+// Product or destination nouns are material when the headline uses them to
+// define the offer. In body copy they are often harmless supplier context.
+const HEADLINE_SCOPE_GROUPS = [
+  ["river", "river cruise", "river cruises"],
+  ["ocean", "ocean cruise", "ocean cruises"],
+  ["expedition", "expeditions"],
+  ["yacht", "yachts"],
+  ["safari", "safaris"],
+  ["africa", "african"],
+  ["alaska", "alaskan"],
+  ["caribbean"],
+  ["bahamas"],
+  ["bermuda"],
+  ["europe", "european"],
+  ["south pacific"],
+  ["stateroom", "staterooms", "room", "rooms"],
+];
+
+const NUMBER_WORDS = new Map([
+  ["one", "1"], ["two", "2"], ["three", "3"], ["four", "4"],
+  ["five", "5"], ["six", "6"], ["seven", "7"], ["eight", "8"],
+  ["nine", "9"], ["ten", "10"], ["eleven", "11"], ["twelve", "12"],
+  ["first", "1"], ["second", "2"], ["third", "3"], ["fourth", "4"],
+]);
+
+function normalizeClaimText(text) {
+  return ` ${(text || "")
+    .toLowerCase()
+    .replace(/[,$]/g, "")
+    .replace(/[^a-z0-9%+\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()} `;
 }
 
-// Validation relies on these shared lexical allowlists and code detectors to
-// distinguish normal marketing glue from fabricated facts or leaked rate codes.
-// Heuristic allowlist for customer-facing connective language.
-const ALLOWED_AI_WORDS = new Set([
-  "book",
-  "now",
-  "your",
-  "next",
-  "enjoy",
-  "receive",
-  "save",
-  "savings",
-  "exclusive",
-  "limited",
-  "time",
-  "offer",
-  "available",
-  "today",
-  "free",
-  "for",
-  "the",
-  "and",
-  "with",
-  "plus",
-  "get",
-  "off",
-  "take",
-  "advantage",
-  "features",
-  "includes",
-  "offers",
-  "deal",
-  "deals",
-  "onboard",
-  "credit",
-  "per",
-  "person",
-  "gratuities",
-  "call",
-  "agent",
-  "details",
-  "special",
-  "rates",
-  "rate",
-  "pricing",
-  "during",
-  "guests",
-  "guest",
-  "stay",
-  "stays",
-  "hotel",
-  "resort",
-  "package",
-  "packages",
-  "flight",
-  "booking",
-  "bookings",
-  "properties",
-  "tour",
-  "tours",
-  "cruise",
-  "trip",
-  "fare",
-  "fares",
-  "spend",
-  "spending",
-  "shop",
-  "hidden",
-  "secret",
-  "simply",
-  "show",
-  "low",
-  "too",
-  "good",
-  "online",
-  "ask",
-  "about",
-  "sales",
-  "sale",
-  "member",
-  "members",
-  "dining",
-  "concierge",
-]);
+function hasPhrase(text, phrase) {
+  return text.includes(` ${phrase} `);
+}
+
+function findIntroducedGroups(sourceText, outputText, groups) {
+  return groups
+    .filter((group) =>
+      group.some((term) => hasPhrase(outputText, term)) &&
+      !group.some((term) => hasPhrase(sourceText, term)))
+    .map((group) => group.find((term) => hasPhrase(outputText, term)));
+}
+
+function extractClaimNumbers(text) {
+  const withoutDates = (text || "").replace(
+    /\b\d{1,2}\/\d{1,2}(?:\/\d{2,4})?(?:\s*-\s*\d{1,2}\/\d{1,2}\/\d{2,4})?\b/g,
+    " ",
+  );
+  const normalized = normalizeClaimText(withoutDates);
+  const values = new Set();
+  for (const match of normalized.matchAll(/\b(\d+(?:\.\d+)?)(?:st|nd|rd|th)?(%?)\b/g)) {
+    const value = `${match[1]}${match[2]}`;
+    // Calendar years and date components are validated separately.
+    if (!value.endsWith("%") && Number(value) >= 2000 && Number(value) <= 2100) continue;
+    values.add(value);
+  }
+  for (const [word, value] of NUMBER_WORDS) {
+    if (new RegExp(`\\b${word}\\b`).test(normalized)) values.add(value);
+  }
+  return values;
+}
 
 const CODE_PATTERN =
   /\b[A-Z]{2,}\d{1,}[A-Z]*\b|\b[A-Z]\d[A-Z]\b|\bpromo\s*code\b/i;
@@ -290,21 +285,87 @@ export function validateDeal(aiDeal, rawDeal) {
   const headline = aiDeal.headline || "";
   const description = aiDeal.description || "";
   const combined = `${headline} ${description}`;
-  const sourceWords = extractWords(rawDeal.originalText);
-  const aiWords = extractWords(combined);
+  const sourceText = normalizeClaimText(rawDeal.originalText);
+  const outputText = normalizeClaimText(combined);
+  const sourceNumbers = extractClaimNumbers(rawDeal.originalText);
+  const outputNumbers = extractClaimNumbers(combined);
+  const introducedNumbers = [...outputNumbers].filter((value) => !sourceNumbers.has(value));
+  const removedNumbers = [...sourceNumbers].filter((value) => !outputNumbers.has(value));
 
-  const suspicious = [];
-  for (const word of aiWords) {
-    if (!sourceWords.has(word) && !ALLOWED_AI_WORDS.has(word)) {
-      suspicious.push(word);
-    }
+  if (introducedNumbers.length > 0) {
+    warnings.push({
+      type: "material-number",
+      ruleId: "COPY.NUMBER_ADDED",
+      severity: "error",
+      msg: `Output adds a numeric claim not found in the source: ${introducedNumbers.join(", ")}.`,
+    });
   }
 
-  if (suspicious.length > 0) {
+  if (removedNumbers.length > 0) {
     warnings.push({
-      type: "embellishment",
+      type: "material-number",
+      ruleId: "COPY.NUMBER_REMOVED",
+      severity: "error",
+      msg: `Output omits a numeric term from the offer: ${removedNumbers.join(", ")}.`,
+    });
+  }
+
+  const introducedBenefits = findIntroducedGroups(
+    sourceText,
+    outputText,
+    MATERIAL_CLAIM_GROUPS,
+  );
+  const introducedScope = findIntroducedGroups(
+    sourceText,
+    outputText,
+    MATERIAL_SCOPE_GROUPS,
+  );
+  const introducedHeadlineScope = findIntroducedGroups(
+    sourceText,
+    normalizeClaimText(headline),
+    HEADLINE_SCOPE_GROUPS,
+  );
+  introducedScope.push(...introducedHeadlineScope);
+  const nonDuplicateBenefits = introducedBenefits.filter(
+    (benefit) => !(benefit === "dining" && introducedScope.includes("specialty dining")),
+  );
+  if (nonDuplicateBenefits.length > 0) {
+    warnings.push({
+      type: "material-benefit",
+      ruleId: "COPY.BENEFIT_ADDED",
       severity: "warn",
-      msg: `AI may have added words not in source: "${suspicious.join('", "')}"`,
+      msg: `Output may add a benefit not stated in the source: ${nonDuplicateBenefits.join(", ")}.`,
+    });
+  }
+  if (introducedScope.length > 0) {
+    warnings.push({
+      type: "material-scope",
+      ruleId: "COPY.SCOPE_ADDED",
+      severity: "warn",
+      msg: `Output may narrow or expand the offer's scope: ${introducedScope.join(", ")}.`,
+    });
+  }
+
+  if (hasPhrase(sourceText, "up to") && !hasPhrase(outputText, "up to")) {
+    warnings.push({
+      type: "material-limit",
+      ruleId: "COPY.UP_TO_REMOVED",
+      severity: "error",
+      msg: 'Source says "up to," but the output presents the benefit without that limit.',
+    });
+  }
+
+  const bookingYear = rawDeal.originalText.match(/\b(20\d{2})\s+bookings?\b/i);
+  if (
+    bookingYear &&
+    (!new RegExp(`\\b${bookingYear[1]}\\b`).test(combined) ||
+      !/\bbook(?:ing|ings)?\b/i.test(combined))
+  ) {
+    warnings.push({
+      type: "material-condition",
+      ruleId: "COPY.BOOKING_YEAR_CHANGED",
+      severity: "error",
+      msg: `${bookingYear[1]} is a booking condition in the source; the output omits it or may present it as a travel year.`,
     });
   }
 

@@ -13,6 +13,7 @@ import {
 import { resolveVendor } from "../src/logic/suppliers.js";
 import {
   parseRawToGroups,
+  validateDeal,
   validateAndMerge,
 } from "../src/logic/copywriting.js";
 import {
@@ -287,12 +288,11 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
   const merged = validateAndMerge(rawGroups, aiResponse);
   assert.ok(!merged.error, `Unexpected copy validation error: ${merged.error?.title}`);
   assert.equal(merged.data.length, 3);
-  assert.equal(merged.warnings.length, 3);
+  assert.equal(merged.warnings.length, 2);
 
   const [exclusiveDeal] = merged.data[0].deals;
   assert.deepEqual(collectWarningTypes(exclusiveDeal.warnings), [
     "code",
-    "embellishment",
     "format",
   ]);
   assert.match(exclusiveDeal.description, /Ends 6\/15\.$/);
@@ -302,6 +302,54 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
   assert.ok(
     carnivalDeal.warnings.some((warning) => warning.type === "date"),
     "Expected the AI date note to surface as a copy-validation warning.",
+  );
+
+  const harmlessParaphraseWarnings = validateDeal(
+    {
+      headline: "Save 50% with Reduced Deposits",
+      description: "Secure your cruise for half the usual deposit amount today.",
+    },
+    { originalText: "50% Reduced Deposits", isExclusive: false },
+  );
+  assert.deepEqual(
+    harmlessParaphraseWarnings.filter((warning) => warning.type.startsWith("material")),
+    [],
+  );
+
+  const inventedScopeWarnings = validateDeal(
+    {
+      headline: "Get Up to $250 Onboard Credit",
+      description: "Use it for shore excursions and spa treatments on your luxury voyage.",
+    },
+    { originalText: "Up to $250 OBC", isExclusive: false },
+  );
+  assert.ok(
+    inventedScopeWarnings.some((warning) => warning.ruleId === "COPY.SCOPE_ADDED"),
+    "Expected invented use and luxury claims to require review.",
+  );
+
+  const bookingYearWarnings = validateDeal(
+    {
+      headline: "Save $50 Per Guest on New 2027 Travel",
+      description: "Plan ahead for future travel and save.",
+    },
+    { originalText: "Save $50 Per Guest on New 2027 Bookings", isExclusive: false },
+  );
+  assert.ok(
+    bookingYearWarnings.some((warning) => warning.ruleId === "COPY.BOOKING_YEAR_CHANGED"),
+    "Expected a booking-year condition changed into a travel year to block.",
+  );
+
+  const missingAmountWarnings = validateDeal(
+    {
+      headline: "Save on Select Departures",
+      description: "Enjoy valuable savings on eligible dates.",
+    },
+    { originalText: "Save $750 Per Person on Select Departures", isExclusive: false },
+  );
+  assert.ok(
+    missingAmountWarnings.some((warning) => warning.ruleId === "COPY.NUMBER_REMOVED"),
+    "Expected an omitted offer amount to block.",
   );
 
   console.log("Tag fixture: PASS");
