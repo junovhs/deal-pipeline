@@ -156,3 +156,17 @@ export function transform(raw, { includeUnknowns = true } = {}) {
     },
   };
 }
+
+/**
+ * Returns only records accepted by Tag for downstream processing.
+ *
+ * X rows remain visible in the Tag review output, but they are terminal
+ * exclusions and must never cross the Tag -> Dedupe boundary.
+ */
+export function filterAcceptedTaggedText(taggedText) {
+  return (taggedText || '')
+    .split(/\r?\n/)
+    .filter((line) => !/^\s*X\s*\t/i.test(line))
+    .join('\n')
+    .trim();
+}

@@ -115,6 +115,28 @@ export default function App() {
     });
   }, []);
 
+  const updateDedupeState = useCallback((updater) => {
+    setSession((prev) => {
+      const current = prev.dedupe;
+      const next = typeof updater === 'function'
+        ? updater(current)
+        : { ...current, ...updater };
+      const outputChanged = current.hqText !== next.hqText
+        || current.lastRun !== next.lastRun
+        || current.threshold !== next.threshold
+        || current.restrictToday !== next.restrictToday
+        || current.rejectedHQIds !== next.rejectedHQIds;
+
+      return {
+        ...prev,
+        dedupe: next,
+        copy: outputChanged
+          ? { ...createDefaultSession().copy, houseStyle: prev.copy.houseStyle }
+          : prev.copy,
+      };
+    });
+  }, []);
+
   const showToast = useCallback((msg, type = 'info') => {
     if (toastTimerRef.current) {
       clearTimeout(toastTimerRef.current);
@@ -257,7 +279,7 @@ export default function App() {
           <DedupeStep
             key={`dedupe-${resetVersion}`}
             session={session.dedupe}
-            onSessionChange={(updater) => updateStepState('dedupe', updater)}
+            onSessionChange={updateDedupeState}
             onComplete={handleDedupeComplete}
             showToast={showToast}
           />

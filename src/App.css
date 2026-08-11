@@ -1384,7 +1384,7 @@ select {
 .results-hero p { margin-top: 6px; color: var(--muted); }
 .results-actions { display: flex; gap: 8px; flex: 0 0 auto; }
 .results-primary { min-width: 190px; padding-block: 10px; }
-.decision-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin: 14px 0 18px; }
+.decision-metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; margin: 14px 0 18px; }
 .decision-metric {
     display: flex;
     flex-direction: column;
@@ -1405,6 +1405,7 @@ select {
 .metric-good strong { color: var(--good); }
 .metric-purple strong { color: var(--purple); }
 .metric-new strong { color: var(--warn); }
+.metric-excluded strong { color: var(--bad); }
 .focused-results { gap: 12px; }
 .result-group { border: 1px solid var(--border); border-radius: 13px; background: rgba(20, 27, 45, 0.48); overflow: hidden; }
 .result-group-heading { padding: 14px 16px; border-bottom: 1px solid var(--border); }

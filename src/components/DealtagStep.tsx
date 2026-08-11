@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useCallback } from 'react';
-import { transform } from '../logic/dealtag.js';
+import { filterAcceptedTaggedText, transform } from '../logic/dealtag.js';
 
 function parseLines(output) {
   if (!output) return [];
@@ -40,7 +40,12 @@ export default function DealtagStep({ session, onSessionChange, onComplete, show
       showToast('Run transform first', 'error');
       return;
     }
-    onComplete(output);
+    const acceptedOutput = filterAcceptedTaggedText(output);
+    if (!acceptedOutput) {
+      showToast('No accepted deals to send', 'error');
+      return;
+    }
+    onComplete(acceptedOutput);
   }, [onComplete, output, showToast]);
 
   const syncScroll = useCallback((from, to) => {

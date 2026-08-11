@@ -563,9 +563,15 @@ export function parseHQ(text) {
     if (tag === 'v') {
       currentVendorResolution = resolveVendor(content.replace(/:$/, ''));
       currentVendor = currentVendorResolution.canonicalName || content.replace(/:$/, '').trim();
-    } else if (tag === 'x' && !looksLikeDealContent(content)) {
-      currentVendorResolution = resolveVendor(content.replace(/:$/, ''));
-      currentVendor = currentVendorResolution.canonicalName || content.replace(/:$/, '').trim();
+    } else if (tag === 'x') {
+      // X is a terminal exclusion from Tag. A vendor-shaped X also ends the
+      // current accepted supplier block so later malformed rows cannot inherit
+      // the previous supplier accidentally.
+      if (!looksLikeDealContent(content)) {
+        currentVendorResolution = null;
+        currentVendor = null;
+      }
+      continue;
     } else {
       if (!currentVendor) continue;
       const type = tag === 'ed' ? 'exclusive' : 'deal';
@@ -656,6 +662,60 @@ export function runFullMatch(hqDeals, websiteDeals, { filterSupplier = '' } = {}
     }
   }
   return allResults;
+}
+
+/**
+ * Partitions comparison results into explicit, count-conserving outcomes.
+ * Operator exclusions and the optional ending-today rule are terminal: neither
+ * outcome is eligible for the Copy payload.
+ */
+export function categorizeDedupeResults(
+  results,
+  {
+    threshold = 1,
+    excludedHQIds = [],
+    excludeEndingToday = false,
+    today = new Date(),
+  } = {},
+) {
+  const excludedIds = new Set(excludedHQIds);
+  const matched = [];
+  const unmatched = [];
+  const extensions = [];
+  const excluded = [];
+
+  for (const result of results || []) {
+    const score = result.meta?.score ?? 0;
+
+    if (excludedIds.has(result.hq.id)) {
+      excluded.push({ ...result, exclusionReason: 'operator' });
+      continue;
+    }
+
+    if (!result.web || score < threshold) {
+      if (excludeEndingToday && sameDay(result.hq.end, today)) {
+        excluded.push({ ...result, exclusionReason: 'ending-today' });
+      } else {
+        unmatched.push(result);
+      }
+    } else if (result.meta.isExtension) {
+      extensions.push(result);
+    } else {
+      matched.push(result);
+    }
+  }
+
+  matched.sort((a, b) => (b.meta?.score ?? 0) - (a.meta?.score ?? 0));
+  unmatched.sort((a, b) => a.hq.vendor.localeCompare(b.hq.vendor));
+
+  return {
+    matched,
+    unmatched,
+    extensions,
+    excluded,
+    total: (results || []).length,
+    today,
+  };
 }
 
 // --- Export unmatched as tagged text ---

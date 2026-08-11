@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { transform } from "../src/logic/dealtag.js";
+import { filterAcceptedTaggedText, transform } from "../src/logic/dealtag.js";
 import {
+  categorizeDedupeResults,
   ingestWebsiteJSON,
   parseHQ,
   resetIds,
@@ -84,6 +85,9 @@ async function main() {
     "X\tMystery Escapes",
     "X\tSave $200 on select sailings ends 08/01/26",
   ]);
+  const acceptedTaggedText = filterAcceptedTaggedText(tagged.text);
+  assert.equal(acceptedTaggedText.includes("\nX\t"), false);
+  assert.equal(acceptedTaggedText.startsWith("X\t"), false);
 
   const weeklyTagged = transform(weeklyRawPromo, { includeUnknowns: true });
   assert.deepEqual(weeklyTagged.stats, {
@@ -183,7 +187,7 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
 
   resetIds();
   const hqDeals = parseHQ(tagged.text);
-  assert.equal(hqDeals.length, 4);
+  assert.equal(hqDeals.length, 3);
   assert.deepEqual(
     hqDeals.map((deal) => ({
       vendor: deal.vendor,
@@ -194,7 +198,6 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
       { vendor: "Norwegian", type: "exclusive", hasEndDate: true },
       { vendor: "Royal Caribbean", type: "deal", hasEndDate: true },
       { vendor: "Carnival", type: "deal", hasEndDate: true },
-      { vendor: "Mystery Escapes", type: "deal", hasEndDate: true },
     ],
   );
 
@@ -238,7 +241,7 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
   }
 
   const matches = runFullMatch(hqDeals, websiteDeals);
-  assert.equal(matches.length, 4);
+  assert.equal(matches.length, 3);
 
   const norwegianMatch = findMatch(matches, "Norwegian");
   assert.equal(norwegianMatch.web?.supplier, "Norwegian");
@@ -268,9 +271,23 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
   assert.equal(carnivalMatch.meta.why[0].text, "no web deals");
   assert.deepEqual(carnivalMatch.meta.candidateRankings, []);
 
-  const unknownSupplierMatch = findMatch(matches, "Mystery Escapes");
-  assert.equal(unknownSupplierMatch.web, null);
-  assert.equal(unknownSupplierMatch.hq.text, "Save $200 on select sailings ends 08/01/26");
+  const categorized = categorizeDedupeResults(matches, {
+    threshold: 8,
+    excludedHQIds: [norwegianMatch.hq.id],
+  });
+  assert.deepEqual(categorized.excluded.map((row) => row.hq.vendor), ["Norwegian"]);
+  assert.equal(categorized.excluded[0].exclusionReason, "operator");
+  assert.equal(
+    categorized.unmatched.some((row) => row.hq.id === norwegianMatch.hq.id),
+    false,
+    "An operator-excluded match must never be reclassified as needing copy.",
+  );
+  assert.equal(
+    categorized.matched.length + categorized.extensions.length
+      + categorized.unmatched.length + categorized.excluded.length,
+    categorized.total,
+    "Every dedupe result must have exactly one terminal outcome.",
+  );
 
   const rawGroups = parseRawToGroups(tagged.text);
   assert.deepEqual(

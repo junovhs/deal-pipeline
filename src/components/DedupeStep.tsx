@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useRef, useState } from 'react';
 import {
   parseHQ, resetIds, ingestWebsiteJSON, runFullMatch,
-  exportUnmatched, sameDay, dateFmt,
+  categorizeDedupeResults, exportUnmatched, sameDay, dateFmt,
 } from '../logic/dedupe.js';
 import { validateWebsiteExport } from '../logic/dealCoreClient';
 
@@ -54,35 +54,14 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
     });
   }, [lastRun]);
 
-  const rejectedHQ = useMemo(() => new Set(rejectedHQIds), [rejectedHQIds]);
-
   const categorized = useMemo(() => {
     if (!results) return null;
-    const today = new Date();
-    let matched = [];
-    let unmatched = [];
-    let extensions = [];
-
-    for (const result of results) {
-      const score = result.meta?.score ?? 0;
-      if (rejectedHQ.has(result.hq.id) || !result.web || score < threshold) {
-        unmatched.push(result);
-      } else if (result.meta.isExtension) {
-        extensions.push(result);
-      } else {
-        matched.push(result);
-      }
-    }
-
-    if (restrictToday) {
-      unmatched = unmatched.filter((result) => !sameDay(result.hq.end, today));
-    }
-
-    matched.sort((a, b) => (b.meta?.score ?? 0) - (a.meta?.score ?? 0));
-    unmatched.sort((a, b) => a.hq.vendor.localeCompare(b.hq.vendor));
-
-    return { matched, unmatched, extensions, total: results.length, today };
-  }, [results, rejectedHQ, restrictToday, threshold]);
+    return categorizeDedupeResults(results, {
+      threshold,
+      excludedHQIds: rejectedHQIds,
+      excludeEndingToday: restrictToday,
+    });
+  }, [results, rejectedHQIds, restrictToday, threshold]);
 
   const visible = useMemo(() => {
     if (!categorized) return null;
@@ -226,7 +205,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
               <label className="mini-label">Minimum score <input type="number" value={threshold} min={1} max={40} onChange={(event) => updateSession({ threshold: +event.target.value })} /></label>
               <label className="mini-label">Supplier <select value={supplierFilter} onChange={(event) => updateSession({ supplierFilter: event.target.value })}><option value="">All suppliers</option>{webSuppliers.map((supplier) => <option key={String(supplier)}>{String(supplier)}</option>)}</select></label>
               <button className={`btn ${restrictToday ? 'btn-danger' : ''}`} onClick={() => updateSession({ restrictToday: !restrictToday })}>Exclude ending today: {restrictToday ? 'On' : 'Off'}</button>
-              {rejectedHQIds.length > 0 && <button className="btn" onClick={() => updateSession({ rejectedHQIds: [] })}>Restore rejected matches ({rejectedHQIds.length})</button>}
+              {rejectedHQIds.length > 0 && <button className="btn" onClick={() => updateSession({ rejectedHQIds: [] })}>Restore excluded deals ({rejectedHQIds.length})</button>}
             </div>
           </div>
         </details>
@@ -347,8 +326,8 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
               <div className="results-hero">
                 <div>
                   <span className="workspace-eyebrow">Comparison complete</span>
-                  <h3>{categorized.matched.length + categorized.extensions.length} already covered. {categorized.unmatched.length} to move forward.</h3>
-                  <p>Existing deals are set aside so you can focus on genuinely new work.</p>
+                  <h3>{categorized.matched.length + categorized.extensions.length} already covered. {categorized.unmatched.length} to move forward. {categorized.excluded.length} excluded.</h3>
+                  <p>Existing and excluded deals are set aside. Only genuinely new work is sent to Copy.</p>
                 </div>
                 <div className="results-actions">
                   <button className="btn" onClick={handleExportUnmatched}>Copy new deals</button>
@@ -359,6 +338,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
                 <button className={`decision-metric metric-good ${viewFilter === 'matched' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'matched' })}><strong>{categorized.matched.length}</strong><span>Existing matches</span></button>
                 <button className={`decision-metric metric-purple ${viewFilter === 'updates' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'updates' })}><strong>{categorized.extensions.length}</strong><span>Extensions</span></button>
                 <button className={`decision-metric metric-new ${viewFilter === 'unmatched' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'unmatched' })}><strong>{categorized.unmatched.length}</strong><span>Needs copy</span></button>
+                <div className="decision-metric metric-excluded" title="Excluded deals are never sent to Copy"><strong>{categorized.excluded.length}</strong><span>Excluded</span></div>
                 <button className={`decision-metric metric-total ${viewFilter === 'all' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'all' })}><strong>{categorized.total}</strong><span>Source total</span></button>
               </div>
             </>
@@ -438,7 +418,7 @@ function MatchCard({ r, today, onReject }) {
         </div>
       )}
       <div className="card-actions">
-        <button className="btn btn-reject" onClick={() => onReject(r.hq.id)}>Reject</button>
+        <button className="btn btn-reject" title="Exclude this HQ deal from the batch; it will not be sent to Copy" onClick={() => onReject(r.hq.id)}>Exclude deal</button>
       </div>
     </div>
   );
