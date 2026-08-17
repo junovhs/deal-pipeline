@@ -678,7 +678,7 @@ export function categorizeDedupeResults(
     today = new Date(),
   } = {},
 ) {
-  const excludedIds = new Set(excludedHQIds);
+  const rejectedMatchIds = new Set(excludedHQIds);
   const matched = [];
   const unmatched = [];
   const extensions = [];
@@ -687,8 +687,11 @@ export function categorizeDedupeResults(
   for (const result of results || []) {
     const score = result.meta?.score ?? 0;
 
-    if (excludedIds.has(result.hq.id)) {
-      excluded.push({ ...result, exclusionReason: 'operator' });
+    if (rejectedMatchIds.has(result.hq.id)) {
+      unmatched.push({
+        ...result,
+        meta: { ...result.meta, operatorRejectedMatch: true },
+      });
       continue;
     }
 

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { filterAcceptedTaggedText, transform } from "../src/logic/dealtag.js";
 import {
   categorizeDedupeResults,
+  exportUnmatched,
   ingestWebsiteJSON,
   parseHQ,
   resetIds,
@@ -275,12 +276,21 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
     threshold: 8,
     excludedHQIds: [norwegianMatch.hq.id],
   });
-  assert.deepEqual(categorized.excluded.map((row) => row.hq.vendor), ["Norwegian"]);
-  assert.equal(categorized.excluded[0].exclusionReason, "operator");
+  assert.deepEqual(categorized.excluded, []);
   assert.equal(
     categorized.unmatched.some((row) => row.hq.id === norwegianMatch.hq.id),
-    false,
-    "An operator-excluded match must never be reclassified as needing copy.",
+    true,
+    "An operator-rejected match must be reclassified as needing copy.",
+  );
+  assert.equal(
+    categorized.unmatched.find((row) => row.hq.id === norwegianMatch.hq.id)
+      ?.meta.operatorRejectedMatch,
+    true,
+  );
+  assert.match(
+    exportUnmatched(categorized.unmatched.map((row) => row.hq)),
+    /v\s+Norwegian/,
+    "The rejected match must be included in the payload sent to Copy.",
   );
   assert.equal(
     categorized.matched.length + categorized.extensions.length

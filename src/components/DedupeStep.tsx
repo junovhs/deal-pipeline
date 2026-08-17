@@ -205,7 +205,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
               <label className="mini-label">Minimum score <input type="number" value={threshold} min={1} max={40} onChange={(event) => updateSession({ threshold: +event.target.value })} /></label>
               <label className="mini-label">Supplier <select value={supplierFilter} onChange={(event) => updateSession({ supplierFilter: event.target.value })}><option value="">All suppliers</option>{webSuppliers.map((supplier) => <option key={String(supplier)}>{String(supplier)}</option>)}</select></label>
               <button className={`btn ${restrictToday ? 'btn-danger' : ''}`} onClick={() => updateSession({ restrictToday: !restrictToday })}>Exclude ending today: {restrictToday ? 'On' : 'Off'}</button>
-              {rejectedHQIds.length > 0 && <button className="btn" onClick={() => updateSession({ rejectedHQIds: [] })}>Restore excluded deals ({rejectedHQIds.length})</button>}
+              {rejectedHQIds.length > 0 && <button className="btn" onClick={() => updateSession({ rejectedHQIds: [] })}>Undo no-match decisions ({rejectedHQIds.length})</button>}
             </div>
           </div>
         </details>
@@ -326,8 +326,8 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
               <div className="results-hero">
                 <div>
                   <span className="workspace-eyebrow">Comparison complete</span>
-                  <h3>{categorized.matched.length + categorized.extensions.length} already covered. {categorized.unmatched.length} to move forward. {categorized.excluded.length} excluded.</h3>
-                  <p>Existing and excluded deals are set aside. Only genuinely new work is sent to Copy.</p>
+                  <h3>{categorized.matched.length + categorized.extensions.length} already covered. {categorized.unmatched.length} to move forward. {categorized.excluded.length} policy-excluded.</h3>
+                  <p>Rejected match proposals move forward as new work. Only policy-excluded deals are set aside.</p>
                 </div>
                 <div className="results-actions">
                   <button className="btn" onClick={handleExportUnmatched}>Copy new deals</button>
@@ -338,7 +338,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
                 <button className={`decision-metric metric-good ${viewFilter === 'matched' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'matched' })}><strong>{categorized.matched.length}</strong><span>Existing matches</span></button>
                 <button className={`decision-metric metric-purple ${viewFilter === 'updates' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'updates' })}><strong>{categorized.extensions.length}</strong><span>Extensions</span></button>
                 <button className={`decision-metric metric-new ${viewFilter === 'unmatched' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'unmatched' })}><strong>{categorized.unmatched.length}</strong><span>Needs copy</span></button>
-                <div className="decision-metric metric-excluded" title="Excluded deals are never sent to Copy"><strong>{categorized.excluded.length}</strong><span>Excluded</span></div>
+                <div className="decision-metric metric-excluded" title="Policy-excluded deals are not sent to Copy"><strong>{categorized.excluded.length}</strong><span>Policy excluded</span></div>
                 <button className={`decision-metric metric-total ${viewFilter === 'all' ? 'is-active' : ''}`} onClick={() => updateSession({ viewFilter: 'all' })}><strong>{categorized.total}</strong><span>Source total</span></button>
               </div>
             </>
@@ -418,7 +418,7 @@ function MatchCard({ r, today, onReject }) {
         </div>
       )}
       <div className="card-actions">
-        <button className="btn btn-reject" title="Exclude this HQ deal from the batch; it will not be sent to Copy" onClick={() => onReject(r.hq.id)}>Exclude deal</button>
+        <button className="btn btn-reject" title="Reject this proposed website match and send the HQ deal to Copy" onClick={() => onReject(r.hq.id)}>Doesn&apos;t match — needs copy</button>
       </div>
     </div>
   );
