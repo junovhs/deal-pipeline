@@ -8,6 +8,7 @@
 //   - Validation + merge
 // =============================================================================
 
+/** Default operator-editable policy embedded in batch and repair prompts. */
 export const DEFAULT_HOUSE_STYLE = `ABSOLUTE RULES (violating these is a critical error):
 
 1. NEVER ADD FACTUAL CLAIMS that are not in the source.
@@ -53,7 +54,12 @@ TERM REPLACEMENTS:
 - OBC → "Onboard Credit"
 - PP → "Per Person"`;
 
-// Parse the v/d/ed tagged text into vendor groups, with stable IDs.
+/**
+ * Parses tagged `v`/`d`/`ed` text into ordered vendor groups for AI prompting.
+ * Deal IDs are stable within the parsed batch, exclusivity comes only from the
+ * `ed` tag, and orphan deal lines are ignored rather than assigned to the wrong
+ * supplier.
+ */
 export function parseRawToGroups(text) {
   if (!text) return [];
   const lines = text.split("\n");
@@ -90,6 +96,11 @@ export function parseRawToGroups(text) {
 }
 
 // Clean AI response and extract JSON array
+/**
+ * Extracts the outer JSON array from an AI response and tolerates trailing
+ * commas. Structural cardinality and factual safety are validated separately
+ * by `validateAndMerge`.
+ */
 export function cleanAndParseJSON(input) {
   const start = input.indexOf("[");
   const end = input.lastIndexOf("]");
@@ -99,7 +110,12 @@ export function cleanAndParseJSON(input) {
   return JSON.parse(clean);
 }
 
-// Generate the full AI prompt from vendor groups
+/**
+ * Produces the batch copywriting prompt while preserving vendor and deal order
+ * as a cardinality contract. The prompt requires structured dates, forbids
+ * supplier names and expiry dates in customer copy, and embeds the editable
+ * house style without trusting the AI output as validated data.
+ */
 export function generatePrompt(groups, houseStyle = DEFAULT_HOUSE_STYLE) {
   let promptText = `You are a travel marketing assistant writing deal copy for a website.
 
@@ -144,6 +160,11 @@ OUTPUT JSON FORMAT:
 }
 
 // Generate a prompt for a single deal repair/regeneration.
+/**
+ * Builds a narrowly scoped repair prompt for one selected deal, including its
+ * source, current copy, exclusivity, house style, and optional operator note.
+ * The requested response is one bare JSON object suitable for patch parsing.
+ */
 export function generateSingleDealPrompt({
   vendorName,
   deal,
@@ -299,6 +320,11 @@ function randomUuid() {
   return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10).join("")}`;
 }
 
+/**
+ * Creates a URL-safe, recognizable slug from up to two meaningful deal words
+ * plus a cryptographically random UUID v4. Callers persist the returned value;
+ * regenerating it intentionally creates a new public identifier.
+ */
 export function createDealSlug(text) {
   const words = (text || "")
     .normalize("NFKD")
@@ -311,10 +337,38 @@ export function createDealSlug(text) {
   return `${readablePrefix}-${randomUuid()}`;
 }
 
+/**
+ * Compares proposed customer copy with its source deal and returns actionable
+ * findings for material drift, leaked codes, suspect dates, excessive length,
+ * and exclusivity formatting. Ordinary marketing paraphrases are allowed;
+ * errors represent blockers while warnings require operator judgment.
+ */
 export function validateDeal(aiDeal, rawDeal) {
   const warnings = [];
-  const headline = aiDeal.headline || "";
-  const description = aiDeal.description || "";
+  for (const field of ['headline', 'description']) {
+    if (typeof aiDeal[field] !== 'string' || !aiDeal[field].trim() || /\bMISSING (?:HEADLINE|DESCRIPTION)\b/i.test(aiDeal[field])) {
+      warnings.push({ type: 'missing-copy', ruleId: 'COPY.REQUIRED_FIELD', severity: 'error', msg: `The ${field} is missing. Add customer copy before publishing.` });
+    }
+  }
+  const parsedDates = {};
+  for (const field of ['startDate', 'endDate']) {
+    if (!aiDeal[field]) continue;
+    const match = String(aiDeal[field]).match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
+    let valid = false;
+    if (match) {
+      let year = Number(match[3]);
+      if (match[3].length === 2) year += year >= 70 ? 1900 : 2000;
+      const date = new Date(year, Number(match[1]) - 1, Number(match[2]));
+      valid = date.getFullYear() === year && date.getMonth() === Number(match[1]) - 1 && date.getDate() === Number(match[2]);
+      if (valid) parsedDates[field] = date;
+    }
+    if (!valid) warnings.push({ type: 'date', ruleId: 'COPY.INVALID_DATE', severity: 'error', msg: `${field} must be a real calendar date in M/D/YY or M/D/YYYY format.` });
+  }
+  if (parsedDates.startDate && parsedDates.endDate && parsedDates.startDate > parsedDates.endDate) {
+    warnings.push({ type: 'date', ruleId: 'COPY.DATE_ORDER', severity: 'error', msg: 'The start date is after the end date.' });
+  }
+  const headline = typeof aiDeal.headline === 'string' ? aiDeal.headline : "";
+  const description = typeof aiDeal.description === 'string' ? aiDeal.description : "";
   const combined = `${headline} ${description}`;
   const sourceText = normalizeClaimText(rawDeal.originalText);
   const outputText = normalizeClaimText(combined);
@@ -494,6 +548,12 @@ function buildFinalDescription(baseDescription, endDateStr) {
   return desc;
 }
 
+/**
+ * Validates an entire AI response against the source batch before constructing
+ * editable deal rows. Vendor or per-vendor deal-count changes fail closed;
+ * accepted rows retain source provenance, receive unique slugs, and aggregate
+ * per-deal lint findings for the review gate.
+ */
 export function validateAndMerge(rawGroups, jsonInput) {
   const aiGroups = cleanAndParseJSON(jsonInput);
 
@@ -582,6 +642,11 @@ export function validateAndMerge(rawGroups, jsonInput) {
 
 // --- Single-deal patch helpers ---
 
+/**
+ * Extracts a single-deal repair payload from a bare object, vendor wrapper, or
+ * batch-shaped array and tolerates trailing commas. Semantic targeting is left
+ * to `extractDealPatch` and `applyDealPatch`.
+ */
 export function cleanAndParsePatchJSON(input) {
   const trimmed = (input || "").trim();
   if (!trimmed) throw new Error("Patch JSON is empty.");
@@ -602,6 +667,11 @@ export function cleanAndParsePatchJSON(input) {
   return JSON.parse(clean);
 }
 
+/**
+ * Normalizes supported repair-response shapes into one patch and fills missing
+ * identity fields from the deal the operator selected. Empty or malformed
+ * wrapper shapes fail explicitly instead of patching an arbitrary row.
+ */
 export function extractDealPatch(parsed, selectedContext = null) {
   if (Array.isArray(parsed)) {
     if (!parsed.length) throw new Error("Patch array is empty.");
@@ -641,6 +711,11 @@ export function extractDealPatch(parsed, selectedContext = null) {
   return out;
 }
 
+/**
+ * Applies a normalized repair to exactly one copied deal using stable ID or
+ * vendor/deal position, then rebuilds the final description and reruns lint.
+ * The input group tree is cloned so session updates remain immutable.
+ */
 export function applyDealPatch(finalGroups, patch, selectedContext = null) {
   const normalized = extractDealPatch(patch, selectedContext);
 
@@ -710,6 +785,11 @@ export function applyDealPatch(finalGroups, patch, selectedContext = null) {
 }
 
 // Add a new raw deal line block to the tagged input.
+/**
+ * Inserts a quick-added deal beneath an existing tagged supplier or appends a
+ * new supplier block. The helper validates non-empty operator input and emits
+ * the same `v`/`d`/`ed` format consumed by the rest of the pipeline.
+ */
 export function appendDealToRawInput(
   rawInput,
   { vendorName, dealText, isExclusive },

@@ -37,8 +37,16 @@ function fireConfetti() {
   }
 }
 
+/**
+ * Manages the manual AI-copy workflow from prompt generation through lint
+ * review, targeted repair, completion tracking, and field-by-field clipboard
+ * handoff. Generated copy remains session data until the operator explicitly
+ * accepts warnings and checks each deal complete.
+ */
 export default function CopywritingStep({ session, onSessionChange, showToast }) {
   const { view, rawInput, jsonInput, finalGroups, houseStyle, dealNotes } = session;
+  const [workFilter, setWorkFilter] = useState("pending");
+  const [workSearch, setWorkSearch] = useState("");
   const [copySuccess, setCopySuccess] = useState({});
   const [validationError, setValidationError] = useState(null);
   const [validationWarnings, setValidationWarnings] = useState(null);
@@ -147,7 +155,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
         deals: g.deals.map((d, di) => {
           if (gi === vIdx && di === dIdx) {
             const next = forceState !== null ? forceState : !d.checked;
-            if (next) fireConfetti();
+            if (next && prev.finalGroups.every((group, groupIndex) => group.deals.every((deal, dealIndex) => (groupIndex === vIdx && dealIndex === dIdx) || deal.checked))) fireConfetti();
             return { ...d, checked: next };
           }
           return d;
@@ -167,8 +175,8 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
           return n;
         });
       }, 1500);
-    });
-  }, [toggleCheck]);
+    }).catch(() => showToast("Could not copy. Please try again.", "error"));
+  }, [toggleCheck, showToast]);
 
   const reset = useCallback(() => {
     updateSession({
@@ -339,6 +347,10 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
     return { errors, warns };
   }, [finalGroups]);
 
+  const matchesFilter = (deal, group) => {
+    const status = workFilter === "all" || (workFilter === "pending" && !deal.checked) || (workFilter === "done" && deal.checked) || (workFilter === "issues" && !deal.checked && deal.warnings?.length > 0);
+    return status && `${group.name} ${deal.headline} ${deal.originalText}`.toLowerCase().includes(workSearch.toLowerCase());
+  };
   if (view === "work") {
     return (
       <div className="copy-step">
@@ -472,7 +484,14 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
           </Modal>
         )}
 
-        {finalGroups.map((group, vIdx) => (
+        <div className="review-toolbar copy-review-toolbar">
+          <div className="review-tabs">{[["pending", "To publish"], ["issues", "Needs attention"], ["done", "Done"], ["all", "All deals"]].map(([value, label]) => <button key={value} className={`btn ${workFilter === value ? 'btn-accent' : ''}`} onClick={() => setWorkFilter(value)}>{label}</button>)}</div>
+          <label className="review-search">Find a deal<input value={workSearch} onChange={e => setWorkSearch(e.target.value)} placeholder="Supplier or offer…" /></label>
+          <span className="pill">{totalDeals - doneDeals} left to publish</span>
+        </div>
+        <p className="review-hint">Copy each field, paste it into the website, then mark the deal done. Copying a description does not mark it published.</p>
+        {!finalGroups.some(g => g.deals.some(d => matchesFilter(d, g))) && <div className="dedupe-empty"><h3>No deals in this view</h3><p>Choose another filter or clear your search.</p></div>}
+        {finalGroups.map((group, vIdx) => group.deals.some(deal => matchesFilter(deal, group)) && (
           <div key={group.vendorIndex || vIdx} className="vendor-block">
             <h2 className="vendor-block-title">
               <a
@@ -487,13 +506,17 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
             </h2>
             <div className="deal-list">
               {group.deals.map((deal, dIdx) => {
+                if (!matchesFilter(deal, group)) return null;
+                const sourceAction = (session.sourceActions || []).find(item => item.vendor === group.name && item.text === deal.originalText);
                 const noteKey = deal.dealId || `${vIdx}-${dIdx}`;
                 return (
                   <div
                     key={deal.dealId || dIdx}
                     className={`deal-row ${deal.checked ? "deal-checked" : ""}`}
                   >
-                    <div
+                    <button
+                      aria-label={deal.checked ? "Mark deal unfinished" : "Mark deal published"}
+                      title={deal.checked ? "Mark unfinished" : "Mark published"}
                       className="deal-check"
                       onClick={() => toggleCheck(vIdx, dIdx)}
                     >
@@ -502,7 +525,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                       >
                         {deal.checked && "✓"}
                       </div>
-                    </div>
+                    </button>
 
                     <div className="deal-content">
                       {deal.warnings && deal.warnings.length > 0 && (
@@ -518,6 +541,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                         </div>
                       )}
 
+                      {sourceAction?.action === 'update' && <div className="comparison-alert">Update existing website deal: <a href={`https://travelperks.com/admin/entries/deals?search=${encodeURIComponent(sourceAction.websiteTitle || group.name)}`} target="travelperks-admin" rel="noreferrer">{sourceAction.websiteTitle || group.name} ↗</a> · Keep its existing URL.</div>}
                       <div className="deal-meta-row">
                         <span className="pill">{deal.dealId}</span>
                         {deal.isExclusive && (
@@ -529,12 +553,12 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                         <span
                           className={`copy-text deal-headline ${deal.isExclusive ? "deal-exclusive" : ""}`}
                           onClick={() =>
-                            handleCopy(deal.headline, `h${vIdx}${dIdx}`)
+                            handleCopy(deal.headline, `h-${vIdx}-${dIdx}`)
                           }
                         >
                           {deal.headline}
                         </span>
-                        {copySuccess[`h${vIdx}${dIdx}`] && (
+                        {copySuccess[`h-${vIdx}-${dIdx}`] && (
                           <span className="copied-badge">Copied</span>
                         )}
                       </div>
@@ -545,8 +569,8 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                           onClick={() =>
                             handleCopy(
                               deal.description,
-                              `d${vIdx}${dIdx}`,
-                              true,
+                              `d-${vIdx}-${dIdx}`,
+                              false,
                               vIdx,
                               dIdx,
                             )
@@ -554,7 +578,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                         >
                           {deal.description}
                         </span>
-                        {copySuccess[`d${vIdx}${dIdx}`] && (
+                        {copySuccess[`d-${vIdx}-${dIdx}`] && (
                           <span className="copied-badge">Copied</span>
                         )}
                       </div>
@@ -566,41 +590,46 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
 
                       <div className="dates-row">
                         {deal.startDate && (
-                          <span
+                          <button
                             className="date-pill date-start"
                             onClick={() =>
-                              handleCopy(deal.startDate, `sd${vIdx}${dIdx}`)
+                              handleCopy(deal.startDate, `sd-${vIdx}-${dIdx}`)
                             }
                           >
-                            Starts: {deal.startDate}
-                          </span>
+                            Copy start: {deal.startDate}
+                          </button>
                         )}
                         {deal.endDate && (
-                          <span
+                          <button
                             className="date-pill date-end"
                             onClick={() =>
-                              handleCopy(deal.endDate, `ed${vIdx}${dIdx}`)
+                              handleCopy(deal.endDate, `ed-${vIdx}-${dIdx}`)
                             }
                           >
-                            Ends: {deal.endDate}
-                          </span>
+                            Copy end: {deal.endDate}
+                          </button>
                         )}
-                        <span
+                        {sourceAction?.action !== "update" && <button
                           className="date-pill slug-pill"
                           title="Click to copy URL slug"
                           onClick={() =>
-                            handleCopy(deal.urlSlug, `slug${vIdx}${dIdx}`)
+                            handleCopy(deal.urlSlug, `slug-${vIdx}-${dIdx}`)
                           }
                         >
-                          {deal.urlSlug}
-                        </span>
-                        {(copySuccess[`sd${vIdx}${dIdx}`] ||
-                          copySuccess[`ed${vIdx}${dIdx}`] ||
-                          copySuccess[`slug${vIdx}${dIdx}`]) && (
+                          Copy URL slug · {deal.urlSlug}
+                        </button>}
+                        {(copySuccess[`sd-${vIdx}-${dIdx}`] ||
+                          copySuccess[`ed-${vIdx}-${dIdx}`] ||
+                          copySuccess[`slug-${vIdx}-${dIdx}`]) && (
                           <span className="copied-badge">Copied</span>
                         )}
                       </div>
 
+                      <div className="publish-fields">
+                        <button className="btn btn-small" onClick={() => handleCopy(deal.headline, `h-${vIdx}-${dIdx}`)}>{copySuccess[`h-${vIdx}-${dIdx}`] ? 'Copied ✓' : 'Copy headline'}</button>
+                        <button className="btn btn-small" onClick={() => handleCopy(deal.description, `d-${vIdx}-${dIdx}`)}>{copySuccess[`d-${vIdx}-${dIdx}`] ? 'Copied ✓' : 'Copy description'}</button>
+                        <button className="btn btn-success btn-small" onClick={() => toggleCheck(vIdx, dIdx)}>{deal.checked ? 'Reopen deal' : 'Mark published ✓'}</button>
+                      </div>
                       <div className="deal-actions">
                         <button
                           className="btn btn-small"
@@ -817,7 +846,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
         <div className="panel">
           <div className="panel-header">
             <div className="badge-circle">1</div>
-            <h2>Raw Text</h2>
+            <h2>1. Get copy for your action list</h2>
           </div>
           <div className="panel-body">
             <textarea
@@ -840,7 +869,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
         <div className="panel">
           <div className="panel-header">
             <div className="badge-circle">2</div>
-            <h2>AI Response</h2>
+            <h2>2. Check the AI response</h2>
           </div>
           <div className="panel-body">
             <textarea
@@ -856,7 +885,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
               onClick={handleValidate}
               disabled={!jsonInput}
             >
-              Verify & Start
+              Check copy & open publishing queue
             </button>
           </div>
         </div>

@@ -6,9 +6,9 @@ import { DEFAULT_HOUSE_STYLE } from './logic/copywriting.js';
 import { parseRawEmail } from './logic/dealCoreClient';
 
 const STEPS = [
-  { key: 'tag', label: 'Tag', desc: 'Shape the source', intro: 'Turn the weekly source into clean, structured deal lines.' },
-  { key: 'dedupe', label: 'Dedupe', desc: 'Compare the site', intro: 'Compare the new batch with the live website export.' },
-  { key: 'copy', label: 'Copy', desc: 'Finish the batch', intro: 'Write, review, and track the website-ready deal copy.' },
+  { key: 'tag', label: 'Tag', desc: 'Prepare the source', intro: 'Turn the weekly source into clean, structured deal lines.' },
+  { key: 'dedupe', label: 'Compare', desc: 'Find the work', intro: 'Review the weakest matches first. Keep only new offers and changes.' },
+  { key: 'copy', label: 'Publish', desc: 'Review & copy', intro: 'Check the copy, move each field to the website, and track what’s done.' },
 ];
 
 const STORAGE_KEY = 'deal-pipeline-session';
@@ -26,11 +26,12 @@ function createDefaultSession() {
       hqText: '',
       websiteRows: [],
       lastRun: null,
-      threshold: 8,
+      threshold: 0,
       supplierFilter: '',
-      viewFilter: 'all',
+      viewFilter: 'review',
       restrictToday: false,
       rejectedHQIds: [],
+      decisions: {},
     },
     copy: {
       view: 'input',
@@ -39,6 +40,7 @@ function createDefaultSession() {
       finalGroups: [],
       houseStyle: DEFAULT_HOUSE_STYLE,
       dealNotes: {},
+      sourceActions: [],
     },
   };
 }
@@ -62,6 +64,11 @@ function loadSession() {
   }
 }
 
+/**
+ * Owns the three-step workflow shell and the durable browser session shared by
+ * Tag, Dedupe, and Copy. Step handoffs deliberately reset downstream derived
+ * state, while the global reset clears persisted work and remounts every step.
+ */
 export default function App() {
   const [session, setSession] = useState(loadSession);
   const [notify, setNotify] = useState(null);
@@ -125,7 +132,8 @@ export default function App() {
         || current.lastRun !== next.lastRun
         || current.threshold !== next.threshold
         || current.restrictToday !== next.restrictToday
-        || current.rejectedHQIds !== next.rejectedHQIds;
+        || current.rejectedHQIds !== next.rejectedHQIds
+        || current.decisions !== next.decisions;
 
       return {
         ...prev,
@@ -157,6 +165,7 @@ export default function App() {
         hqText: text,
         lastRun: null,
         rejectedHQIds: [],
+      decisions: {},
       },
       copy: {
         ...createDefaultSession().copy,
@@ -166,17 +175,18 @@ export default function App() {
     showToast('Tagged text loaded into Dedupe', 'success');
   }, [showToast]);
 
-  const handleDedupeComplete = useCallback((text) => {
+  const handleDedupeComplete = useCallback((text, sourceActions = []) => {
     setSession((prev) => ({
       ...prev,
       activeStep: 'copy',
       copy: {
         ...createDefaultSession().copy,
         rawInput: text,
+        sourceActions,
         houseStyle: prev.copy.houseStyle,
       },
     }));
-    showToast('Unmatched deals loaded into Copywriting', 'success');
+    showToast('New and changed deals loaded into Copywriting', 'success');
   }, [showToast]);
 
   const handleGlobalReset = useCallback(() => {
@@ -192,7 +202,7 @@ export default function App() {
   const stepStates = {
     tag: session.tag.output?.trim() ? 'complete' : 'current',
     dedupe: session.dedupe.lastRun ? 'complete' : session.dedupe.hqText?.trim() ? 'ready' : 'waiting',
-    copy: session.copy.finalGroups?.length ? 'complete' : session.copy.rawInput?.trim() ? 'ready' : 'waiting',
+    copy: session.copy.finalGroups?.length && session.copy.finalGroups.every(group => group.deals.every(deal => deal.checked)) ? 'complete' : session.copy.rawInput?.trim() ? 'ready' : 'waiting',
   };
   const activeStepIndex = STEPS.findIndex((step) => step.key === session.activeStep);
   const activeStep = STEPS[activeStepIndex] || STEPS[0];
@@ -204,7 +214,7 @@ export default function App() {
         <a className="app-brand" href="/" aria-label="Deal Pipeline home">
           <span className="brand-mark" aria-hidden="true">DP</span>
           <span>
-            <span className="brand-eyebrow">AI-assisted deal ops</span>
+            <span className="brand-eyebrow">Weekly deal workspace</span>
             <span className="app-title">Deal Pipeline</span>
           </span>
         </a>

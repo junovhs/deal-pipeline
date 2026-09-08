@@ -68,6 +68,13 @@ function isIndentedChildDeal(line, currentKnown) {
   return currentKnown !== null && /^\s+\S/.test(line) && !BULLET_PREFIX.test(line);
 }
 
+/**
+ * Converts a raw weekly promotion email into the tagged `v`/`d`/`ed` text
+ * consumed by dedupe and copywriting. Supplier headings establish context for
+ * following deals; unresolved headings and deals become `X` records when
+ * `includeUnknowns` is true so uncertain source material is never silently lost.
+ * Returns both the tagged text and counts used by the Tag-step review UI.
+ */
 export function transform(raw, { includeUnknowns = true } = {}) {
   const lines = raw.replace(/\r\n/g, '\n').split('\n');
   const out = [];

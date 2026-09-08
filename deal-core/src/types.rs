@@ -1,5 +1,10 @@
+//! Shared serialized contracts for parser output, diagnostics, provenance, and
+//! supplier-resolution uncertainty.
+
 use serde::{Deserialize, Serialize};
 
+/// Stable API envelope that carries either data or a typed error plus any
+/// non-fatal diagnostics gathered while producing the result.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CoreResult<T> {
@@ -12,6 +17,7 @@ pub struct CoreResult<T> {
 }
 
 impl<T> CoreResult<T> {
+    /// Constructs a successful envelope while preserving advisory diagnostics.
     pub fn success(data: T, diagnostics: Vec<CoreDiagnostic>) -> Self {
         Self {
             ok: true,
@@ -21,6 +27,8 @@ impl<T> CoreResult<T> {
         }
     }
 
+    /// Constructs a failed envelope with no data and the evidence explaining
+    /// both the blocking error and any additional diagnostics.
     pub fn failure(error: CoreError, diagnostics: Vec<CoreDiagnostic>) -> Self {
         Self {
             ok: false,
@@ -31,6 +39,7 @@ impl<T> CoreResult<T> {
     }
 }
 
+/// Machine-stable failure code paired with an operator-readable explanation.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CoreError {
@@ -38,6 +47,7 @@ pub struct CoreError {
     pub message: String,
 }
 
+/// Non-fatal or supporting evidence with optional source-line context.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CoreDiagnostic {
@@ -50,6 +60,7 @@ pub struct CoreDiagnostic {
     pub raw_text: Option<String>,
 }
 
+/// Domain that produced a diagnostic, allowing the UI to route it correctly.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum CoreDiagnosticKind {
@@ -58,6 +69,7 @@ pub enum CoreDiagnosticKind {
     WebsiteExportSchema,
 }
 
+/// Operator-facing urgency of a diagnostic independent of its domain.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DiagnosticSeverity {
@@ -66,6 +78,7 @@ pub enum DiagnosticSeverity {
     Error,
 }
 
+/// Lossless line-oriented result of parsing one raw promotion source.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParsedBatch {
@@ -73,6 +86,8 @@ pub struct ParsedBatch {
     pub records: Vec<ParsedLineRecord>,
 }
 
+/// One physical source line with normalized text, classification, supplier
+/// resolution, and immutable provenance back to the original input.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParsedLineRecord {
@@ -87,6 +102,8 @@ pub struct ParsedLineRecord {
     pub provenance: Provenance,
 }
 
+/// Structural role assigned to a parsed source line; unknown and ignored input
+/// remain explicit variants so the parser never drops uncertainty silently.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DealTag {
@@ -99,6 +116,7 @@ pub enum DealTag {
     IgnoredWhitespace,
 }
 
+/// High-level email section that may constrain supplier and deal interpretation.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SectionKind {
@@ -108,6 +126,8 @@ pub enum SectionKind {
     Other(String),
 }
 
+/// Typed supplier-linkage outcome that distinguishes confident identity,
+/// bounded ambiguity, policy ineligibility, unresolved context, and no evidence.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "status", rename_all = "camelCase")]
 pub enum SupplierResolution {
@@ -127,6 +147,7 @@ pub enum SupplierResolution {
     Unknown,
 }
 
+/// Origin and one-based source line needed to explain or repair derived data.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Provenance {
@@ -134,6 +155,7 @@ pub struct Provenance {
     pub line_number: u32,
 }
 
+/// Authorized origin of a deal observation or operator-authored correction.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DealSource {

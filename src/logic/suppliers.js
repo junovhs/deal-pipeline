@@ -253,6 +253,11 @@ const TAG_INELIGIBLE_SUPPLIERS = new Set([
   "Viator",
 ]);
 
+/**
+ * Produces the accent-insensitive, punctuation-neutral supplier key used by
+ * catalog, alias, ambiguity, and family lookups. It is a comparison key, not a
+ * customer-facing supplier label.
+ */
 export function norm(s) {
   return (s || "")
     .toLowerCase()
@@ -272,16 +277,19 @@ function cleanVendorInput(input) {
     .trim();
 }
 
+/** Canonical supplier records enriched with the default normalized family key. */
 export const supplierCatalog = SUPPLIER_CATALOG.map((entry) => ({
   ...entry,
   family: norm(entry.name),
 }));
 
+/** Read-only presentation projection used by supplier selectors and links. */
 export const suppliers = supplierCatalog.map(({ name, url, cats }) => ({ name, url, cats }));
 
 const catalogByName = new Map(supplierCatalog.map((entry) => [entry.name, entry]));
 const catalogByNormName = new Map(supplierCatalog.map((entry) => [norm(entry.name), entry]));
 
+/** Normalized observed labels mapped to their canonical supplier names. */
 export const aliases = new Map();
 for (const [canonicalName, rawAliases] of Object.entries(SUPPLIER_ALIASES)) {
   if (!catalogByName.has(canonicalName)) {
@@ -292,6 +300,7 @@ for (const [canonicalName, rawAliases] of Object.entries(SUPPLIER_ALIASES)) {
   }
 }
 
+/** Canonical supplier name to dedupe-family key, including declared brand families. */
 export const familyOf = Object.fromEntries(
   supplierCatalog.map((entry) => [entry.name, norm(entry.name)]),
 );
@@ -353,6 +362,12 @@ function buildUnknownResolution(rawInput, normalizedInput) {
   };
 }
 
+/**
+ * Resolves an observed supplier label without guessing across known
+ * ambiguities. The result records canonical identity, family membership,
+ * match provenance, candidate names, and whether the supplier may be emitted
+ * by the tagging pipeline; unknown labels remain explicitly `unknown`.
+ */
 export function resolveVendor(input) {
   const rawInput = cleanVendorInput(input);
   if (!rawInput) {
@@ -395,18 +410,34 @@ export function resolveVendor(input) {
   return buildUnknownResolution(rawInput, normalizedInput);
 }
 
+/**
+ * Returns the canonical supplier name when resolution succeeds, otherwise the
+ * cleaned observed label. Use `resolveVendor` when ambiguity or eligibility
+ * must remain visible to the caller.
+ */
 export function canonicalVendor(input) {
   const resolution = resolveVendor(input);
   return resolution.canonicalName || cleanVendorInput(input) || null;
 }
 
+/**
+ * Reports whether a supplier label is safe to emit as a recognized `v` record.
+ * Recognition and tag eligibility are intentionally separate because some
+ * known brands must remain visible for review but cannot enter automation.
+ */
 export function isTagEligibleSupplier(input) {
   return resolveVendor(input).tagEligible;
 }
 
+/**
+ * Returns the stable family key used to place HQ and website deals in the same
+ * dedupe candidate pool. Unknown names receive a normalized fallback key so
+ * unrelated suppliers are not collapsed into a shared unknown bucket.
+ */
 export function vendorFamily(name) {
   const resolution = resolveVendor(name);
   return resolution.familyKey || norm(resolution.canonicalName || cleanVendorInput(name));
 }
 
+/** Canonical supplier names in catalog order for lightweight UI enumeration. */
 export const supplierNames = suppliers.map((supplier) => supplier.name);

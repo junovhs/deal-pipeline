@@ -1,3 +1,6 @@
+//! Executable reports for repository fixtures that exercise public core behavior.
+
+/// Outcome and human-readable evidence for one named regression fixture.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FixtureCaseReport {
     pub name: &'static str,
@@ -5,6 +8,7 @@ pub struct FixtureCaseReport {
     pub detail: String,
 }
 
+/// Named collection of fixture cases returned to tests or external harnesses.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FixtureReport {
     pub suite: &'static str,
@@ -12,11 +16,14 @@ pub struct FixtureReport {
 }
 
 impl FixtureReport {
+    /// Returns true only when every case in the suite passed.
     pub fn passed(&self) -> bool {
         self.cases.iter().all(|case| case.passed)
     }
 }
 
+/// Runs the bundled weekly-email smoke fixture and reports whether parsing
+/// preserved the complete line count and produced non-empty structured data.
 pub fn run_fixture_suite() -> FixtureReport {
     let raw = include_str!("../fixtures/weekly/2026-06-01/raw-email.txt");
     let parsed = crate::parse_raw_email_core(raw);

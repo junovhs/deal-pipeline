@@ -1,8 +1,12 @@
+//! Validation boundary for operator-supplied website exports.
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::{CoreDiagnostic, CoreDiagnosticKind, CoreError, CoreResult, DiagnosticSeverity};
 
+/// Recognized website deal rows plus explicit accounting for every inspected
+/// record, allowing partial exports to surface discarded-row diagnostics.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WebsiteExportBatch {
@@ -12,6 +16,9 @@ pub struct WebsiteExportBatch {
     pub rows: Vec<Value>,
 }
 
+/// Accepts only rows with supplier identity and customer-facing deal copy.
+/// Zero recognized rows fail closed as an incompatible export; mixed exports
+/// succeed with warnings and retain only recognized deal rows.
 pub fn validate_website_export_core(rows: Vec<Value>) -> CoreResult<WebsiteExportBatch> {
     let inspected_count = rows.len() as u32;
     let recognized_rows: Vec<Value> = rows.into_iter().filter(is_deal_row).collect();

@@ -1,3 +1,6 @@
+//! Deterministic parsing and website-export validation exposed to the browser
+//! through a JSON-compatible WASM boundary.
+
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
@@ -10,12 +13,16 @@ pub use types::*;
 pub use website::*;
 
 #[wasm_bindgen(js_name = parseRawEmail)]
+/// Parses raw email text for JavaScript callers and serializes the complete
+/// result envelope, including diagnostics, into JSON-compatible `JsValue`.
 pub fn parse_raw_email(raw_text: &str) -> JsValue {
     let result = parse_raw_email_core(raw_text);
     to_json_compatible_value(&result)
 }
 
 #[wasm_bindgen(js_name = validateWebsiteExport)]
+/// Validates a JavaScript website-export value without panicking on incompatible
+/// input; deserialization failures become a typed `CoreResult` error.
 pub fn validate_website_export(rows: JsValue) -> JsValue {
     let result = match serde_wasm_bindgen::from_value(rows) {
         Ok(rows) => validate_website_export_core(rows),
@@ -37,6 +44,9 @@ fn to_json_compatible_value<T: Serialize>(value: &T) -> JsValue {
         .unwrap_or(JsValue::NULL)
 }
 
+/// Preserves every physical source line with stable line provenance while the
+/// core parser is incrementally developed. Supplier headings establish context
+/// for following deal lines, and uncertainty remains typed rather than guessed.
 pub fn parse_raw_email_core(raw_text: &str) -> CoreResult<ParsedBatch> {
     let mut records = Vec::new();
     let mut active_supplier: Option<String> = None;

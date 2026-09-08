@@ -9,6 +9,11 @@ function parseLines(output) {
   });
 }
 
+/**
+ * Presents raw-email tagging as a reviewable two-pane operation. It delegates
+ * classification to `transform`, keeps input and output scrolling aligned, and
+ * hands only the operator-reviewed tagged text to the Dedupe step.
+ */
 export default function DealtagStep({ session, onSessionChange, onComplete, showToast }) {
   const leftRef = useRef(null);
   const rightRef = useRef(null);
@@ -32,7 +37,7 @@ export default function DealtagStep({ session, onSessionChange, onComplete, show
   }, [includeX, input, updateSession]);
 
   const copy = useCallback(() => {
-    navigator.clipboard.writeText(output).then(() => showToast('Output copied', 'success'));
+    navigator.clipboard.writeText(output).then(() => showToast('Output copied', 'success')).catch(() => showToast('Could not copy. Please try again.', 'error'));
   }, [output, showToast]);
 
   const sendToDedupe = useCallback(() => {
@@ -63,8 +68,8 @@ export default function DealtagStep({ session, onSessionChange, onComplete, show
       <div className="two-col">
         <div className="panel">
           <div className="panel-header">
-            <h2>Input</h2>
-            <span className="pill">{input.split('\n').length} lines</span>
+            <h2>Weekly promo email</h2>
+            <span className="pill">{input.trim() ? input.split('\n').length : 0} lines</span>
           </div>
           <div
             className="panel-body"
@@ -73,7 +78,7 @@ export default function DealtagStep({ session, onSessionChange, onComplete, show
           >
             <textarea
               value={input}
-              onChange={(e) => updateSession({ input: e.target.value })}
+              onChange={(e) => updateSession({ input: e.target.value, output: '', stats: null })}
               placeholder="Paste your full promo list here..."
               spellCheck={false}
             />
@@ -83,24 +88,24 @@ export default function DealtagStep({ session, onSessionChange, onComplete, show
               <input
                 type="checkbox"
                 checked={includeX}
-                onChange={(e) => updateSession({ includeX: e.target.checked })}
+                onChange={(e) => updateSession({ includeX: e.target.checked, output: '', stats: null })}
               />
               Include unknowns (X)
             </label>
-            <button className="btn btn-accent" onClick={run}>Transform</button>
+            <button className="btn btn-accent" onClick={run} disabled={!input.trim()}>Tag deals</button>
             <button className="btn" onClick={copy} disabled={!output}>Copy Output</button>
           </div>
         </div>
 
         <div className="panel">
           <div className="panel-header">
-            <h2>Output</h2>
+            <h2>Tagged deals</h2>
             {stats && (
               <div className="stat-pills">
-                <span className="pill pill-ok">v:{stats.vendors}</span>
-                <span className="pill">d:{stats.deals}</span>
-                <span className="pill pill-warn">ed:{stats.excl}</span>
-                <span className="pill pill-bad">X:{stats.unknownSuppliers}</span>
+                <span className="pill pill-ok">{stats.vendors} suppliers</span>
+                <span className="pill">{stats.deals} deals</span>
+                <span className="pill pill-warn">{stats.excl} exclusive</span>
+                <span className="pill pill-bad">{stats.unknownSuppliers} unknown</span>
               </div>
             )}
           </div>
@@ -116,12 +121,12 @@ export default function DealtagStep({ session, onSessionChange, onComplete, show
                   <span className="tag-text">{line.text}</span>
                 </div>
               ))}
-              {lines.length === 0 && <div className="empty-state">Output will appear here after Transform</div>}
+              {lines.length === 0 && <div className="empty-state">Tag the email to review your deals here</div>}
             </div>
           </div>
           <div className="panel-footer">
             <button className="btn btn-forward" onClick={sendToDedupe} disabled={!output}>
-              Send to Dedupe
+              Continue to Compare →
             </button>
           </div>
         </div>

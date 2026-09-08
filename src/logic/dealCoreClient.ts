@@ -3,6 +3,7 @@ import initDealCore, {
   validateWebsiteExport as validateWebsiteExportWasm,
 } from '../wasm/deal-core/deal_core.js';
 
+/** JSON-compatible success/failure envelope shared across the WASM boundary. */
 export type CoreResult<T> =
   | {
       ok: true;
@@ -30,10 +31,17 @@ export type CoreResult<T> =
       }>;
     };
 
+/** Initializes the generated WASM module before any typed core operation. */
 export async function loadDealCore(): Promise<void> {
   await initDealCore();
 }
 
+/**
+ * Initializes the WASM core and parses raw email text into lossless records with
+ * source-line provenance and typed supplier resolution. Parser uncertainty is
+ * returned as diagnostics or explicit supplier states, never hidden by a
+ * JavaScript-side fallback interpretation.
+ */
 export async function parseRawEmail(
   rawText: string,
   _options: Record<string, unknown> = {},
@@ -82,6 +90,7 @@ export async function parseRawEmail(
   }>;
 }
 
+/** Accepted website rows plus accounting for inspected and discarded records. */
 export type WebsiteExportBatch = {
   inspectedCount: number;
   recognizedCount: number;
@@ -89,6 +98,12 @@ export type WebsiteExportBatch = {
   rows: Record<string, unknown>[];
 };
 
+/**
+ * Sends operator-supplied website rows through the versioned WASM schema
+ * boundary before dedupe consumes them. The result distinguishes inspected,
+ * recognized, and ignored rows and carries diagnostics instead of treating an
+ * arbitrary JSON array as current-catalog truth.
+ */
 export async function validateWebsiteExport(
   rows: Record<string, unknown>[],
 ): Promise<CoreResult<WebsiteExportBatch>> {

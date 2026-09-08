@@ -25,6 +25,7 @@ function toLA(m, d, y) { return new Date(y, m - 1, d, 12, 0, 0); }
 function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
 function endOfDay(d) { const x = new Date(d); x.setHours(23,59,59,999); return x; }
 
+/** Compares two present dates by local calendar day rather than timestamp. */
 export function sameDay(a, b) {
   return !!(a && b) &&
     a.getFullYear() === b.getFullYear() &&
@@ -32,6 +33,12 @@ export function sameDay(a, b) {
     a.getDate() === b.getDate();
 }
 
+/**
+ * Extracts the booking window encoded in terse HQ deal text using Los Angeles
+ * calendar semantics. Ongoing offers have no end date, malformed years become
+ * `dateWarning` evidence instead of guessed dates, and an omitted year rolls
+ * forward only when the inferred date would otherwise already be past.
+ */
 export function parseHQDates(text) {
   const t = text.toLowerCase();
   const out = { start: null, end: null, ongoing: false, dateWarning: null };
@@ -162,6 +169,7 @@ function textSimilarity(a, b) {
   return union > 0 ? inter / union : 0;
 }
 
+/** Shared Los Angeles date formatter used by the operator-facing match UI. */
 const dateFmt = new Intl.DateTimeFormat('en-US', {
   year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'America/Los_Angeles'
 });
@@ -535,6 +543,7 @@ function optimalMatch(hqGroup, webGroup) {
 // --- HQ Parser ---
 
 let nextId = 0;
+/** Resets batch-local HQ identifiers before reparsing frozen source text. */
 export function resetIds() { nextId = 0; }
 
 function cleanTaggedContent(value) {
@@ -548,6 +557,12 @@ function looksLikeDealContent(value) {
   return /\$|\d\s*%|\b(?:ends?|ongoing|sale|save|savings|off|free|credit|deposit|rates?|package|promo|upgrade|groups?)\b/i.test(value);
 }
 
+/**
+ * Parses tagged source text into normalized HQ deal records for matching.
+ * Vendor context comes only from accepted `v` lines; terminal `X` exclusions
+ * are ignored. Deal records retain the original line, supplier resolution
+ * status, dates, exclusivity, and the feature bag used by scoring stages.
+ */
 export function parseHQ(text) {
   const lines = (text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const items = [];
@@ -599,6 +614,12 @@ export function parseHQ(text) {
 
 // --- Website JSON ingest ---
 
+/**
+ * Adapts validated website-export rows into the comparison shape used by the
+ * matcher. It preserves each raw row while normalizing supplier identity,
+ * family, dates, display text, and feature evidence; schema acceptance belongs
+ * to the upstream website-export validator rather than this adapter.
+ */
 export function ingestWebsiteJSON(arr) {
   return (arr || []).map(row => {
     const supplier = row.shopOverline || '';
@@ -625,6 +646,12 @@ export function ingestWebsiteJSON(arr) {
 
 // --- Full matching pipeline ---
 
+/**
+ * Builds supplier-family candidate pools and assigns each HQ deal at most one
+ * website candidate using the staged scoring and optimal-matching policy.
+ * Missing website candidates remain explicit unmatched results, and an optional
+ * supplier filter narrows HQ work without changing the candidate evidence.
+ */
 export function runFullMatch(hqDeals, websiteDeals, { filterSupplier = '' } = {}) {
   const filterResolution = filterSupplier ? resolveVendor(filterSupplier) : null;
   const filterName = filterResolution?.canonicalName || filterSupplier;
@@ -723,6 +750,10 @@ export function categorizeDedupeResults(
 
 // --- Export unmatched as tagged text ---
 
+/**
+ * Serializes reviewed unmatched HQ records back to canonical tagged text for
+ * the Copy step, preserving exclusivity and grouping suppliers alphabetically.
+ */
 export function exportUnmatched(deals) {
   const grouped = {};
   deals.forEach(d => {
