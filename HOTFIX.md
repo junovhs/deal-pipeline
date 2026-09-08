@@ -38,3 +38,19 @@ new offers and intentional changes into copy preparation.
 Work was integrated in the original checkout on main, with no additional
 worktrees. Existing unrelated configuration and mapping edits were preserved.
 No website deals were published and no remote push was performed.
+
+## Matching accuracy follow-up
+
+- Small-batch optimal assignment now includes independent no-match slots; zero
+  and negative candidates cannot force assignments or displace stronger matches.
+  The existing large-batch greedy path already skips nonpositive candidates.
+- Money and percentage scoring compares complete distinct value sets. A shared
+  amount no longer hides conflicting amounts; near values are treated as changed
+  terms rather than receiving a similarity bonus. Repeated amounts are deduplicated.
+- Confidence is reduced when another positive candidate is within three points
+  or outranks the assigned candidate. Conflicting numeric terms also prevent a
+  strong confidence label. The review card exposes ambiguity and alternatives.
+- Added `npm run test:matching` for global assignment, unmatched options, amount
+  conflicts, repeated amounts, exact ties, and clear winners. Existing fixture
+  cases still pass. These checks establish corrected behavior on known cases,
+  not a measured accuracy rate on a labeled production batch.

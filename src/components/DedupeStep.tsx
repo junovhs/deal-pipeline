@@ -2,6 +2,7 @@ import React, { useMemo, useCallback, useRef, useState } from 'react';
 import {
   parseHQ, resetIds, ingestWebsiteJSON, runFullMatch,
   categorizeDedupeResults, exportUnmatched, sameDay, dateFmt,
+  MATCHER_VERSION,
 } from '../logic/dedupe.js';
 import { buildReviewQueue, dateChange } from '../logic/review.js';
 import { validateWebsiteExport } from '../logic/dealCoreClient';
@@ -56,6 +57,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
 
   const results = useMemo(() => {
     if (!lastRun) return null;
+    if (lastRun.matcherVersion !== MATCHER_VERSION) return null;
     if (!lastRun.hqText.trim() || !lastRun.websiteRows.length) return null;
     resetIds();
     const lastRunDeals = parseHQ(lastRun.hqText);
@@ -133,6 +135,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
 
     updateSession({
       lastRun: {
+        matcherVersion: MATCHER_VERSION,
         hqText,
         websiteRows,
         supplierFilter,
@@ -236,7 +239,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
           {!filtered(activeView === 'review' ? queue.review : activeView === 'actions' ? needsCopy : queue.unchanged).length && <div className="dedupe-empty"><h3>{search ? 'No deals match your search' : activeView === 'review' ? 'Match review complete' : activeView === 'actions' ? 'No new or changed deals' : 'No unchanged deals confirmed yet'}</h3><p>{activeView === 'review' && !search ? 'Open New & changes to see the work moving forward.' : 'Your other lists are available above.'}</p></div>}
           {!!queue.excluded.length && <details className="dedupe-disclosure"><summary>Excluded by ending-today policy · {queue.excluded.length}</summary>{queue.excluded.map(row => <p key={row.hq.id} className="review-hint">{row.hq.vendor} · {row.hq.text}</p>)}</details>}
         </section>
-      ) : <div className="dedupe-empty"><h3>Load your website export, then compare</h3><p>Your saved source and website file stay here while you move between steps.</p></div>}
+      ) : <div className="dedupe-empty"><h3>{lastRun && lastRun.matcherVersion !== MATCHER_VERSION ? 'Matching has improved — compare again' : 'Load your website export, then compare'}</h3><p>{lastRun && lastRun.matcherVersion !== MATCHER_VERSION ? 'Your inputs are saved. Run a fresh comparison before reviewing the updated candidates.' : 'Your saved source and website file stay here while you move between steps.'}</p></div>}
     </div>
   );
 }
@@ -251,6 +254,8 @@ function MatchCard({ r, today, onDecision, decision = null, canUndo = true }) {
       {decision && <span className="pill">{decision === 'new' ? 'New deal' : decision === 'change' ? 'Update existing deal' : 'No change needed'}</span>}
       {sameDay(r.hq.end, today) && <span className="pill pill-warn">Ends today</span>}
     </div>
+    {r.meta?.ambiguous && <div className="comparison-alert">Ambiguous match — another website candidate scores {r.meta.candidateMargin < 0 ? 'higher' : 'within 3 points'}. Check the alternatives below.</div>}
+    {r.meta?.numbersMismatch && <div className="comparison-alert">Offer amounts differ. This may be an update or a different offer.</div>}
     {change && <div className="comparison-alert">{change}</div>}
     <div className="match-grid">
       <div className="match-side"><h4>Incoming offer</h4><p className="match-text">{r.hq.text}</p><div className="match-meta">{r.hq.ongoing ? 'Ongoing' : r.hq.end ? `Ends ${dateFmt.format(r.hq.end)}` : 'No end date in source'}</div></div>
@@ -264,6 +269,7 @@ function MatchCard({ r, today, onDecision, decision = null, canUndo = true }) {
       </>}
       {r.web && <a className="btn" href={`https://travelperks.com/admin/entries/deals?search=${encodeURIComponent(r.web.raw?.title || r.hq.vendor)}`} target="travelperks-admin" rel="noreferrer">Find on website ↗</a>}
     </div>
-    <details className="match-evidence"><summary>Why this candidate?</summary><div className="why-chips">{(r.meta?.why || []).map((why, i) => <span className={`why-chip chip-${why.type}`} key={i}>{why.text}</span>)}</div>{(r.meta?.stages || []).map(stage => <p className="match-meta" key={stage.key}>{stage.label}: {stage.delta > 0 ? '+' : ''}{stage.delta} · {stage.reasons.join(', ') || 'no signal'}</p>)}</details>
+    <details className="match-evidence"><summary>Why this candidate? / Alternatives</summary>
+      {(r.meta?.candidateRankings || []).map((candidate, index) => <p className="match-meta" key={index}><strong>{candidate.title}</strong> · score {candidate.score}</p>)}<div className="why-chips">{(r.meta?.why || []).map((why, i) => <span className={`why-chip chip-${why.type}`} key={i}>{why.text}</span>)}</div>{(r.meta?.stages || []).map(stage => <p className="match-meta" key={stage.key}>{stage.label}: {stage.delta > 0 ? '+' : ''}{stage.delta} · {stage.reasons.join(', ') || 'no signal'}</p>)}</details>
   </article>;
 }

@@ -188,6 +188,9 @@ function confidenceFromScore(score, hasWeb, isExtension) {
   return 'none';
 }
 
+// Saved decisions belong to the candidate assignments produced by this version.
+export const MATCHER_VERSION = 2;
+
 function buildEmptyMeta(overrides = {}) {
   return {
     score: 0,
@@ -260,29 +263,28 @@ function scoreNumberStage(hq, web) {
   const hqP = hq.bag.percents, webP = web.bag.percents;
   let numbersMismatch = false;
 
-  if (hqD.length && webD.length) {
-    let bestDiff = Infinity;
-    for (const a of hqD) for (const b of webD) {
-      const d = Math.abs(a - b);
-      if (d < bestDiff) bestDiff = d;
+  for (const [label, hqValues, webValues, bonus, penalty] of [
+    ['$', hqD, webD, 6, 5], ['%', hqP, webP, 5, 4],
+  ]) {
+    // Repeated mentions of the same amount are not additional offer terms.
+    const incoming = [...new Set(hqValues)].sort((a, b) => a - b);
+    const existing = [...new Set(webValues)].sort((a, b) => a - b);
+    if (!incoming.length && !existing.length) continue;
+    if (!incoming.length || !existing.length) {
+      delta -= 1;
+      why.push({ text: `${label}${incoming.length ? 'hq' : 'web'}-only`, type: 'neu' });
+      continue;
     }
-    if (bestDiff === 0) { delta += 6; why.push({ text: '$=' + hqD[0], type: 'pos' }); }
-    else if (bestDiff <= 50) { delta += 2; why.push({ text: '$≈', type: 'neu' }); }
-    else { delta -= 5; numbersMismatch = true; why.push({ text: '$≠(' + hqD.join(',') + ' vs ' + webD.join(',') + ')', type: 'neg' }); }
-  } else if (hqD.length && !webD.length) { delta -= 1; why.push({ text: '$hq-only', type: 'neu' }); }
-  else if (!hqD.length && webD.length) { delta -= 1; why.push({ text: '$web-only', type: 'neu' }); }
-
-  if (hqP.length && webP.length) {
-    let bestDiff = Infinity;
-    for (const a of hqP) for (const b of webP) {
-      const d = Math.abs(a - b);
-      if (d < bestDiff) bestDiff = d;
+    const exact = incoming.length === existing.length && incoming.every((value, index) => value === existing[index]);
+    if (exact) {
+      delta += bonus;
+      why.push({ text: `${label}=${incoming.join(',')}`, type: 'pos' });
+    } else {
+      delta -= penalty;
+      numbersMismatch = true;
+      why.push({ text: `${label} terms differ (${incoming.join(',')} vs ${existing.join(',')})`, type: 'neg' });
     }
-    if (bestDiff === 0) { delta += 5; why.push({ text: '%=' + hqP[0], type: 'pos' }); }
-    else if (bestDiff <= 5) { delta += 2; why.push({ text: '%≈', type: 'neu' }); }
-    else { delta -= 4; numbersMismatch = true; why.push({ text: '%≠(' + hqP.join(',') + ' vs ' + webP.join(',') + ')', type: 'neg' }); }
-  } else if (hqP.length && !webP.length) { delta -= 1; why.push({ text: '%hq-only', type: 'neu' }); }
-  else if (!hqP.length && webP.length) { delta -= 1; why.push({ text: '%web-only', type: 'neu' }); }
+  }
 
   return {
     delta,
@@ -404,8 +406,9 @@ function scorePair(hq, web) {
     hqOnly: featureStage.hqOnly,
     webOnly: featureStage.webOnly,
     isExtension,
+    numbersMismatch: numberStage.numbersMismatch,
     stages,
-    confidence: confidenceFromScore(score, true, isExtension),
+    confidence: numberStage.numbersMismatch && score >= 18 ? 'review' : confidenceFromScore(score, true, isExtension),
   };
 }
 
@@ -424,17 +427,25 @@ function buildCandidateRankings(matrixRow, webGroup) {
     .slice(0, 3);
 }
 
-function attachCandidateRankings(meta, matrixRow, webGroup) {
+function attachCandidateRankings(meta, matrixRow, webGroup, assignedIndex = -1) {
+  const alternatives = matrixRow.filter((_, index) => index !== assignedIndex);
+  const nextScore = alternatives.length ? Math.max(...alternatives.map(candidate => candidate.score)) : null;
+  const margin = assignedIndex >= 0 && nextScore !== null ? meta.score - nextScore : null;
+  // A close runner-up (or a better candidate claimed by another deal) needs eyes.
+  const ambiguous = assignedIndex >= 0 && nextScore > 0 && margin <= 3;
   return {
     ...meta,
+    confidence: ambiguous && meta.confidence === 'strong' ? 'review' : meta.confidence,
+    ambiguous,
+    candidateMargin: margin,
     candidateRankings: buildCandidateRankings(matrixRow, webGroup),
   };
 }
 
-// --- Hungarian algorithm (unchanged) ---
+// --- Assignment with an independent no-match option for every incoming deal ---
 
-function hungarian(matrix, n, m) {
-  const size = Math.max(n, m);
+export function assignCandidateMatrix(matrix, n, m) {
+  const size = n + m;
   const cost = [];
   for (let i = 0; i < size; i++) {
     cost[i] = [];
@@ -474,7 +485,7 @@ function hungarian(matrix, n, m) {
   const result = [];
   const assigned = new Array(n).fill(-1);
   for (let j = 1; j <= size; j++) {
-    if (p[j] > 0 && p[j] <= n && j <= m) assigned[p[j] - 1] = j - 1;
+    if (p[j] > 0 && p[j] <= n && j <= m && matrix[p[j] - 1][j - 1].score > 0) assigned[p[j] - 1] = j - 1;
   }
   for (let i = 0; i < n; i++) result.push([i, assigned[i]]);
   return result;
@@ -511,7 +522,7 @@ function greedyMatch(hqGroup, webGroup, matrix) {
       hq: hqGroup[i],
       web: a ? webGroup[a.webIdx] : null,
       meta: a
-        ? attachCandidateRankings(a.meta, matrix[i], webGroup)
+        ? attachCandidateRankings(a.meta, matrix[i], webGroup, a.webIdx)
         : fallback,
     });
   }
@@ -528,12 +539,12 @@ function optimalMatch(hqGroup, webGroup) {
     }
   }
   if (n <= 20 && m <= 20) {
-    const assignment = hungarian(matrix, n, m);
+    const assignment = assignCandidateMatrix(matrix, n, m);
     return assignment.map(([i, j]) => ({
       hq: hqGroup[i],
       web: j !== -1 ? webGroup[j] : null,
       meta: j !== -1
-        ? attachCandidateRankings(matrix[i][j], matrix[i], webGroup)
+        ? attachCandidateRankings(matrix[i][j], matrix[i], webGroup, j)
         : attachCandidateRankings(buildEmptyMeta(), matrix[i], webGroup),
     }));
   }

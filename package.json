@@ -12,7 +12,8 @@
     "core:wasm": "wasm-pack build deal-core --target web --out-dir ../src/wasm/deal-core && node -e \"require('fs').rmSync('src/wasm/deal-core/.gitignore', { force: true })\"",
     "test:fixtures": "node scripts/run-regression-fixtures.js",
     "test:workflow": "node scripts/test-operator-workflow.js",
-    "test": "npm run core:test && npm run test:fixtures && npm run test:workflow"
+    "test:matching": "node scripts/test-matching.js",
+    "test": "npm run core:test && npm run test:fixtures && npm run test:workflow && npm run test:matching"
   },
   "dependencies": {
     "canvas-confetti": "^1.6.0",
