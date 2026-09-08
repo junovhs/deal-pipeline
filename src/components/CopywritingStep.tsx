@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   parseRawToGroups,
   generatePrompt,
@@ -147,6 +147,10 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
     setPendingData(null);
   }, []);
 
+  // Tracks which copyable fields have been clicked per deal, so page 3 can
+  // auto-mark a deal published once every field has been copied.
+  const copiedFieldsRef = useRef({});
+
   const toggleCheck = useCallback((vIdx, dIdx, forceState = null) => {
     updateSession((prev) => ({
       ...prev,
@@ -155,6 +159,8 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
         deals: g.deals.map((d, di) => {
           if (gi === vIdx && di === dIdx) {
             const next = forceState !== null ? forceState : !d.checked;
+            // Reopening clears the copy tracker so the next full pass re-arms auto-mark.
+            if (!next) delete copiedFieldsRef.current[`${vIdx}-${dIdx}`];
             if (next && prev.finalGroups.every((group, groupIndex) => group.deals.every((deal, dealIndex) => (groupIndex === vIdx && dealIndex === dIdx) || deal.checked))) fireConfetti();
             return { ...d, checked: next };
           }
@@ -164,10 +170,22 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
     }));
   }, [updateSession]);
 
-  const handleCopy = useCallback((text, key, isComplete = false, vIdx = 0, dIdx = 0) => {
+  // autoMark: { field, vIdx, dIdx, deal, showSlug } — once every copyable field
+  // on that deal has been clicked, mark it published automatically.
+  const handleCopy = useCallback((text, key, autoMark = null) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopySuccess((prev) => ({ ...prev, [key]: true }));
-      if (isComplete) toggleCheck(vIdx, dIdx, true);
+      if (autoMark) {
+        const { field, vIdx, dIdx, deal, showSlug } = autoMark;
+        const dealKey = `${vIdx}-${dIdx}`;
+        const copied = { ...(copiedFieldsRef.current[dealKey] || {}), [field]: true };
+        copiedFieldsRef.current[dealKey] = copied;
+        const required = ["h", "d"];
+        if (deal.startDate) required.push("sd");
+        if (deal.endDate) required.push("ed");
+        if (showSlug && deal.urlSlug) required.push("slug");
+        if (required.every((f) => copied[f])) toggleCheck(vIdx, dIdx, true);
+      }
       setTimeout(() => {
         setCopySuccess((prev) => {
           const n = { ...prev };
@@ -508,6 +526,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
               {group.deals.map((deal, dIdx) => {
                 if (!matchesFilter(deal, group)) return null;
                 const sourceAction = (session.sourceActions || []).find(item => item.vendor === group.name && item.text === deal.originalText);
+                const showSlug = sourceAction?.action !== "update";
                 const noteKey = deal.dealId || `${vIdx}-${dIdx}`;
                 return (
                   <div
@@ -553,7 +572,13 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                         <span
                           className={`copy-text deal-headline ${deal.isExclusive ? "deal-exclusive" : ""}`}
                           onClick={() =>
-                            handleCopy(deal.headline, `h-${vIdx}-${dIdx}`)
+                            handleCopy(deal.headline, `h-${vIdx}-${dIdx}`, {
+                              field: "h",
+                              vIdx,
+                              dIdx,
+                              deal,
+                              showSlug,
+                            })
                           }
                         >
                           {deal.headline}
@@ -570,9 +595,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                             handleCopy(
                               deal.description,
                               `d-${vIdx}-${dIdx}`,
-                              false,
-                              vIdx,
-                              dIdx,
+                              { field: "d", vIdx, dIdx, deal, showSlug },
                             )
                           }
                         >
@@ -593,7 +616,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                           <button
                             className="date-pill date-start"
                             onClick={() =>
-                              handleCopy(deal.startDate, `sd-${vIdx}-${dIdx}`)
+                              handleCopy(deal.startDate, `sd-${vIdx}-${dIdx}`, { field: "sd", vIdx, dIdx, deal, showSlug })
                             }
                           >
                             Copy start: {deal.startDate}
@@ -603,17 +626,17 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                           <button
                             className="date-pill date-end"
                             onClick={() =>
-                              handleCopy(deal.endDate, `ed-${vIdx}-${dIdx}`)
+                              handleCopy(deal.endDate, `ed-${vIdx}-${dIdx}`, { field: "ed", vIdx, dIdx, deal, showSlug })
                             }
                           >
                             Copy end: {deal.endDate}
                           </button>
                         )}
-                        {sourceAction?.action !== "update" && <button
+                        {showSlug && <button
                           className="date-pill slug-pill"
                           title="Click to copy URL slug"
                           onClick={() =>
-                            handleCopy(deal.urlSlug, `slug-${vIdx}-${dIdx}`)
+                            handleCopy(deal.urlSlug, `slug-${vIdx}-${dIdx}`, { field: "slug", vIdx, dIdx, deal, showSlug })
                           }
                         >
                           Copy URL slug · {deal.urlSlug}
@@ -626,8 +649,6 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                       </div>
 
                       <div className="publish-fields">
-                        <button className="btn btn-small" onClick={() => handleCopy(deal.headline, `h-${vIdx}-${dIdx}`)}>{copySuccess[`h-${vIdx}-${dIdx}`] ? 'Copied ✓' : 'Copy headline'}</button>
-                        <button className="btn btn-small" onClick={() => handleCopy(deal.description, `d-${vIdx}-${dIdx}`)}>{copySuccess[`d-${vIdx}-${dIdx}`] ? 'Copied ✓' : 'Copy description'}</button>
                         <button className="btn btn-success btn-small" onClick={() => toggleCheck(vIdx, dIdx)}>{deal.checked ? 'Reopen deal' : 'Mark published ✓'}</button>
                       </div>
                       <div className="deal-actions">
