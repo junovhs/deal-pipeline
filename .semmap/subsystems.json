@@ -1,5 +1,21 @@
 [
   {
+    "name": "src-fixtures",
+    "purpose": "src fixtures website (3 files)",
+    "files": [
+      "deal-core/src/fixtures.rs",
+      "deal-core/src/lib.rs",
+      "deal-core/src/website.rs"
+    ],
+    "interface_symbols": [],
+    "hotspot_files": [
+      "deal-core/src/website.rs",
+      "deal-core/src/fixtures.rs"
+    ],
+    "internal_edge_density": 0.5,
+    "external_callers": 0
+  },
+  {
     "name": "components-step",
     "purpose": "components step copywriting (3 files)",
     "files": [

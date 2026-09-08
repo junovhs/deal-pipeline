@@ -1,6 +1,72 @@
 {
-  "generated_at": "2026-08-03T21:43:44Z",
+  "generated_at": "2026-08-10T21:14:14Z",
   "entries": [
+    {
+      "file": "deal-core/src/fixtures.rs",
+      "language": "rust",
+      "idiom_category": "general-idioms",
+      "excerpts": [
+        "//! Executable reports for repository fixtures that exercise public core behavior.",
+        "",
+        "/// Outcome and human-readable evidence for one named regression fixture.",
+        "#[derive(Debug, Clone, PartialEq, Eq)]",
+        "pub struct FixtureCaseReport {",
+        "    pub name: &'static str,",
+        "    pub passed: bool,",
+        "    pub detail: String,",
+        "}",
+        "",
+        "/// Named collection of fixture cases returned to tests or external harnesses.",
+        "#[derive(Debug, Clone, PartialEq, Eq)]",
+        "pub struct FixtureReport {",
+        "    pub suite: &'static str,",
+        "    pub cases: Vec<FixtureCaseReport>,"
+      ]
+    },
+    {
+      "file": "deal-core/src/types.rs",
+      "language": "rust",
+      "idiom_category": "general-idioms",
+      "excerpts": [
+        "//! Shared serialized contracts for parser output, diagnostics, provenance, and",
+        "//! supplier-resolution uncertainty.",
+        "",
+        "use serde::{Deserialize, Serialize};",
+        "",
+        "/// Stable API envelope that carries either data or a typed error plus any",
+        "/// non-fatal diagnostics gathered while producing the result.",
+        "#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]",
+        "#[serde(rename_all = \"camelCase\")]",
+        "pub struct CoreResult<T> {",
+        "    pub ok: bool,",
+        "    #[serde(skip_serializing_if = \"Option::is_none\")]",
+        "    pub data: Option<T>,",
+        "    #[serde(skip_serializing_if = \"Option::is_none\")]",
+        "    pub error: Option<CoreError>,"
+      ]
+    },
+    {
+      "file": "deal-core/src/website.rs",
+      "language": "rust",
+      "idiom_category": "result-option-idiom",
+      "excerpts": [
+        "//! Validation boundary for operator-supplied website exports.",
+        "",
+        "use serde::{Deserialize, Serialize};",
+        "use serde_json::Value;",
+        "",
+        "use crate::{CoreDiagnostic, CoreDiagnosticKind, CoreError, CoreResult, DiagnosticSeverity};",
+        "",
+        "/// Recognized website deal rows plus explicit accounting for every inspected",
+        "/// record, allowing partial exports to surface discarded-row diagnostics.",
+        "#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]",
+        "#[serde(rename_all = \"camelCase\")]",
+        "pub struct WebsiteExportBatch {",
+        "    pub inspected_count: u32,",
+        "    pub recognized_count: u32,",
+        "    pub ignored_count: u32,"
+      ]
+    },
     {
       "file": "scripts/run-regression-fixtures.js",
       "language": "javascript",
@@ -20,7 +86,7 @@
         "} from \"../src/logic/dedupe.js\";",
         "import { resolveVendor } from \"../src/logic/suppliers.js\";",
         "import {",
-        "  parseRawToGroups,"
+        "  createDealSlug,"
       ]
     },
     {
@@ -59,12 +125,12 @@
         "  cleanAndParsePatchJSON,",
         "  applyDealPatch,",
         "  appendDealToRawInput,",
+        "  createDealSlug,",
         "} from \"../logic/copywriting.js\";",
         "",
         "let confettiLoaded = false;",
         "let confettiFn = null;",
-        "",
-        "function loadConfetti() {"
+        ""
       ]
     },
     {
@@ -83,10 +149,10 @@
         "  });",
         "}",
         "",
-        "export default function DealtagStep({ session, onSessionChange, onComplete, showToast }) {",
-        "  const leftRef = useRef(null);",
-        "  const rightRef = useRef(null);",
-        "  const syncing = useRef(false);"
+        "/**",
+        " * Presents raw-email tagging as a reviewable two-pane operation. It delegates",
+        " * classification to `transform`, keeps input and output scrolling aligned, and",
+        " * hands only the operator-reviewed tagged text to the Dedupe step."
       ]
     },
     {
@@ -106,9 +172,9 @@
         "  return Array.isArray(data) ? data : data.entries || data.data || [];",
         "}",
         "",
-        "export default function DedupeStep({ session, onSessionChange, onComplete, showToast }) {",
-        "  const fileRef = useRef(null);",
-        "  const [importError, setImportError] = useState('');"
+        "/**",
+        " * Orchestrates website-export validation, supplier-scoped matching, and human",
+        " * review of matched, extension, and unmatched deals. Matcher inputs are frozen"
       ]
     },
     {
@@ -126,11 +192,11 @@
         "//   - Validation + merge",
         "// =============================================================================",
         "",
+        "/** Default operator-editable policy embedded in batch and repair prompts. */",
         "export const DEFAULT_HOUSE_STYLE = `ABSOLUTE RULES (violating these is a critical error):",
         "",
         "1. NEVER ADD FACTUAL CLAIMS that are not in the source.",
-        "- If the source says \"$100 OBC\", do NOT add \"per stateroom\", \"per person\", \"per cabin\", or any other qualifier that isn't explicitly stated.",
-        "- If the source says \"PPGs for 2\", that means \"Free Gratuities for 2\" — do NOT change the meaning."
+        "- If the source says \"$100 OBC\", do NOT add \"per stateroom\", \"per person\", \"per cabin\", or any other qualifier that isn't explicitly stated."
       ]
     },
     {
@@ -143,6 +209,7 @@
         "  validateWebsiteExport as validateWebsiteExportWasm,",
         "} from '../wasm/deal-core/deal_core.js';",
         "",
+        "/** JSON-compatible success/failure envelope shared across the WASM boundary. */",
         "export type CoreResult<T> =",
         "  | {",
         "      ok: true;",
@@ -151,8 +218,7 @@
         "        kind: string;",
         "        severity: string;",
         "        message: string;",
-        "        lineNumber?: number;",
-        "        rawText?: string;"
+        "        lineNumber?: number;"
       ]
     },
     {
@@ -170,7 +236,7 @@
         "",
         "const SECTION_HEADING = /(offers?)\\s*:?\\s*$/i;",
         "const DATE_RE = /(?:\\b\\d{1,2}\\/\\d{1,2}(?:\\/\\d{2,4})?\\b|\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)[a-z]*\\b\\s*\\d{1,2},?\\s*\\d{2,4})/i;",
-        "const DEAL_MARKER = /(ends?\\b|ongoing\\b|end\\s*date\\b|valid\\s*(?:through|until)\\b|expires?\\b)/i;",
+        "const DEAL_MARKER = /(ends?\\b|ongoing\\b|end\\s*date\\b|valid\\s*(?:through|until)\\b|expires?\\b|capacity\\s+controlled\\b|limited\\s+availability\\b)/i;",
         "const DEAL_CUES = /\\b(save|savings?|off|deposit|gratuities|obc|upgrade|kids\\s+sail\\s+free|reduced)\\b/i;",
         "const BULLET_PREFIX = /^\\s*(?:\\u00e2\\u20ac\\u00a2|\\u2022)\\s*/;",
         "",
@@ -241,6 +307,28 @@
         "",
         "/**",
         " * @param {any} rows"
+      ]
+    },
+    {
+      "file": "deal-core/src/lib.rs",
+      "language": "rust",
+      "idiom_category": "result-option-idiom",
+      "excerpts": [
+        "//! Deterministic parsing and website-export validation exposed to the browser",
+        "//! through a JSON-compatible WASM boundary.",
+        "",
+        "use serde::Serialize;",
+        "use wasm_bindgen::prelude::*;",
+        "",
+        "mod fixtures;",
+        "mod types;",
+        "mod website;",
+        "",
+        "pub use fixtures::*;",
+        "pub use types::*;",
+        "pub use website::*;",
+        "",
+        "#[wasm_bindgen(js_name = parseRawEmail)]"
       ]
     }
   ]

@@ -9,3 +9,5 @@ deal-core/target/
 # semmap artifacts (regenerable, not committed - DEC-10)
 SEMMAP.md
 .semmap/
+
+/target/

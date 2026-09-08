@@ -52,6 +52,32 @@
     "analysis": {}
   },
   {
+    "path": "deal-core/Cargo.toml",
+    "layer": 0,
+    "file_kind": "script",
+    "description": "Workspace configuration.",
+    "exports": [],
+    "hotspot": false,
+    "description_authored": false,
+    "weighted_fan_in": 0,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {}
+  },
+  {
+    "path": "neti.toml",
+    "layer": 0,
+    "file_kind": "script",
+    "description": "Configuration for neti.",
+    "exports": [],
+    "hotspot": false,
+    "description_authored": false,
+    "weighted_fan_in": 0,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {}
+  },
+  {
     "path": "north-star.md",
     "layer": 0,
     "file_kind": "generated",
@@ -126,6 +152,143 @@
     }
   },
   {
+    "path": "deal-core/src/fixtures.rs",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Executable reports for repository fixtures that exercise public core behavior.",
+    "exports": [
+      "run_fixture_suite",
+      "FixtureCaseReport",
+      "FixtureReport.passed",
+      "FixtureReport"
+    ],
+    "hotspot": false,
+    "description_authored": true,
+    "weighted_fan_in": 1,
+    "fan_in": 1,
+    "risk_score": 1.0,
+    "analysis": {
+      "functions": {
+        "total": 4,
+        "public": 2,
+        "max_cognitive_complexity": 0,
+        "avg_cognitive_complexity": 0
+      },
+      "types": {
+        "total": 2,
+        "public": 2
+      },
+      "calls": {
+        "total_calls": 35,
+        "resolved_calls": 6,
+        "unresolved_calls": 29,
+        "resolution_rate": 0.17142858
+      },
+      "docs": {
+        "documented_symbols": 5,
+        "undocumented_public": 0
+      },
+      "activation": {
+        "total_sites": 9,
+        "kinds": [
+          "callback-surface"
+        ]
+      }
+    }
+  },
+  {
+    "path": "deal-core/src/types.rs",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Shared serialized contracts for parser output, diagnostics, provenance, and supplier-resolution uncertainty.",
+    "exports": [
+      "ParsedLineRecord",
+      "CoreDiagnosticKind",
+      "SupplierResolution",
+      "DealSource"
+    ],
+    "hotspot": false,
+    "description_authored": true,
+    "weighted_fan_in": 3,
+    "fan_in": 2,
+    "risk_score": 3.0,
+    "analysis": {
+      "functions": {
+        "total": 3,
+        "public": 2,
+        "max_cognitive_complexity": 0,
+        "avg_cognitive_complexity": 0
+      },
+      "types": {
+        "total": 12,
+        "public": 12
+      },
+      "calls": {
+        "total_calls": 56,
+        "resolved_calls": 14,
+        "unresolved_calls": 42,
+        "resolution_rate": 0.25
+      },
+      "docs": {
+        "documented_symbols": 15,
+        "undocumented_public": 0
+      },
+      "activation": {
+        "total_sites": 8,
+        "kinds": [
+          "callback-surface"
+        ]
+      }
+    }
+  },
+  {
+    "path": "deal-core/src/website.rs",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Validation boundary for operator-supplied website exports.",
+    "exports": [
+      "validate_website_export_core",
+      "WebsiteExportBatch"
+    ],
+    "hotspot": false,
+    "description_authored": true,
+    "weighted_fan_in": 3,
+    "fan_in": 2,
+    "risk_score": 3.6,
+    "analysis": {
+      "functions": {
+        "total": 6,
+        "public": 1,
+        "max_cognitive_complexity": 3,
+        "avg_cognitive_complexity": 0
+      },
+      "types": {
+        "total": 1,
+        "public": 1
+      },
+      "calls": {
+        "total_calls": 78,
+        "resolved_calls": 9,
+        "unresolved_calls": 69,
+        "resolution_rate": 0.115384616
+      },
+      "control_flow": {
+        "max_nesting_depth": 1,
+        "cognitive_complexity": 3
+      },
+      "docs": {
+        "documented_symbols": 3,
+        "undocumented_public": 0
+      },
+      "activation": {
+        "total_sites": 17,
+        "kinds": [
+          "callback-surface"
+        ]
+      }
+    }
+  },
+  {
     "path": "package-lock.json",
     "layer": 1,
     "file_kind": "generated",
@@ -150,12 +313,12 @@
     "fan_in": 0,
     "risk_score": 0.0,
     "evidence_lines": [
-      "async/await usage in `main` (L42-L295)",
-      "async/await usage in `readFixture` (L28-L30)",
-      "module-level const `__dirname` (L23)",
-      "module-level const `fixtureDir` (L24-L26)",
-      "persistence pattern in `main` (L42-L295)",
-      "persistence pattern in `readFixture` (L28-L30)"
+      "async/await usage in `main` (L44-L377)",
+      "async/await usage in `readFixture` (L30-L32)",
+      "module-level const `__dirname` (L25)",
+      "module-level const `fixtureDir` (L26-L28)",
+      "persistence pattern in `main` (L44-L377)",
+      "persistence pattern in `readFixture` (L30-L32)"
     ],
     "semantic_summary": "async",
     "analysis": {
@@ -166,10 +329,10 @@
         "avg_cognitive_complexity": 1
       },
       "calls": {
-        "total_calls": 383,
+        "total_calls": 447,
         "resolved_calls": 12,
-        "unresolved_calls": 371,
-        "resolution_rate": 0.03133159
+        "unresolved_calls": 435,
+        "resolution_rate": 0.026845638
       },
       "control_flow": {
         "max_nesting_depth": 1,
@@ -182,7 +345,7 @@
         "has_spawn": false
       },
       "activation": {
-        "total_sites": 21,
+        "total_sites": 24,
         "kinds": [
           "callback-surface"
         ]
@@ -193,20 +356,20 @@
     "path": "src/App.tsx",
     "layer": 1,
     "file_kind": "production",
-    "description": "Implements App functionality.",
+    "description": "Owns the three-step workflow shell and the durable browser session shared by Tag, Dedupe, and Copy.",
     "exports": [
       "App",
       "default"
     ],
     "hotspot": false,
-    "description_authored": false,
+    "description_authored": true,
     "weighted_fan_in": 0,
     "fan_in": 0,
     "risk_score": 4.666667,
     "evidence_lines": [
       "module-level const `STEPS` (L8-L12)",
       "module-level const `STORAGE_KEY` (L14)",
-      "swallowed-error site in `App` (L65-L277)"
+      "swallowed-error site in `App` (L70-L282)"
     ],
     "semantic_summary": "error-swallowing",
     "analysis": {
@@ -239,8 +402,8 @@
         "has_spawn": true
       },
       "docs": {
-        "documented_symbols": 0,
-        "undocumented_public": 1
+        "documented_symbols": 1,
+        "undocumented_public": 0
       },
       "activation": {
         "total_sites": 12,
@@ -255,7 +418,7 @@
     "path": "src/components/CopywritingStep.tsx",
     "layer": 1,
     "file_kind": "production",
-    "description": "Implements copywriting step.",
+    "description": "Manages the manual AI-copy workflow from prompt generation through lint review, targeted repair, completion tracking, and field-by-field clipboard handoff.",
     "exports": [
       "CopywritingStep",
       "default"
@@ -265,30 +428,30 @@
       "syntax-degraded"
     ],
     "hotspot": false,
-    "description_authored": false,
+    "description_authored": true,
     "weighted_fan_in": 1,
     "fan_in": 1,
-    "risk_score": 8.6,
+    "risk_score": 8.8,
     "evidence_lines": [
-      "module-level mutable static `confettiFn` (L13)",
-      "module-level mutable static `confettiLoaded` (L12)"
+      "module-level mutable static `confettiFn` (L14)",
+      "module-level mutable static `confettiLoaded` (L13)"
     ],
     "analysis": {
       "functions": {
         "total": 4,
         "public": 1,
-        "max_cognitive_complexity": 28,
+        "max_cognitive_complexity": 29,
         "avg_cognitive_complexity": 7
       },
       "calls": {
-        "total_calls": 545,
+        "total_calls": 587,
         "resolved_calls": 2,
-        "unresolved_calls": 543,
-        "resolution_rate": 0.0036697248
+        "unresolved_calls": 585,
+        "resolution_rate": 0.003407155
       },
       "control_flow": {
         "max_nesting_depth": 3,
-        "cognitive_complexity": 30
+        "cognitive_complexity": 31
       },
       "concurrency": {
         "total_sites": 3,
@@ -297,8 +460,8 @@
         "has_spawn": true
       },
       "docs": {
-        "documented_symbols": 0,
-        "undocumented_public": 1
+        "documented_symbols": 1,
+        "undocumented_public": 0
       },
       "syntax": {
         "error_count": 2,
@@ -317,13 +480,13 @@
     "path": "src/components/DealtagStep.tsx",
     "layer": 1,
     "file_kind": "production",
-    "description": "Implements dealtag step.",
+    "description": "Presents raw-email tagging as a reviewable two-pane operation.",
     "exports": [
       "DealtagStep",
       "default"
     ],
     "hotspot": false,
-    "description_authored": false,
+    "description_authored": true,
     "weighted_fan_in": 1,
     "fan_in": 1,
     "risk_score": 1.4,
@@ -345,8 +508,8 @@
         "cognitive_complexity": 3
       },
       "docs": {
-        "documented_symbols": 0,
-        "undocumented_public": 1
+        "documented_symbols": 1,
+        "undocumented_public": 0
       },
       "activation": {
         "total_sites": 6,
@@ -361,7 +524,7 @@
     "path": "src/components/DedupeStep.tsx",
     "layer": 1,
     "file_kind": "production",
-    "description": "Implements dedupe step.",
+    "description": "Orchestrates website-export validation, supplier-scoped matching, and human review of matched, extension, and unmatched deals.",
     "exports": [
       "DedupeStep",
       "default"
@@ -370,12 +533,12 @@
       "complex-flow"
     ],
     "hotspot": false,
-    "description_authored": false,
+    "description_authored": true,
     "weighted_fan_in": 3,
     "fan_in": 2,
     "risk_score": 9.8,
     "evidence_lines": [
-      "async/await usage in `DedupeStep` (L13-L394)"
+      "async/await usage in `DedupeStep` (L19-L400)"
     ],
     "semantic_summary": "async",
     "analysis": {
@@ -402,8 +565,8 @@
         "has_spawn": false
       },
       "docs": {
-        "documented_symbols": 0,
-        "undocumented_public": 1
+        "documented_symbols": 1,
+        "undocumented_public": 0
       },
       "activation": {
         "total_sites": 24,
@@ -419,50 +582,51 @@
     "path": "src/logic/copywriting.js",
     "layer": 1,
     "file_kind": "production",
-    "description": "Validates and merge.",
+    "description": "Default operator-editable policy embedded in batch and repair prompts.",
     "exports": [
       "appendDealToRawInput",
       "cleanAndParsePatchJSON",
       "parseRawToGroups",
       "cleanAndParseJSON"
     ],
-    "quality_tags": [
-      "undocumented"
-    ],
     "hotspot": true,
-    "description_authored": false,
+    "description_authored": true,
     "weighted_fan_in": 4,
     "fan_in": 3,
-    "risk_score": 6.4,
+    "risk_score": 6.8,
     "evidence_lines": [
-      "module-level const `ALLOWED_AI_WORDS` (L202-L282)",
-      "module-level const `CODE_PATTERN` (L284-L285)",
-      "module-level const `DEFAULT_HOUSE_STYLE` (L11-L54)",
-      "module-level const `RATE_CODE_PATTERN` (L286)"
+      "module-level const `CODE_PATTERN` (L300-L301)",
+      "module-level const `DEFAULT_HOUSE_STYLE` (L12-L55)",
+      "module-level const `HEADLINE_SCOPE_GROUPS` (L237-L251)",
+      "module-level const `MATERIAL_CLAIM_GROUPS` (L213-L226)",
+      "module-level const `MATERIAL_SCOPE_GROUPS` (L228-L233)",
+      "module-level const `NUMBER_WORDS` (L253-L258)",
+      "module-level const `RATE_CODE_PATTERN` (L302)",
+      "module-level const `SLUG_STOP_WORDS` (L304-L307)"
     ],
     "analysis": {
       "functions": {
-        "total": 12,
-        "public": 10,
-        "max_cognitive_complexity": 12,
-        "avg_cognitive_complexity": 4
+        "total": 17,
+        "public": 11,
+        "max_cognitive_complexity": 14,
+        "avg_cognitive_complexity": 3
       },
       "calls": {
-        "total_calls": 491,
-        "resolved_calls": 8,
-        "unresolved_calls": 483,
-        "resolution_rate": 0.01629328
+        "total_calls": 666,
+        "resolved_calls": 22,
+        "unresolved_calls": 644,
+        "resolution_rate": 0.033033032
       },
       "control_flow": {
         "max_nesting_depth": 3,
-        "cognitive_complexity": 56
+        "cognitive_complexity": 67
       },
       "docs": {
-        "documented_symbols": 0,
-        "undocumented_public": 11
+        "documented_symbols": 12,
+        "undocumented_public": 0
       },
       "activation": {
-        "total_sites": 19,
+        "total_sites": 43,
         "kinds": [
           "callback-surface"
         ]
@@ -483,18 +647,15 @@
       "WebsiteExportBatch",
       "validateWebsiteExport"
     ],
-    "quality_tags": [
-      "undocumented"
-    ],
-    "hotspot": false,
+    "hotspot": true,
     "description_authored": false,
-    "weighted_fan_in": 2,
-    "fan_in": 2,
-    "risk_score": 4.0,
+    "weighted_fan_in": 4,
+    "fan_in": 3,
+    "risk_score": 6.0,
     "evidence_lines": [
-      "async/await usage in `loadDealCore` (L33-L35)",
-      "async/await usage in `parseRawEmail` (L37-L83)",
-      "async/await usage in `validateWebsiteExport` (L92-L97)"
+      "async/await usage in `loadDealCore` (L35-L37)",
+      "async/await usage in `parseRawEmail` (L45-L91)",
+      "async/await usage in `validateWebsiteExport` (L107-L112)"
     ],
     "semantic_summary": "async",
     "analysis": {
@@ -525,8 +686,8 @@
         "has_spawn": false
       },
       "docs": {
-        "documented_symbols": 0,
-        "undocumented_public": 5
+        "documented_symbols": 5,
+        "undocumented_public": 0
       },
       "activation": {
         "total_sites": 2,
@@ -540,7 +701,7 @@
     "path": "src/logic/dealtag.js",
     "layer": 1,
     "file_kind": "production",
-    "description": "Implements transform functionality.",
+    "description": "Converts a raw weekly promotion email into the tagged `v`/`d`/`ed` text consumed by dedupe and copywriting.",
     "exports": [
       "transform"
     ],
@@ -548,7 +709,7 @@
       "complex-flow"
     ],
     "hotspot": false,
-    "description_authored": false,
+    "description_authored": true,
     "weighted_fan_in": 3,
     "fan_in": 2,
     "risk_score": 11.2,
@@ -577,8 +738,8 @@
         "cognitive_complexity": 53
       },
       "docs": {
-        "documented_symbols": 0,
-        "undocumented_public": 1
+        "documented_symbols": 1,
+        "undocumented_public": 0
       },
       "activation": {
         "total_sites": 24,
@@ -600,7 +761,6 @@
       "dateFmt"
     ],
     "quality_tags": [
-      "undocumented",
       "complex-flow"
     ],
     "hotspot": false,
@@ -609,12 +769,12 @@
     "fan_in": 2,
     "risk_score": 10.0,
     "evidence_lines": [
-      "module-level const `FEATURE_PATTERNS` (L89-L113)",
-      "module-level const `FEATURE_WEIGHTS` (L142-L148)",
-      "module-level const `IGNORE_FEATURES` (L140)",
-      "module-level const `TEXT_STOPS` (L150-L154)",
-      "module-level const `dateFmt` (L165-L167)",
-      "module-level mutable static `nextId` (L537)"
+      "module-level const `FEATURE_PATTERNS` (L96-L120)",
+      "module-level const `FEATURE_WEIGHTS` (L149-L155)",
+      "module-level const `IGNORE_FEATURES` (L147)",
+      "module-level const `TEXT_STOPS` (L157-L161)",
+      "module-level const `dateFmt` (L173-L175)",
+      "module-level mutable static `nextId` (L545)"
     ],
     "analysis": {
       "functions": {
@@ -634,8 +794,8 @@
         "cognitive_complexity": 164
       },
       "docs": {
-        "documented_symbols": 0,
-        "undocumented_public": 7
+        "documented_symbols": 8,
+        "undocumented_public": 0
       },
       "activation": {
         "total_sites": 58,
@@ -652,18 +812,15 @@
     "path": "src/logic/suppliers.js",
     "layer": 1,
     "file_kind": "production",
-    "description": "Implements supplier catalog.",
+    "description": "Canonical supplier records enriched with the default normalized family key.",
     "exports": [
       "isTagEligibleSupplier",
       "familyOf",
       "canonicalVendor",
       "resolveVendor"
     ],
-    "quality_tags": [
-      "undocumented"
-    ],
     "hotspot": true,
-    "description_authored": false,
+    "description_authored": true,
     "weighted_fan_in": 6,
     "fan_in": 4,
     "risk_score": 7.4,
@@ -674,8 +831,8 @@
       "module-level const `SUPPLIER_FAMILIES` (L196-L201)",
       "module-level const `SUPPLIER_KEYWORD_RULES` (L237-L242)",
       "module-level const `TAG_INELIGIBLE_SUPPLIERS` (L244-L254)",
-      "module-level const `aliases` (L285)",
-      "module-level const `ambiguousByLabel` (L304)",
+      "module-level const `aliases` (L293)",
+      "module-level const `ambiguousByLabel` (L313)",
       "6 more detector facts omitted from SEMMAP.md"
     ],
     "analysis": {
@@ -696,8 +853,8 @@
         "cognitive_complexity": 16
       },
       "docs": {
-        "documented_symbols": 0,
-        "undocumented_public": 10
+        "documented_symbols": 10,
+        "undocumented_public": 0
       },
       "activation": {
         "total_sites": 23,
@@ -864,6 +1021,66 @@
         "undocumented_public": 9
       }
     }
+  },
+  {
+    "path": "deal-core/src/lib.rs",
+    "layer": 3,
+    "file_kind": "production",
+    "description": "Deterministic parsing and website-export validation exposed to the browser through a JSON-compatible WASM boundary.",
+    "exports": [
+      "validate_website_export",
+      "parse_raw_email_core",
+      "parse_raw_email"
+    ],
+    "hotspot": false,
+    "description_authored": true,
+    "weighted_fan_in": 2,
+    "fan_in": 1,
+    "risk_score": 3.0,
+    "analysis": {
+      "functions": {
+        "total": 8,
+        "public": 3,
+        "max_cognitive_complexity": 5,
+        "avg_cognitive_complexity": 1
+      },
+      "calls": {
+        "total_calls": 116,
+        "resolved_calls": 7,
+        "unresolved_calls": 109,
+        "resolution_rate": 0.060344826
+      },
+      "control_flow": {
+        "max_nesting_depth": 1,
+        "cognitive_complexity": 8
+      },
+      "docs": {
+        "documented_symbols": 4,
+        "undocumented_public": 0
+      },
+      "activation": {
+        "total_sites": 23,
+        "kinds": [
+          "callback-surface"
+        ]
+      },
+      "guards": {
+        "total_sites": 1
+      }
+    }
+  },
+  {
+    "path": "prototypes/import-clean-poc.html",
+    "layer": 3,
+    "file_kind": "production",
+    "description": "Deal Intake Lab — Proof of Concept",
+    "exports": [],
+    "hotspot": false,
+    "description_authored": false,
+    "weighted_fan_in": 0,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "analysis": {}
   },
   {
     "path": "src/App.css",

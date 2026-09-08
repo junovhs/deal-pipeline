@@ -60,6 +60,31 @@
     "kind": "import"
   },
   {
+    "from": "deal-core/src/lib.rs",
+    "to": "deal-core/src/fixtures.rs",
+    "kind": "import"
+  },
+  {
+    "from": "deal-core/src/lib.rs",
+    "to": "deal-core/src/types.rs",
+    "kind": "import"
+  },
+  {
+    "from": "deal-core/src/lib.rs",
+    "to": "deal-core/src/website.rs",
+    "kind": "import"
+  },
+  {
+    "from": "deal-core/src/fixtures.rs",
+    "to": "deal-core/src/lib.rs",
+    "kind": "call"
+  },
+  {
+    "from": "deal-core/src/website.rs",
+    "to": "src/logic/dealCoreClient.ts",
+    "kind": "call"
+  },
+  {
     "from": "src/App.tsx",
     "to": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
     "kind": "call"
@@ -102,6 +127,16 @@
   {
     "from": "src/wasm/deal-core/deal_core.js",
     "to": "src/wasm/deal-core/deal_core_bg.wasm.d.ts",
+    "kind": "call"
+  },
+  {
+    "from": "deal-core/src/lib.rs",
+    "to": "deal-core/src/website.rs",
+    "kind": "call"
+  },
+  {
+    "from": "deal-core/src/lib.rs",
+    "to": "deal-core/src/types.rs",
     "kind": "call"
   }
 ]

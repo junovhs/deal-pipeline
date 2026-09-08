@@ -1,12 +1,3 @@
 {
-  "mcpServers": {
-    "ishoo": {
-      "command": "ishoo",
-      "args": ["mcp"]
-    },
-    "semmap": {
-      "command": "semmap",
-      "args": ["mcp"]
-    }
-  }
+  "mcpServers": {}
 }

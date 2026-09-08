@@ -94,6 +94,12 @@ Generated semantic map.
 `criticism.md`
 Support file for criticism.
 
+`deal-core/Cargo.toml`
+Workspace configuration.
+
+`neti.toml`
+Configuration for neti.
+
 `north-star.md`
 Support file for north-star.
 
@@ -112,6 +118,18 @@ Exports: default
 
 ## Layer 1 -- Domain (Engine)
 
+`deal-core/src/fixtures.rs`
+Executable reports for repository fixtures that exercise public core behavior.
+Exports: run_fixture_suite, FixtureCaseReport, FixtureReport.passed, FixtureReport
+
+`deal-core/src/types.rs`
+Shared serialized contracts for parser output, diagnostics, provenance, and supplier-resolution uncertainty.
+Exports: ParsedLineRecord, CoreDiagnosticKind, SupplierResolution, DealSource
+
+`deal-core/src/website.rs`
+Validation boundary for operator-supplied website exports.
+Exports: validate_website_export_core, WebsiteExportBatch
+
 `package-lock.json`
 Implements package-lock functionality. data.
 
@@ -119,60 +137,64 @@ Implements package-lock functionality. data.
 Implements run-regression-fixtures functionality.
 Semantic: async
 Evidence:
-- async/await usage in `main` (L42-L295)
-- async/await usage in `readFixture` (L28-L30)
-- module-level const `__dirname` (L23)
-- module-level const `fixtureDir` (L24-L26)
-- persistence pattern in `main` (L42-L295)
-- persistence pattern in `readFixture` (L28-L30)
+- async/await usage in `main` (L44-L377)
+- async/await usage in `readFixture` (L30-L32)
+- module-level const `__dirname` (L25)
+- module-level const `fixtureDir` (L26-L28)
+- persistence pattern in `main` (L44-L377)
+- persistence pattern in `readFixture` (L30-L32)
 
 `src/App.tsx`
-Implements App functionality.
+Owns the three-step workflow shell and the durable browser session shared by Tag, Dedupe, and Copy.
 Exports: App, default
 Semantic: error-swallowing
 Evidence:
 - module-level const `STEPS` (L8-L12)
 - module-level const `STORAGE_KEY` (L14)
-- swallowed-error site in `App` (L65-L277)
+- swallowed-error site in `App` (L70-L282)
 
 `src/components/CopywritingStep.tsx`
-Implements copywriting step. [QUALITY:complex-flow,syntax-degraded]
+Manages the manual AI-copy workflow from prompt generation through lint review, targeted repair, completion tracking, and field-by-field clipboard handoff. [QUALITY:complex-flow,syntax-degraded]
 Exports: CopywritingStep, default
 Evidence:
-- module-level mutable static `confettiFn` (L13)
-- module-level mutable static `confettiLoaded` (L12)
+- module-level mutable static `confettiFn` (L14)
+- module-level mutable static `confettiLoaded` (L13)
 
 `src/components/DealtagStep.tsx`
-Implements dealtag step.
+Presents raw-email tagging as a reviewable two-pane operation.
 Exports: DealtagStep, default
 
 `src/components/DedupeStep.tsx`
-Implements dedupe step. [QUALITY:complex-flow]
+Orchestrates website-export validation, supplier-scoped matching, and human review of matched, extension, and unmatched deals. [QUALITY:complex-flow]
 Exports: DedupeStep, default
 Semantic: async
 Evidence:
-- async/await usage in `DedupeStep` (L13-L394)
+- async/await usage in `DedupeStep` (L19-L400)
 
 `src/logic/copywriting.js`
-Validates and merge. [HOTSPOT] [QUALITY:undocumented]
+Default operator-editable policy embedded in batch and repair prompts. [HOTSPOT]
 Exports: appendDealToRawInput, cleanAndParsePatchJSON, parseRawToGroups, cleanAndParseJSON
 Evidence:
-- module-level const `ALLOWED_AI_WORDS` (L202-L282)
-- module-level const `CODE_PATTERN` (L284-L285)
-- module-level const `DEFAULT_HOUSE_STYLE` (L11-L54)
-- module-level const `RATE_CODE_PATTERN` (L286)
+- module-level const `CODE_PATTERN` (L300-L301)
+- module-level const `DEFAULT_HOUSE_STYLE` (L12-L55)
+- module-level const `HEADLINE_SCOPE_GROUPS` (L237-L251)
+- module-level const `MATERIAL_CLAIM_GROUPS` (L213-L226)
+- module-level const `MATERIAL_SCOPE_GROUPS` (L228-L233)
+- module-level const `NUMBER_WORDS` (L253-L258)
+- module-level const `RATE_CODE_PATTERN` (L302)
+- module-level const `SLUG_STOP_WORDS` (L304-L307)
 
 `src/logic/dealCoreClient.ts`
-Parses raw email. [QUALITY:undocumented]
+Parses raw email. [HOTSPOT]
 Exports: parseRawEmail, loadDealCore, WebsiteExportBatch, validateWebsiteExport
 Semantic: async
 Evidence:
-- async/await usage in `loadDealCore` (L33-L35)
-- async/await usage in `parseRawEmail` (L37-L83)
-- async/await usage in `validateWebsiteExport` (L92-L97)
+- async/await usage in `loadDealCore` (L35-L37)
+- async/await usage in `parseRawEmail` (L45-L91)
+- async/await usage in `validateWebsiteExport` (L107-L112)
 
 `src/logic/dealtag.js`
-Implements transform functionality. [QUALITY:complex-flow]
+Converts a raw weekly promotion email into the tagged `v`/`d`/`ed` text consumed by dedupe and copywriting. [QUALITY:complex-flow]
 Exports: transform
 Evidence:
 - module-level const `BULLET_PREFIX` (L13)
@@ -182,18 +204,18 @@ Evidence:
 - module-level const `SECTION_HEADING` (L9)
 
 `src/logic/dedupe.js`
-Implements date fmt. [QUALITY:undocumented,complex-flow]
+Implements date fmt. [QUALITY:complex-flow]
 Exports: ingestWebsiteJSON, runFullMatch, parseHQDates, dateFmt
 Evidence:
-- module-level const `FEATURE_PATTERNS` (L89-L113)
-- module-level const `FEATURE_WEIGHTS` (L142-L148)
-- module-level const `IGNORE_FEATURES` (L140)
-- module-level const `TEXT_STOPS` (L150-L154)
-- module-level const `dateFmt` (L165-L167)
-- module-level mutable static `nextId` (L537)
+- module-level const `FEATURE_PATTERNS` (L96-L120)
+- module-level const `FEATURE_WEIGHTS` (L149-L155)
+- module-level const `IGNORE_FEATURES` (L147)
+- module-level const `TEXT_STOPS` (L157-L161)
+- module-level const `dateFmt` (L173-L175)
+- module-level mutable static `nextId` (L545)
 
 `src/logic/suppliers.js`
-Implements supplier catalog. [HOTSPOT] [QUALITY:undocumented]
+Canonical supplier records enriched with the default normalized family key. [HOTSPOT]
 Exports: isTagEligibleSupplier, familyOf, canonicalVendor, resolveVendor
 Evidence:
 - module-level const `SUPPLIER_ALIASES` (L98-L194)
@@ -202,8 +224,8 @@ Evidence:
 - module-level const `SUPPLIER_FAMILIES` (L196-L201)
 - module-level const `SUPPLIER_KEYWORD_RULES` (L237-L242)
 - module-level const `TAG_INELIGIBLE_SUPPLIERS` (L244-L254)
-- module-level const `aliases` (L285)
-- module-level const `ambiguousByLabel` (L304)
+- module-level const `aliases` (L293)
+- module-level const `ambiguousByLabel` (L313)
 - 6 more detector facts omitted from SEMMAP.md
 
 `src/vite-env.d.ts`
@@ -244,6 +266,13 @@ Evidence:
 
 ## Layer 3 -- App / Entrypoints
 
+`deal-core/src/lib.rs`
+Deterministic parsing and website-export validation exposed to the browser through a JSON-compatible WASM boundary.
+Exports: validate_website_export, parse_raw_email_core, parse_raw_email
+
+`prototypes/import-clean-poc.html`
+Deal Intake Lab — Proof of Concept
+
 `src/App.css`
 Implements app functionality. styles.
 
@@ -253,7 +282,7 @@ Implements app functionality. styles.
 ```yaml
 DependencyGraph:
   # --- Entrypoints ---
-  App.css:
+  App.css, import-clean-poc.html:
     Imports: []
     ImportedBy: []
   # --- High Fan-In Hotspots ---
@@ -261,7 +290,7 @@ DependencyGraph:
     Imports: []
     ImportedBy: [dealtag.js, dedupe.js]
   # --- Layer 0 -- Config ---
-  AGENTS.md, CLAUDE.md, SEMMAP.md, criticism.md, north-star.md, package.json, tsconfig.json, vite.config.js:
+  AGENTS.md, CLAUDE.md, SEMMAP.md, criticism.md, neti.toml, north-star.md, package.json, tsconfig.json, vite.config.js:
     Imports: []
     ImportedBy: []
   # --- Layer 1 -- Domain (Engine) ---
@@ -282,7 +311,7 @@ DependencyGraph:
     ImportedBy: [App.tsx, CopywritingStep.tsx]
   dealCoreClient.ts:
     Imports: [deal_core.js]
-    ImportedBy: [App.tsx, DedupeStep.tsx]
+    ImportedBy: [App.tsx, DedupeStep.tsx, website.rs]
   dealtag.js:
     Imports: [suppliers.js]
     ImportedBy: [DealtagStep.tsx]
@@ -292,6 +321,22 @@ DependencyGraph:
   package-lock.json, scripts/run-regression-fixtures.js, vite-env.d.ts:
     Imports: []
     ImportedBy: []
+  # --- Subproject -- deal-core ---
+  deal-core/Cargo.toml:
+    Imports: []
+    ImportedBy: []
+  fixtures.rs:
+    Imports: [lib.rs]
+    ImportedBy: [lib.rs]
+  lib.rs:
+    Imports: [fixtures.rs, types.rs, website.rs]
+    ImportedBy: [fixtures.rs]
+  types.rs:
+    Imports: []
+    ImportedBy: [lib.rs]
+  website.rs:
+    Imports: [dealCoreClient.ts]
+    ImportedBy: [lib.rs]
   # --- Subproject -- src/wasm/deal-core ---
   deal_core.d.ts, src/wasm/deal-core/package.json:
     Imports: []
