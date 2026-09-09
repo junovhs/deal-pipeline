@@ -11,3 +11,6 @@ SEMMAP.md
 .semmap/
 
 /target/
+
+# Ishoo writes .bak copies of managed markdown; they are local only.
+*.bak
