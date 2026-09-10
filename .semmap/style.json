@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-10T21:14:14Z",
+  "generated_at": "2026-09-08T23:21:28Z",
   "entries": [
     {
       "file": "deal-core/src/fixtures.rs",
@@ -77,16 +77,16 @@
         "import path from \"node:path\";",
         "import { fileURLToPath } from \"node:url\";",
         "",
-        "import { transform } from \"../src/logic/dealtag.js\";",
+        "import { filterAcceptedTaggedText, transform } from \"../src/logic/dealtag.js\";",
         "import {",
+        "  categorizeDedupeResults,",
+        "  exportUnmatched,",
         "  ingestWebsiteJSON,",
         "  parseHQ,",
         "  resetIds,",
         "  runFullMatch,",
         "} from \"../src/logic/dedupe.js\";",
-        "import { resolveVendor } from \"../src/logic/suppliers.js\";",
-        "import {",
-        "  createDealSlug,"
+        "import { resolveVendor } from \"../src/logic/suppliers.js\";"
       ]
     },
     {
@@ -102,9 +102,9 @@
         "import { parseRawEmail } from './logic/dealCoreClient';",
         "",
         "const STEPS = [",
-        "  { key: 'tag', label: 'Tag', desc: 'Shape the source', intro: 'Turn the weekly source into clean, structured deal lines.' },",
-        "  { key: 'dedupe', label: 'Dedupe', desc: 'Compare the site', intro: 'Compare the new batch with the live website export.' },",
-        "  { key: 'copy', label: 'Copy', desc: 'Finish the batch', intro: 'Write, review, and track the website-ready deal copy.' },",
+        "  { key: 'tag', label: 'Tag', desc: 'Prepare the source', intro: 'Turn the weekly source into clean, structured deal lines.' },",
+        "  { key: 'dedupe', label: 'Compare', desc: 'Find the work', intro: 'Review the weakest matches first. Keep only new offers and changes.' },",
+        "  { key: 'copy', label: 'Publish', desc: 'Review & copy', intro: 'Check the copy, move each field to the website, and track what’s done.' },",
         "];",
         "",
         "const STORAGE_KEY = 'deal-pipeline-session';",
@@ -116,7 +116,7 @@
       "language": "typescript",
       "idiom_category": "general-idioms",
       "excerpts": [
-        "import React, { useState, useEffect, useCallback, useMemo } from \"react\";",
+        "import React, { useState, useEffect, useCallback, useMemo, useRef } from \"react\";",
         "import {",
         "  parseRawToGroups,",
         "  generatePrompt,",
@@ -139,7 +139,7 @@
       "idiom_category": "general-idioms",
       "excerpts": [
         "import React, { useMemo, useRef, useCallback } from 'react';",
-        "import { transform } from '../logic/dealtag.js';",
+        "import { filterAcceptedTaggedText, transform } from '../logic/dealtag.js';",
         "",
         "function parseLines(output) {",
         "  if (!output) return [];",
@@ -163,8 +163,10 @@
         "import React, { useMemo, useCallback, useRef, useState } from 'react';",
         "import {",
         "  parseHQ, resetIds, ingestWebsiteJSON, runFullMatch,",
-        "  exportUnmatched, sameDay, dateFmt,",
+        "  categorizeDedupeResults, exportUnmatched, sameDay, dateFmt,",
+        "  MATCHER_VERSION,",
         "} from '../logic/dedupe.js';",
+        "import { buildReviewQueue, dateChange } from '../logic/review.js';",
         "import { validateWebsiteExport } from '../logic/dealCoreClient';",
         "",
         "function parseWebsiteRows(text) {",
@@ -172,9 +174,7 @@
         "  return Array.isArray(data) ? data : data.entries || data.data || [];",
         "}",
         "",
-        "/**",
-        " * Orchestrates website-export validation, supplier-scoped matching, and human",
-        " * review of matched, extension, and unmatched deals. Matcher inputs are frozen"
+        "/**"
       ]
     },
     {
@@ -266,6 +266,28 @@
       ]
     },
     {
+      "file": "src/logic/review.js",
+      "language": "javascript",
+      "idiom_category": "general-idioms",
+      "excerpts": [
+        "import { sameDay } from './dedupe.js';",
+        "",
+        "// A score proposes identity; only the operator can confirm unchanged copy.",
+        "export function buildReviewQueue(categorized, decisions = {}) {",
+        "  if (!categorized) return { review: [], changes: [], unchanged: [], newDeals: [], excluded: [] };",
+        "  const queue = { review: [], changes: [], unchanged: [], newDeals: [], excluded: categorized.excluded };",
+        "  for (const row of [...categorized.matched, ...categorized.extensions, ...categorized.unmatched]) {",
+        "    const decision = decisions[row.hq.id];",
+        "    if (decision === 'new') queue.newDeals.push(row);",
+        "    else if (decision === 'change') queue.changes.push(row);",
+        "    else if (decision === 'unchanged') queue.unchanged.push(row);",
+        "    else if (categorized.unmatched.includes(row)) queue.newDeals.push(row);",
+        "    else queue.review.push(row);",
+        "  }",
+        "  queue.review.sort((a, b) => (a.meta?.score ?? 0) - (b.meta?.score ?? 0));"
+      ]
+    },
+    {
       "file": "src/logic/suppliers.js",
       "language": "javascript",
       "idiom_category": "general-idioms",
@@ -329,6 +351,28 @@
         "pub use website::*;",
         "",
         "#[wasm_bindgen(js_name = parseRawEmail)]"
+      ]
+    },
+    {
+      "file": "scripts/test-matching.js",
+      "language": "javascript",
+      "idiom_category": "general-idioms",
+      "excerpts": [
+        "import assert from 'node:assert/strict';",
+        "import { assignCandidateMatrix, parseHQ, resetIds, ingestWebsiteJSON, runFullMatch } from '../src/logic/dedupe.js';",
+        "",
+        "const assign = values => assignCandidateMatrix(values.map(row => row.map(score => ({ score }))), values.length, values[0].length);",
+        "assert.deepEqual(assign([[10, 9], [0, -100]]), [[0, 0], [1, -1]], 'A bad deal must not displace a better match');",
+        "assert.deepEqual(assign([[-2, -4]]), [[0, -1]], 'All negative candidates remain unmatched');",
+        "assert.deepEqual(assign([[0]]), [[0, -1]], 'No evidence does not imply a match');",
+        "assert.deepEqual(assign([[10, 9], [9, 1]]), [[0, 1], [1, 0]], 'Keep globally optimal positive assignments');",
+        "assert.deepEqual(assign([[10], [1]]), [[0, 0], [1, -1]], 'One website deal cannot be assigned twice');",
+        "",
+        "function match(source, titles, expiryDate = null) {",
+        "  resetIds();",
+        "  return runFullMatch(parseHQ(`v\\tNorwegian Cruise Line\\nd\\t${source}`), ingestWebsiteJSON(titles.map(title => ({ shopOverline: 'Norwegian Cruise Line', title, expiryDate })) ))[0];",
+        "}",
+        "const source = 'Free Gratuities for 2 + $100 OBC ends 06/15/26';"
       ]
     }
   ]

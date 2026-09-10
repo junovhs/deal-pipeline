@@ -6,8 +6,8 @@
     "typescript",
     "javascript"
   ],
-  "total_files": 32,
-  "total_lines": 15344,
+  "total_files": 35,
+  "total_lines": 15435,
   "subsystems": [
     "src-fixtures",
     "components-step"
@@ -15,12 +15,12 @@
   "entry_points": [
     "deal-core/src/lib.rs"
   ],
-  "generated_at": "2026-08-10T21:14:14Z",
+  "generated_at": "2026-09-08T23:21:30Z",
   "omni_ast_version": "0.4.27",
   "file_hashes": {
     "AGENTS.md": "d51e2e7247649854c3bc5f9b9c616eb4fb6b9a15c009a17a495c2808138adbf9",
     "CLAUDE.md": "16a25a8c965d1a26ce5c459d80fc1bf9e3c98955271d02f7541eecfa8931cd4d",
-    "SEMMAP.md": "cfd0142604a5ad475961ef6b44bfafcdca1ce262a2db657f6cb3a2563dcbb780",
+    "HOTFIX.md": "3a59ff2ed2ff55ffcef551747477e3f2eb18f9fd917572280baae7d66e8fb4a9",
     "criticism.md": "75c8e37068eddda887202da7d3f9baf080d5714e0e54bc870dac67b1c9287151",
     "deal-core/Cargo.toml": "ac755c786bb7792c30aaae1c350c0d2eca534cfab9ce5400c535faeb1fb5857d",
     "deal-core/src/fixtures.rs": "ac3a4725f6bff81118070ce9b13a0d9a51776d135665be66c12a5b1ce1d92a22",
@@ -30,18 +30,21 @@
     "neti.toml": "0a237ad4f7ebfb0f37c19a067a1ae3f2439522e4a77568218d8326e6bcb9574d",
     "north-star.md": "062dcb2760153828d4516427acc863e9c22dd555add8c38664e8b289f1e8d3d0",
     "package-lock.json": "de9356bbe6dcb9d53fbe43b8c280de7cfe313cf493f6225c3948d9c8bc507d30",
-    "package.json": "b9d7fae09bebcd8fc1364e040ffe607e865508220ca5e2a801ce68d000521a89",
+    "package.json": "0c6e5b16e967dba84738f0edd25f3274a5b3a829d970e52b2eebce01706d89ea",
     "prototypes/import-clean-poc.html": "3904b5dee5669c3c5cee50f45e03cae23b02573b374f24cb80e5e3cfad3c3d29",
     "scripts/run-regression-fixtures.js": "4d74cf80eed89820fe1d0065ef21b7a9506c233a82c1d10574dde4fa920c6bcf",
-    "src/App.css": "55cb21129675c2c8d3f4dbab401d6e2248131c3f3bb5c6c3a1f4b316ba40cf1b",
-    "src/App.tsx": "39327cef115432ef457a16fe00ab6b453097c64ffb33dc5ac51f841f8ef9d516",
-    "src/components/CopywritingStep.tsx": "39a3feb465f6af10b79f8430c48a9e18f5d45347f55d7bb6352290f9182bb4c1",
-    "src/components/DealtagStep.tsx": "fa358c0731a57d320aabf7ca22af6a7047941ee9678f9fbe99a4e9c769a9213f",
-    "src/components/DedupeStep.tsx": "0b17e2f577ac05fb43416e5bded4f77b5f96da4d3d85ad20aa56a3621eb0a520",
-    "src/logic/copywriting.js": "921ff9aff1d7994e0e71a222d9f35b58d653e6db68d6d299bf98b99d7b03423f",
+    "scripts/test-matching.js": "c3c53af5e66a5de74c22f66561cbfe23f4be0e544ab4dcacfffa59ffd7eb044c",
+    "scripts/test-operator-workflow.js": "46d2983f1dfb040e9382e9a10a1c92294e9ad7c8fe84eef48b4e16347ac99433",
+    "src/App.css": "c371d69700f1c2dfa494d136b425a495fd421e1f4525b4e7d2fdfde9a5aa72f0",
+    "src/App.tsx": "efb96ab99fd0cfbc37a68e100f056b8d4a73c0f51bb276f5eb036f2fe2bb6703",
+    "src/components/CopywritingStep.tsx": "8e139a03cb100a6c494d428ac7f27dc81a049720ce30b5a2c43489ecfa3c67a9",
+    "src/components/DealtagStep.tsx": "5a1bca47aa8ed810613e49924eefb5c28c6ba041019af0ea7a867e97346313e1",
+    "src/components/DedupeStep.tsx": "0a51a732135acc20423453d4cee4500afab71517e4d9876a299538e6a0e187c8",
+    "src/logic/copywriting.js": "36ab379a0121ee19edf32e2e4d325d3fea390c7db9a414c258a24ff8ba453126",
     "src/logic/dealCoreClient.ts": "0e9dc9aedbf3feb686d276cde771de23aeb967210a91361881c05cced5070a7b",
     "src/logic/dealtag.js": "e8f7bf666767cdfacec5a149a3e3fd7ed3fed36dda7fa04d438db0ff2f2558ac",
-    "src/logic/dedupe.js": "ec35f30d9a95ca9f6261c2031fe6de5c39cf9150bacd1d19fbf6f01d9fe0a9d1",
+    "src/logic/dedupe.js": "6a372912459ed0fdf6bb7425fa0be2cc3c55f190dd2c355cafef3f81d647fffe",
+    "src/logic/review.js": "14e7a9d173be5d8810fbbc28deb21f6ae6b1c967cbba83f08d14ba7be940fbc4",
     "src/logic/suppliers.js": "823f92d9699b8213620e48b76dcc682442ca19f3b625065b5fe4ef58719decbc",
     "src/vite-env.d.ts": "424faf9241dd699dda995b367ed36665732da1e6ec1f33b2fd40394488ecac92",
     "src/wasm/deal-core/deal_core.d.ts": "c19258f9927c06671f6074084a5246d1dab97faaab1f73d372820a634bd41a9a",
@@ -51,5 +54,5 @@
     "tsconfig.json": "5da3c9892486a1849b6f4123addf604aa8b883e4e52a8318f91bc2ad873b223b",
     "vite.config.js": "6dc0ce25c4170ac9fbadb4dbd19ca5c2ceb57b9c5efc5090b82e2923f53dd679"
   },
-  "generated_at_commit": "f60364b17a5521f0da6e821b96692f9cf3fa3f1b"
+  "generated_at_commit": "ffbefad0a2c47750b3c7cf8841b3453d391f1077"
 }

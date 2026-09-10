@@ -41,6 +41,11 @@
   },
   {
     "from": "src/components/DedupeStep.tsx",
+    "to": "src/logic/review.js",
+    "kind": "import"
+  },
+  {
+    "from": "src/components/DedupeStep.tsx",
     "to": "src/logic/dealCoreClient.ts",
     "kind": "import"
   },
@@ -57,6 +62,11 @@
   {
     "from": "src/logic/dedupe.js",
     "to": "src/logic/suppliers.js",
+    "kind": "import"
+  },
+  {
+    "from": "src/logic/review.js",
+    "to": "src/logic/dedupe.js",
     "kind": "import"
   },
   {
@@ -107,6 +117,11 @@
   {
     "from": "src/components/DedupeStep.tsx",
     "to": "src/logic/dedupe.js",
+    "kind": "call"
+  },
+  {
+    "from": "src/components/DedupeStep.tsx",
+    "to": "src/logic/review.js",
     "kind": "call"
   },
   {

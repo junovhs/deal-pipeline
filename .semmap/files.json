@@ -26,10 +26,10 @@
     "analysis": {}
   },
   {
-    "path": "SEMMAP.md",
+    "path": "HOTFIX.md",
     "layer": 0,
     "file_kind": "generated",
-    "description": "Generated semantic map.",
+    "description": "Support file for HOTFIX.",
     "exports": [],
     "hotspot": false,
     "description_authored": false,
@@ -313,12 +313,12 @@
     "fan_in": 0,
     "risk_score": 0.0,
     "evidence_lines": [
-      "async/await usage in `main` (L44-L377)",
-      "async/await usage in `readFixture` (L30-L32)",
-      "module-level const `__dirname` (L25)",
-      "module-level const `fixtureDir` (L26-L28)",
-      "persistence pattern in `main` (L44-L377)",
-      "persistence pattern in `readFixture` (L30-L32)"
+      "async/await usage in `main` (L46-L404)",
+      "async/await usage in `readFixture` (L32-L34)",
+      "module-level const `__dirname` (L27)",
+      "module-level const `fixtureDir` (L28-L30)",
+      "persistence pattern in `main` (L46-L404)",
+      "persistence pattern in `readFixture` (L32-L34)"
     ],
     "semantic_summary": "async",
     "analysis": {
@@ -329,10 +329,10 @@
         "avg_cognitive_complexity": 1
       },
       "calls": {
-        "total_calls": 447,
-        "resolved_calls": 12,
-        "unresolved_calls": 435,
-        "resolution_rate": 0.026845638
+        "total_calls": 504,
+        "resolved_calls": 11,
+        "unresolved_calls": 493,
+        "resolution_rate": 0.021825397
       },
       "control_flow": {
         "max_nesting_depth": 1,
@@ -369,7 +369,7 @@
     "evidence_lines": [
       "module-level const `STEPS` (L8-L12)",
       "module-level const `STORAGE_KEY` (L14)",
-      "swallowed-error site in `App` (L70-L282)"
+      "swallowed-error site in `App` (L72-L309)"
     ],
     "semantic_summary": "error-swallowing",
     "analysis": {
@@ -380,10 +380,10 @@
         "avg_cognitive_complexity": 5
       },
       "calls": {
-        "total_calls": 212,
-        "resolved_calls": 5,
-        "unresolved_calls": 207,
-        "resolution_rate": 0.023584906
+        "total_calls": 258,
+        "resolved_calls": 6,
+        "unresolved_calls": 252,
+        "resolution_rate": 0.023255814
       },
       "control_flow": {
         "max_nesting_depth": 2,
@@ -431,48 +431,51 @@
     "description_authored": true,
     "weighted_fan_in": 1,
     "fan_in": 1,
-    "risk_score": 8.8,
+    "risk_score": 11.2,
     "evidence_lines": [
       "module-level mutable static `confettiFn` (L14)",
       "module-level mutable static `confettiLoaded` (L13)"
     ],
     "analysis": {
       "functions": {
-        "total": 4,
-        "public": 1,
-        "max_cognitive_complexity": 29,
-        "avg_cognitive_complexity": 7
+        "total": 5,
+        "public": 2,
+        "max_cognitive_complexity": 41,
+        "avg_cognitive_complexity": 8
       },
       "calls": {
-        "total_calls": 587,
-        "resolved_calls": 2,
-        "unresolved_calls": 585,
-        "resolution_rate": 0.003407155
+        "total_calls": 720,
+        "resolved_calls": 5,
+        "unresolved_calls": 715,
+        "resolution_rate": 0.0069444445
       },
       "control_flow": {
         "max_nesting_depth": 3,
-        "cognitive_complexity": 31
+        "cognitive_complexity": 43
       },
       "concurrency": {
-        "total_sites": 3,
+        "total_sites": 4,
         "has_async": false,
         "has_locks": false,
         "has_spawn": true
       },
       "docs": {
         "documented_symbols": 1,
-        "undocumented_public": 0
+        "undocumented_public": 1
       },
       "syntax": {
         "error_count": 2,
         "missing_count": 0
       },
       "activation": {
-        "total_sites": 22,
+        "total_sites": 25,
         "kinds": [
           "callback-surface",
           "component-export"
         ]
+      },
+      "guards": {
+        "total_sites": 2
       }
     }
   },
@@ -489,30 +492,30 @@
     "description_authored": true,
     "weighted_fan_in": 1,
     "fan_in": 1,
-    "risk_score": 1.4,
+    "risk_score": 1.6,
     "analysis": {
       "functions": {
         "total": 2,
         "public": 1,
-        "max_cognitive_complexity": 2,
-        "avg_cognitive_complexity": 1
+        "max_cognitive_complexity": 3,
+        "avg_cognitive_complexity": 2
       },
       "calls": {
-        "total_calls": 120,
+        "total_calls": 129,
         "resolved_calls": 1,
-        "unresolved_calls": 119,
-        "resolution_rate": 0.008333334
+        "unresolved_calls": 128,
+        "resolution_rate": 0.007751938
       },
       "control_flow": {
         "max_nesting_depth": 1,
-        "cognitive_complexity": 3
+        "cognitive_complexity": 4
       },
       "docs": {
         "documented_symbols": 1,
         "undocumented_public": 0
       },
       "activation": {
-        "total_sites": 6,
+        "total_sites": 7,
         "kinds": [
           "callback-surface",
           "component-export"
@@ -524,56 +527,62 @@
     "path": "src/components/DedupeStep.tsx",
     "layer": 1,
     "file_kind": "production",
-    "description": "Orchestrates website-export validation, supplier-scoped matching, and human review of matched, extension, and unmatched deals.",
+    "description": "Orchestrates website-export validation, supplier-scoped matching, and human review of matched, extension, unmatched, and excluded deals.",
     "exports": [
       "DedupeStep",
       "default"
     ],
     "quality_tags": [
-      "complex-flow"
+      "undocumented",
+      "complex-flow",
+      "syntax-degraded"
     ],
     "hotspot": false,
     "description_authored": true,
     "weighted_fan_in": 3,
     "fan_in": 2,
-    "risk_score": 9.8,
+    "risk_score": 8.8,
     "evidence_lines": [
-      "async/await usage in `DedupeStep` (L19-L400)"
+      "async/await usage in `DedupeStep` (L21-L245)",
+      "async/await usage in `handleExportUnmatched` (L150-L156)"
     ],
     "semantic_summary": "async",
     "analysis": {
       "functions": {
-        "total": 5,
-        "public": 1,
-        "max_cognitive_complexity": 24,
-        "avg_cognitive_complexity": 4
+        "total": 8,
+        "public": 6,
+        "max_cognitive_complexity": 19,
+        "avg_cognitive_complexity": 3
       },
       "calls": {
-        "total_calls": 647,
-        "resolved_calls": 3,
-        "unresolved_calls": 644,
-        "resolution_rate": 0.004636785
+        "total_calls": 562,
+        "resolved_calls": 5,
+        "unresolved_calls": 557,
+        "resolution_rate": 0.008896797
       },
       "control_flow": {
         "max_nesting_depth": 2,
-        "cognitive_complexity": 24
+        "cognitive_complexity": 19
       },
       "concurrency": {
-        "total_sites": 3,
+        "total_sites": 6,
         "has_async": true,
         "has_locks": false,
         "has_spawn": false
       },
       "docs": {
         "documented_symbols": 1,
-        "undocumented_public": 0
+        "undocumented_public": 5
+      },
+      "syntax": {
+        "error_count": 1,
+        "missing_count": 0
       },
       "activation": {
-        "total_sites": 24,
+        "total_sites": 17,
         "kinds": [
           "callback-surface",
-          "component-export",
-          "string-dispatch"
+          "component-export"
         ]
       }
     }
@@ -589,11 +598,14 @@
       "parseRawToGroups",
       "cleanAndParseJSON"
     ],
+    "quality_tags": [
+      "complex-flow"
+    ],
     "hotspot": true,
     "description_authored": true,
     "weighted_fan_in": 4,
     "fan_in": 3,
-    "risk_score": 6.8,
+    "risk_score": 10.2,
     "evidence_lines": [
       "module-level const `CODE_PATTERN` (L300-L301)",
       "module-level const `DEFAULT_HOUSE_STYLE` (L12-L55)",
@@ -608,25 +620,25 @@
       "functions": {
         "total": 17,
         "public": 11,
-        "max_cognitive_complexity": 14,
-        "avg_cognitive_complexity": 3
+        "max_cognitive_complexity": 31,
+        "avg_cognitive_complexity": 4
       },
       "calls": {
-        "total_calls": 666,
+        "total_calls": 724,
         "resolved_calls": 22,
-        "unresolved_calls": 644,
-        "resolution_rate": 0.033033032
+        "unresolved_calls": 702,
+        "resolution_rate": 0.03038674
       },
       "control_flow": {
         "max_nesting_depth": 3,
-        "cognitive_complexity": 67
+        "cognitive_complexity": 84
       },
       "docs": {
         "documented_symbols": 12,
         "undocumented_public": 0
       },
       "activation": {
-        "total_sites": 43,
+        "total_sites": 44,
         "kinds": [
           "callback-surface"
         ]
@@ -701,15 +713,16 @@
     "path": "src/logic/dealtag.js",
     "layer": 1,
     "file_kind": "production",
-    "description": "Converts a raw weekly promotion email into the tagged `v`/`d`/`ed` text consumed by dedupe and copywriting.",
+    "description": "Implements filter accepted tagged text.",
     "exports": [
+      "filterAcceptedTaggedText",
       "transform"
     ],
     "quality_tags": [
       "complex-flow"
     ],
     "hotspot": false,
-    "description_authored": true,
+    "description_authored": false,
     "weighted_fan_in": 3,
     "fan_in": 2,
     "risk_score": 11.2,
@@ -722,27 +735,27 @@
     ],
     "analysis": {
       "functions": {
-        "total": 9,
-        "public": 1,
+        "total": 10,
+        "public": 2,
         "max_cognitive_complexity": 41,
         "avg_cognitive_complexity": 5
       },
       "calls": {
-        "total_calls": 157,
+        "total_calls": 164,
         "resolved_calls": 11,
-        "unresolved_calls": 146,
-        "resolution_rate": 0.070063695
+        "unresolved_calls": 153,
+        "resolution_rate": 0.067073174
       },
       "control_flow": {
         "max_nesting_depth": 4,
         "cognitive_complexity": 53
       },
       "docs": {
-        "documented_symbols": 1,
+        "documented_symbols": 2,
         "undocumented_public": 0
       },
       "activation": {
-        "total_sites": 24,
+        "total_sites": 25,
         "kinds": [
           "callback-surface"
         ]
@@ -753,58 +766,102 @@
     "path": "src/logic/dedupe.js",
     "layer": 1,
     "file_kind": "production",
-    "description": "Implements date fmt.",
+    "description": "Partitions comparison results into explicit, count-conserving outcomes.",
     "exports": [
+      "assignCandidateMatrix",
+      "categorizeDedupeResults",
       "ingestWebsiteJSON",
-      "runFullMatch",
-      "parseHQDates",
-      "dateFmt"
+      "runFullMatch"
     ],
     "quality_tags": [
       "complex-flow"
     ],
-    "hotspot": false,
-    "description_authored": false,
-    "weighted_fan_in": 3,
-    "fan_in": 2,
-    "risk_score": 10.0,
+    "hotspot": true,
+    "description_authored": true,
+    "weighted_fan_in": 4,
+    "fan_in": 3,
+    "risk_score": 11.0,
     "evidence_lines": [
       "module-level const `FEATURE_PATTERNS` (L96-L120)",
       "module-level const `FEATURE_WEIGHTS` (L149-L155)",
       "module-level const `IGNORE_FEATURES` (L147)",
+      "module-level const `MATCHER_VERSION` (L192)",
       "module-level const `TEXT_STOPS` (L157-L161)",
       "module-level const `dateFmt` (L173-L175)",
-      "module-level mutable static `nextId` (L545)"
+      "module-level mutable static `nextId` (L556)"
     ],
     "analysis": {
       "functions": {
-        "total": 28,
-        "public": 7,
+        "total": 29,
+        "public": 9,
         "max_cognitive_complexity": 35,
         "avg_cognitive_complexity": 5
       },
       "calls": {
-        "total_calls": 983,
-        "resolved_calls": 44,
-        "unresolved_calls": 939,
-        "resolution_rate": 0.044760935
+        "total_calls": 1047,
+        "resolved_calls": 45,
+        "unresolved_calls": 1002,
+        "resolution_rate": 0.042979944
       },
       "control_flow": {
         "max_nesting_depth": 4,
-        "cognitive_complexity": 164
+        "cognitive_complexity": 154
       },
       "docs": {
-        "documented_symbols": 8,
-        "undocumented_public": 0
+        "documented_symbols": 9,
+        "undocumented_public": 2
       },
       "activation": {
-        "total_sites": 58,
+        "total_sites": 64,
         "kinds": [
           "callback-surface"
         ]
       },
       "guards": {
-        "total_sites": 1
+        "total_sites": 2
+      }
+    }
+  },
+  {
+    "path": "src/logic/review.js",
+    "layer": 1,
+    "file_kind": "production",
+    "description": "Creates review queue.",
+    "exports": [
+      "buildReviewQueue",
+      "dateChange"
+    ],
+    "hotspot": false,
+    "description_authored": false,
+    "weighted_fan_in": 3,
+    "fan_in": 2,
+    "risk_score": 4.6,
+    "analysis": {
+      "functions": {
+        "total": 2,
+        "public": 2,
+        "max_cognitive_complexity": 8,
+        "avg_cognitive_complexity": 5
+      },
+      "calls": {
+        "total_calls": 74,
+        "resolved_calls": 0,
+        "unresolved_calls": 74,
+        "resolution_rate": 0.0
+      },
+      "control_flow": {
+        "max_nesting_depth": 2,
+        "cognitive_complexity": 11
+      },
+      "docs": {
+        "documented_symbols": 0,
+        "undocumented_public": 2
+      },
+      "activation": {
+        "total_sites": 5,
+        "kinds": [
+          "callback-surface"
+        ]
       }
     }
   },
@@ -1094,5 +1151,84 @@
     "fan_in": 0,
     "risk_score": 0.0,
     "analysis": {}
+  },
+  {
+    "path": "scripts/test-matching.js",
+    "layer": 4,
+    "file_kind": "script",
+    "description": "Implements test-matching functionality.",
+    "exports": [],
+    "hotspot": false,
+    "description_authored": false,
+    "weighted_fan_in": 0,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "evidence_lines": [
+      "module-level const `clear` (L21)",
+      "module-level const `conflict` (L30)",
+      "module-level const `partial` (L32)",
+      "module-level const `percent` (L37)",
+      "module-level const `repeated` (L35)",
+      "module-level const `source` (L15)",
+      "module-level const `tied` (L16)"
+    ],
+    "analysis": {
+      "functions": {
+        "total": 2,
+        "public": 0,
+        "max_cognitive_complexity": 0,
+        "avg_cognitive_complexity": 0
+      },
+      "calls": {
+        "total_calls": 129,
+        "resolved_calls": 8,
+        "unresolved_calls": 121,
+        "resolution_rate": 0.062015504
+      },
+      "control_flow": {
+        "max_nesting_depth": 0,
+        "cognitive_complexity": 0
+      },
+      "activation": {
+        "total_sites": 3,
+        "kinds": [
+          "callback-surface"
+        ]
+      }
+    }
+  },
+  {
+    "path": "scripts/test-operator-workflow.js",
+    "layer": 4,
+    "file_kind": "script",
+    "description": "Implements test-operator-workflow functionality.",
+    "exports": [],
+    "hotspot": false,
+    "description_authored": false,
+    "weighted_fan_in": 0,
+    "fan_in": 0,
+    "risk_score": 0.0,
+    "evidence_lines": [
+      "module-level const `categories` (L11)",
+      "module-level const `clean` (L28)",
+      "module-level const `payload` (L17)",
+      "module-level const `rows` (L6-L10)",
+      "module-level const `source` (L27)",
+      "module-level mutable static `queue` (L12)"
+    ],
+    "analysis": {
+      "calls": {
+        "total_calls": 119,
+        "resolved_calls": 0,
+        "unresolved_calls": 119,
+        "resolution_rate": 0.0
+      },
+      "activation": {
+        "total_sites": 10,
+        "kinds": [
+          "callback-surface"
+        ]
+      }
+    }
   }
 ]

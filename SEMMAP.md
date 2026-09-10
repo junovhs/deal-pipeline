@@ -88,8 +88,8 @@ Support file for AGENTS.
 `CLAUDE.md`
 Support file for CLAUDE.
 
-`SEMMAP.md`
-Generated semantic map.
+`HOTFIX.md`
+Support file for HOTFIX.
 
 `criticism.md`
 Support file for criticism.
@@ -137,12 +137,12 @@ Implements package-lock functionality. data.
 Implements run-regression-fixtures functionality.
 Semantic: async
 Evidence:
-- async/await usage in `main` (L44-L377)
-- async/await usage in `readFixture` (L30-L32)
-- module-level const `__dirname` (L25)
-- module-level const `fixtureDir` (L26-L28)
-- persistence pattern in `main` (L44-L377)
-- persistence pattern in `readFixture` (L30-L32)
+- async/await usage in `main` (L46-L404)
+- async/await usage in `readFixture` (L32-L34)
+- module-level const `__dirname` (L27)
+- module-level const `fixtureDir` (L28-L30)
+- persistence pattern in `main` (L46-L404)
+- persistence pattern in `readFixture` (L32-L34)
 
 `src/App.tsx`
 Owns the three-step workflow shell and the durable browser session shared by Tag, Dedupe, and Copy.
@@ -151,7 +151,7 @@ Semantic: error-swallowing
 Evidence:
 - module-level const `STEPS` (L8-L12)
 - module-level const `STORAGE_KEY` (L14)
-- swallowed-error site in `App` (L70-L282)
+- swallowed-error site in `App` (L72-L309)
 
 `src/components/CopywritingStep.tsx`
 Manages the manual AI-copy workflow from prompt generation through lint review, targeted repair, completion tracking, and field-by-field clipboard handoff. [QUALITY:complex-flow,syntax-degraded]
@@ -165,14 +165,15 @@ Presents raw-email tagging as a reviewable two-pane operation.
 Exports: DealtagStep, default
 
 `src/components/DedupeStep.tsx`
-Orchestrates website-export validation, supplier-scoped matching, and human review of matched, extension, and unmatched deals. [QUALITY:complex-flow]
+Orchestrates website-export validation, supplier-scoped matching, and human review of matched, extension, unmatched, and excluded deals. [QUALITY:undocumented,complex-flow,syntax-degraded]
 Exports: DedupeStep, default
 Semantic: async
 Evidence:
-- async/await usage in `DedupeStep` (L19-L400)
+- async/await usage in `DedupeStep` (L21-L245)
+- async/await usage in `handleExportUnmatched` (L150-L156)
 
 `src/logic/copywriting.js`
-Default operator-editable policy embedded in batch and repair prompts. [HOTSPOT]
+Default operator-editable policy embedded in batch and repair prompts. [HOTSPOT] [QUALITY:complex-flow]
 Exports: appendDealToRawInput, cleanAndParsePatchJSON, parseRawToGroups, cleanAndParseJSON
 Evidence:
 - module-level const `CODE_PATTERN` (L300-L301)
@@ -194,8 +195,8 @@ Evidence:
 - async/await usage in `validateWebsiteExport` (L107-L112)
 
 `src/logic/dealtag.js`
-Converts a raw weekly promotion email into the tagged `v`/`d`/`ed` text consumed by dedupe and copywriting. [QUALITY:complex-flow]
-Exports: transform
+Implements filter accepted tagged text. [QUALITY:complex-flow]
+Exports: filterAcceptedTaggedText, transform
 Evidence:
 - module-level const `BULLET_PREFIX` (L13)
 - module-level const `DATE_RE` (L10)
@@ -204,15 +205,20 @@ Evidence:
 - module-level const `SECTION_HEADING` (L9)
 
 `src/logic/dedupe.js`
-Implements date fmt. [QUALITY:complex-flow]
-Exports: ingestWebsiteJSON, runFullMatch, parseHQDates, dateFmt
+Partitions comparison results into explicit, count-conserving outcomes. [HOTSPOT] [QUALITY:complex-flow]
+Exports: assignCandidateMatrix, categorizeDedupeResults, ingestWebsiteJSON, runFullMatch
 Evidence:
 - module-level const `FEATURE_PATTERNS` (L96-L120)
 - module-level const `FEATURE_WEIGHTS` (L149-L155)
 - module-level const `IGNORE_FEATURES` (L147)
+- module-level const `MATCHER_VERSION` (L192)
 - module-level const `TEXT_STOPS` (L157-L161)
 - module-level const `dateFmt` (L173-L175)
-- module-level mutable static `nextId` (L545)
+- module-level mutable static `nextId` (L556)
+
+`src/logic/review.js`
+Creates review queue.
+Exports: buildReviewQueue, dateChange
 
 `src/logic/suppliers.js`
 Canonical supplier records enriched with the default normalized family key. [HOTSPOT]
@@ -276,6 +282,29 @@ Deal Intake Lab — Proof of Concept
 `src/App.css`
 Implements app functionality. styles.
 
+## Layer 4 -- Tests
+
+`scripts/test-matching.js`
+Implements test-matching functionality.
+Evidence:
+- module-level const `clear` (L21)
+- module-level const `conflict` (L30)
+- module-level const `partial` (L32)
+- module-level const `percent` (L37)
+- module-level const `repeated` (L35)
+- module-level const `source` (L15)
+- module-level const `tied` (L16)
+
+`scripts/test-operator-workflow.js`
+Implements test-operator-workflow functionality.
+Evidence:
+- module-level const `categories` (L11)
+- module-level const `clean` (L28)
+- module-level const `payload` (L17)
+- module-level const `rows` (L6-L10)
+- module-level const `source` (L27)
+- module-level mutable static `queue` (L12)
+
 
 ## DependencyGraph
 
@@ -290,7 +319,7 @@ DependencyGraph:
     Imports: []
     ImportedBy: [dealtag.js, dedupe.js]
   # --- Layer 0 -- Config ---
-  AGENTS.md, CLAUDE.md, SEMMAP.md, criticism.md, neti.toml, north-star.md, package.json, tsconfig.json, vite.config.js:
+  AGENTS.md, CLAUDE.md, HOTFIX.md, criticism.md, neti.toml, north-star.md, package.json, tsconfig.json, vite.config.js:
     Imports: []
     ImportedBy: []
   # --- Layer 1 -- Domain (Engine) ---
@@ -304,7 +333,7 @@ DependencyGraph:
     Imports: [dealtag.js]
     ImportedBy: [App.tsx]
   DedupeStep.tsx:
-    Imports: [dealCoreClient.ts, deal_core_bg.wasm.d.ts, dedupe.js]
+    Imports: [dealCoreClient.ts, deal_core_bg.wasm.d.ts, dedupe.js, review.js]
     ImportedBy: [App.tsx, CopywritingStep.tsx]
   copywriting.js:
     Imports: []
@@ -317,8 +346,15 @@ DependencyGraph:
     ImportedBy: [DealtagStep.tsx]
   dedupe.js:
     Imports: [suppliers.js]
-    ImportedBy: [DedupeStep.tsx]
+    ImportedBy: [DedupeStep.tsx, review.js]
   package-lock.json, scripts/run-regression-fixtures.js, vite-env.d.ts:
+    Imports: []
+    ImportedBy: []
+  review.js:
+    Imports: [dedupe.js]
+    ImportedBy: [DedupeStep.tsx]
+  # --- Tests ---
+  scripts/test-matching.js, scripts/test-operator-workflow.js:
     Imports: []
     ImportedBy: []
   # --- Subproject -- deal-core ---
