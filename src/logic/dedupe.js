@@ -151,7 +151,7 @@ function extractMarkers(text, { exclusive = false } = {}) {
   // Dollar, euro and pound figures share one set; the currency symbol is not
   // a marker on its own, only the figures are.
   const dollars = new Set();
-  for (const m of text.matchAll(/(?:[$€£]\s*([\d,]+))|(?:([\d,]+)\s*(?:euros?|pounds?|usd|eur|gbp))/gi)) {
+  for (const m of text.matchAll(/(?:[$€£]\s*([\d,]+))|(?:\b([\d,]+)\s*(?:euros?|pounds?|usd|eur|gbp)\b)/gi)) {
     const val = parseInt((m[1] || m[2]).replace(/,/g, ''), 10);
     if (val > 0 && val < 100000) dollars.add(val);
   }
