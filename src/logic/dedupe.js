@@ -102,8 +102,9 @@ export function parseHQDates(text) {
 // Feature extraction and scoring tables are shared by `extractFeatureBag` and
 // `scorePair`, so keeping them module-scoped makes the match rules explicit.
 const FEATURE_PATTERNS = [
-  ["obc", /\bobc\b|on\s*board\s*credit|bar\s*tab/i],
-  ["ppg", /\bppg\b|prepaid\s*gratuit|free\s*gratuit|gratuit/i],
+  ["obc", /\bobcs?\b|on\s*board\s*credit|bar\s*tab/i],
+  ["ppg", /\bppgs?\b|prepaid\s*gratuit|free\s*gratuit|gratuit/i],
+  ["exclusive", /\bexclusive\b|\btln\b/i],
   ["covert", /\bcovert\b|too\s*low\s*to\s*show|hidden|secret|opaque|private\s*sale|unadvertised/i],
   ["kids-free", /kids?\s*(sail|stay)\s*free/i],
   ["instant", /instant\s*(savings?|credit)/i],
@@ -155,7 +156,7 @@ function extractFeatureBag(text) {
 const IGNORE_FEATURES = new Set(["wave", "flash-sale", "ongoing"]);
 
 const FEATURE_WEIGHTS = {
-  covert: 6, obc: 4, ppg: 4, "kids-free": 4, instant: 4,
+  covert: 6, obc: 4, ppg: 4, "kids-free": 4, instant: 4, exclusive: 3,
   dining: 4, "drinks-wifi": 4, "all-inclusive": 4, airfare: 3,
   "2nd-guest": 3, upgrade: 3, coupon: 3, "no-perk": 4, perk: 3,
   deposit: 3, "shore-ex": 3, spa: 3, military: 5, resident: 5,
