@@ -50,12 +50,20 @@ export function parseHQDates(text) {
     /(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s*[-–]\s*(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/
   );
   if (range) {
-    const y2 = parseYear(range[6]);
-    const y1 = parseYear(range[3] ?? range[6]);
-    if (y1 === null || y2 === null) {
+    let y2 = parseYear(range[6]);
+    let y1 = parseYear(range[3] ?? range[6]);
+    if ((range[3] && y1 === null) || (range[6] && y2 === null)) {
       out.dateWarning = `Could not parse year in date range: "${range[0]}"`;
       return out;
     }
+    if (y2 === null) {
+      // No year written: assume the current year, rolling forward only when
+      // the end date would otherwise already be past.
+      const now = new Date().getFullYear();
+      const tent = toLA(+range[4], +range[5], now);
+      y2 = tent < startOfDay(new Date()) ? now + 1 : now;
+    }
+    if (y1 === null) y1 = y2;
     out.start = toLA(+range[1], +range[2], y1);
     out.end = endOfDay(toLA(+range[4], +range[5], y2));
     return out;
