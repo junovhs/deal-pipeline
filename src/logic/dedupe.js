@@ -110,7 +110,7 @@ export const dateFmt = new Intl.DateTimeFormat("en-US", {
 const TYPE_PATTERNS = [
   ["gratuities", /\bppgs?\b|prepaid\s*gratuit|free\s*gratuit|gratuit/i],
   ["obc", /\bobcs?\b|on\s*board\s*credit|shipboard\s*credit|onboard\s*spending|\bbar\s*tab/i],
-  ["covert", /\bcovert\b|too\s*low\s*to\s*show|hidden|secret|opaque|private\s*sale|unadvertised/i],
+  ["covert", /\bcove?rt?\s*(rates?|fares?|pricing|savings?)|\bcovert\b|too\s*low\s*to\s*show|hidden|secret|opaque|private\s*sale|unadvertised/i],
   ["kids-free", /kids?\s*(sail|stay|travel)\s*free|kids?\s*free/i],
   ["instant-savings", /instant\s*(savings?|credit)/i],
   ["upgrade", /\b\d*-?\s*cat(egory)?\s*upgrade|\bupgrade|\bbalcony\s*(stateroom|room)?\s*(at|for)\s*oceanview|oceanview\s*(at|for)\s*inside/i],
@@ -119,7 +119,9 @@ const TYPE_PATTERNS = [
   ["multi-guest", /2nd\s*guest|second\s*guest|3rd\s*(\/|and|&)?\s*4th|third\s*(and|&)\s*fourth|extra\s*guests?|additional\s*guests?|guests?\s*(sail|fly|stay)\s*free|for\s*cabins?\s*\d/i],
   ["dining", /specialty\s*din|free\s*din|tamarind\s*din|canaletto\s*din|dining\s*(credit|package)|free\s*(meals?|lunch|dinner)/i],
   ["coupon", /coupon\s*booklet|savings?\s*coupon|\bbooklet\b/i],
+  ["gift", /\b(bottle|wine|champagne|prosecco|chocolates?|flowers?|gifts?|welcome\s*basket)\b/i],
   ["perks", /\bperk(?:s)?\b(?!.*\bno\s*perk)|free\s*at\s*sea|amenit/i],
+  ["freebie", /\bcomplimentary\b|\bfree\b|\bbonus\b/i],
   ["no-perk", /\bno\s*perk|perk[\s-]*free/i],
   ["deposit", /reduced\s*deposit|deposit\s*(sale|special)|low\s*deposit|\$\s*\d+\s*deposit|(\d+)%\s*deposit/i],
   ["shore-ex", /shore\s*ex|shore\s*excursion|excursion\s*credit/i],
@@ -129,13 +131,13 @@ const TYPE_PATTERNS = [
   ["loyalty", /double\s*points|bonus\s*points|loyalty|crown\s*&?\s*anchor|captain.?s\s*club|latitudes|mariner|venetian\s*society|past\s*guest|repeat\s*guest|cruisefirst/i],
   ["all-inclusive", /all[\s-]*inclusive|bundled|always\s*included/i],
   ["named-sale", /\b(labor\s*day|memorial\s*day|black\s*friday|cyber|holiday|summer|fall|winter|spring|anniversary|birthday|wave|flash|triple\s*play|early\s*saver)\b.*\b(sale|savings?|event|deals?|rates?)|\b(sale|savings?|event)\b.*\b(labor\s*day|memorial\s*day|black\s*friday|cyber|holiday|anniversary)/i],
-  ["savings", /\bsav(e|ings?)\b|\d\s*%\s*off|\$\s*[\d,]+\s*off|discount|reduced\s*(rates?|fares?|pricing)|low(er|est)?\s*(rates?|fares?)|great\s*rates?|cover\s*rates?|\bfares?\s*from|\bfrom\s*\$/i],
+  ["savings", /\bsav(e|ings?)\b|\d\s*%\s*off|\$\s*[\d,]+\s*off|discount|reduced\s*(rates?|fares?|pricing)|low(er|est)?\s*(rates?|fares?)|great\s*rates?|\bfares?\s*from|\bfrom\s*\$/i],
 ];
 
 // Generic sale/savings wording is dropped when a concrete kind of offer is
 // present, so "Labor Day Sale: 40% off + upgrade" reads as savings + upgrade
 // on both sides regardless of how the website copy was phrased.
-const GENERIC_TYPES = new Set(["savings", "named-sale", "perks"]);
+const GENERIC_TYPES = new Set(["savings", "named-sale", "perks", "freebie"]);
 
 function extractMarkers(text, { exclusive = false } = {}) {
   const types = new Set();
@@ -144,7 +146,8 @@ function extractMarkers(text, { exclusive = false } = {}) {
   }
   if (types.has("named-sale")) { types.delete("named-sale"); types.add("savings"); }
   const specific = [...types].filter(t => !GENERIC_TYPES.has(t));
-  if (specific.length && types.has("perks")) types.delete("perks");
+  if (specific.length || types.has("savings")) { types.delete("perks"); types.delete("freebie"); }
+  else if (types.has("perks")) types.delete("freebie");
   // Savings paired with a concrete perk is common ("save + OBC") and is kept;
   // savings alone is its own kind.
 
@@ -167,7 +170,7 @@ function extractMarkers(text, { exclusive = false } = {}) {
     nights.add(parseInt(m[1], 10));
   }
 
-  const isExclusive = exclusive || /\[exclusive\]|\bexclusive\b|\btln\b/i.test(text);
+  const isExclusive = exclusive || types.has("covert") || /\[exclusive\]|\bexclusive\b|\btln\b/i.test(text);
 
   return { types, exclusive: isExclusive, dollars, percents, nights };
 }
@@ -188,6 +191,7 @@ const TYPE_LABELS = {
   'kids-free': 'Kids free', 'instant-savings': 'Instant savings', upgrade: 'Upgrade',
   'drinks-wifi': 'Drinks / Wi-Fi', airfare: 'Airfare', 'multi-guest': 'Multi-guest discount',
   dining: 'Dining', coupon: 'Coupon booklet', perks: 'Perks', 'no-perk': 'No-perk rate',
+  gift: 'Gift', freebie: 'Something free',
   deposit: 'Deposit', 'shore-ex': 'Shore excursions', spa: 'Spa', military: 'Military',
   resident: 'Resident rate', loyalty: 'Loyalty', 'all-inclusive': 'All-inclusive',
   savings: 'Savings',
