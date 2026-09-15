@@ -262,7 +262,7 @@ function MarkerChecklist({ checks }) {
 function differenceSummary(r) {
   if (!r.web) return r.meta?.noWebDeals ? 'This supplier has no deals on the website yet.' : 'No similar deal on the website for this supplier.';
   if (r.meta?.operatorRejectedMatch) return 'You pulled this into the work list.';
-  const labels = { type: 'type of offer', exclusive: 'exclusivity', expiry: 'expiry date', dollars: 'dollar amounts', percents: 'percentages', nights: 'nights' };
+  const labels = { type: 'type of offer', exclusive: 'exclusivity', expiry: 'expiry date', dollars: 'amounts', percents: 'percentages', nights: 'nights' };
   const diffs = (r.meta?.differences || []).map(key => labels[key] || key);
   if (r.meta?.typeStatus === 'partial') diffs.unshift('type only partly overlaps');
   if (!diffs.length) return '';

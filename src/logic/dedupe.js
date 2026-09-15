@@ -148,9 +148,11 @@ function extractMarkers(text, { exclusive = false } = {}) {
   // Savings paired with a concrete perk is common ("save + OBC") and is kept;
   // savings alone is its own kind.
 
+  // Dollar, euro and pound figures share one set; the currency symbol is not
+  // a marker on its own, only the figures are.
   const dollars = new Set();
-  for (const m of text.matchAll(/\$\s*([\d,]+)/g)) {
-    const val = parseInt(m[1].replace(/,/g, ''), 10);
+  for (const m of text.matchAll(/(?:[$€£]\s*([\d,]+))|(?:([\d,]+)\s*(?:euros?|pounds?|usd|eur|gbp))/gi)) {
+    const val = parseInt((m[1] || m[2]).replace(/,/g, ''), 10);
     if (val > 0 && val < 100000) dollars.add(val);
   }
 
@@ -176,7 +178,7 @@ const MARKER_LABELS = {
   type: 'Type of offer',
   exclusive: 'Exclusive',
   expiry: 'Expiry',
-  dollars: 'Dollar amounts',
+  dollars: 'Amounts',
   percents: 'Percentages',
   nights: 'Nights',
 };
