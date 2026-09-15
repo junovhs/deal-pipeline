@@ -1,18 +1,24 @@
 import { sameDay } from './dedupe.js';
 
-// A score proposes identity; only the operator can confirm unchanged copy.
+// The matcher pre-checks identical rows; only the operator confirms them.
+// Decisions are 'skip' (already on the site) or 'work' (goes to the list).
 export function buildReviewQueue(categorized, decisions = {}) {
-  if (!categorized) return { review: [], changes: [], unchanged: [], newDeals: [], excluded: [] };
-  const queue = { review: [], changes: [], unchanged: [], newDeals: [], excluded: categorized.excluded };
-  for (const row of [...categorized.matched, ...categorized.extensions, ...categorized.unmatched]) {
+  if (!categorized) return { pending: [], skipped: [], work: [], excluded: [] };
+  const queue = { pending: [], skipped: [], work: [], excluded: categorized.excluded };
+  for (const row of categorized.identical) {
     const decision = decisions[row.hq.id];
-    if (decision === 'new') queue.newDeals.push(row);
-    else if (decision === 'change') queue.changes.push(row);
-    else if (decision === 'unchanged') queue.unchanged.push(row);
-    else if (categorized.unmatched.includes(row)) queue.newDeals.push(row);
-    else queue.review.push(row);
+    if (decision === 'work') queue.work.push(row);
+    else if (decision === 'skip') queue.skipped.push(row);
+    else queue.pending.push(row);
   }
-  queue.review.sort((a, b) => (a.meta?.score ?? 0) - (b.meta?.score ?? 0));
+  for (const row of categorized.work) {
+    if (decisions[row.hq.id] === 'skip') queue.skipped.push(row);
+    else queue.work.push(row);
+  }
+  const byVendor = (a, b) => a.hq.vendor.localeCompare(b.hq.vendor) || a.hq.id - b.hq.id;
+  queue.pending.sort(byVendor);
+  queue.skipped.sort(byVendor);
+  queue.work.sort(byVendor);
   return queue;
 }
 

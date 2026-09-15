@@ -4,23 +4,24 @@ import { categorizeDedupeResults, exportUnmatched } from '../src/logic/dedupe.js
 import { validateDeal } from '../src/logic/copywriting.js';
 
 const rows = [
-  { hq: { id: 1, vendor: 'Carnival', text: 'Save 20%', end: new Date(2026, 9, 10) }, web: { expiryDate: new Date(2026, 9, 1) }, meta: { score: 20, isExtension: true } },
-  { hq: { id: 2, vendor: 'Carnival', text: 'Free drinks' }, web: {}, meta: { score: 0 } },
-  { hq: { id: 3, vendor: 'Carnival', text: 'New offer' }, web: null, meta: { score: 0 } },
+  { hq: { id: 1, vendor: 'Carnival', text: 'Save 20%', end: new Date(2026, 9, 10) }, web: { expiryDate: new Date(2026, 9, 1) }, meta: { identical: false, differences: ['expiry'] } },
+  { hq: { id: 2, vendor: 'Carnival', text: 'Free drinks' }, web: {}, meta: { identical: true, differences: [] } },
+  { hq: { id: 3, vendor: 'Carnival', text: 'New offer' }, web: null, meta: { identical: false, differences: [] } },
 ];
-const categories = categorizeDedupeResults(rows, { threshold: 0 });
+const categories = categorizeDedupeResults(rows);
 let queue = buildReviewQueue(categories);
-assert.deepEqual(queue.review.map(r => r.hq.id), [2, 1], 'Zero-score candidates and extensions require review, weakest first');
-assert.equal(queue.newDeals.length, 1);
-queue = buildReviewQueue(categories, { 1: 'change', 2: 'unchanged' });
-assert.equal(queue.review.length, 0);
-const payload = exportUnmatched([...queue.changes, ...queue.newDeals].map(r => r.hq));
+assert.deepEqual(queue.pending.map(r => r.hq.id), [2], 'Identical rows are pre-checked and wait for confirmation');
+assert.deepEqual(queue.work.map(r => r.hq.id), [1, 3], 'Extensions and new deals go straight to the work list');
+queue = buildReviewQueue(categories, { 2: 'skip' });
+assert.equal(queue.pending.length, 0);
+const payload = exportUnmatched(queue.work.map(r => r.hq));
 assert.ok(payload.includes('Save 20%'));
 assert.ok(payload.includes('New offer'));
-assert.ok(!payload.includes('Free drinks'), 'Confirmed unchanged deals must never enter the copy payload');
-assert.equal(queue.changes.length + queue.newDeals.length + queue.unchanged.length, rows.length);
-assert.equal(buildReviewQueue(categories, { 1: 'change', 2: 'new' }).newDeals.length, 2, 'Rejected identity returns to new deals');
-assert.equal(buildReviewQueue(categories, { 1: 'change' }).review[0].hq.id, 2, 'Undo restores review');
+assert.ok(!payload.includes('Free drinks'), 'Confirmed identical deals must never enter the copy payload');
+assert.equal(queue.work.length + queue.skipped.length + queue.pending.length, rows.length);
+assert.deepEqual(buildReviewQueue(categories, { 2: 'work' }).work.map(r => r.hq.id), [1, 2, 3], 'A pre-checked row can be pulled into the work list');
+assert.deepEqual(buildReviewQueue(categories, { 1: 'skip' }).skipped.map(r => r.hq.id), [1], 'A work row can be set aside as already on site');
+assert.equal(buildReviewQueue(categories, {}).pending[0].hq.id, 2, 'Undo restores the pre-check');
 assert.ok(dateChange(rows[0]));
 assert.equal(dateChange({ ...rows[0], web: { expiryDate: rows[0].hq.end } }), '');
 

@@ -97,327 +97,197 @@ export function parseHQDates(text) {
   return out;
 }
 
-// --- Feature bag extraction ---
+/** Shared Los Angeles date formatter used by the operator-facing match UI. */
+export const dateFmt = new Intl.DateTimeFormat("en-US", {
+  year: "numeric", month: "2-digit", day: "2-digit", timeZone: "America/Los_Angeles",
+});
 
-// Feature extraction and scoring tables are shared by `extractFeatureBag` and
-// `scorePair`, so keeping them module-scoped makes the match rules explicit.
-const FEATURE_PATTERNS = [
-  ["obc", /\bobcs?\b|on\s*board\s*credit|bar\s*tab/i],
-  ["ppg", /\bppgs?\b|prepaid\s*gratuit|free\s*gratuit|gratuit/i],
-  ["exclusive", /\bexclusive\b|\btln\b/i],
+// --- Marker extraction ---
+
+// A deal is described by a small set of markers the operator checks by eye:
+// the kind of offer, exclusivity, the money/percent/night figures, and the
+// expiry. Text similarity is deliberately not one of them.
+const TYPE_PATTERNS = [
+  ["gratuities", /\bppgs?\b|prepaid\s*gratuit|free\s*gratuit|gratuit/i],
+  ["obc", /\bobcs?\b|on\s*board\s*credit|shipboard\s*credit|onboard\s*spending|\bbar\s*tab/i],
   ["covert", /\bcovert\b|too\s*low\s*to\s*show|hidden|secret|opaque|private\s*sale|unadvertised/i],
-  ["kids-free", /kids?\s*(sail|stay)\s*free/i],
-  ["instant", /instant\s*(savings?|credit)/i],
-  ["upgrade", /\b\d*-?\s*cat(egory)?\s*upgrade|\bupgrade\b|\bbalcony\s*upgrade/i],
-  ["drinks-wifi", /(drinks?|beverage|bev\s*pkg|cheers).*wi[\s-]*fi|wi[\s-]*fi.*(drinks?|beverage)|all[\s-]*inclusive\s*pricing\s*\(drinks/i],
-  ["airfare", /\bair\s*credit|\bbogo\s*air|\bair\s*fare|\bfree\s*air/i],
-  ["2nd-guest", /2nd\s*guest|second\s*guest/i],
-  ["dining", /specialty\s*din|free\s*din|tamarind\s*din|canaletto\s*din|dining\s*credit/i],
+  ["kids-free", /kids?\s*(sail|stay|travel)\s*free|kids?\s*free/i],
+  ["instant-savings", /instant\s*(savings?|credit)/i],
+  ["upgrade", /\b\d*-?\s*cat(egory)?\s*upgrade|\bupgrade|\bbalcony\s*(stateroom|room)?\s*(at|for)\s*oceanview|oceanview\s*(at|for)\s*inside/i],
+  ["drinks-wifi", /(drinks?|beverage|bev\s*pkg|cheers)\b.*wi[\s-]*fi|wi[\s-]*fi.*(drinks?|beverage)|drinks?\s*(package|pkg)|beverage\s*package|free\s*wi[\s-]*fi/i],
+  ["airfare", /\bair\s*credit|\bbogo\s*air|\bair\s*fare|\bfree\s*air|\bairfare|\bfree\s*flights?|\breduced\s*air/i],
+  ["multi-guest", /2nd\s*guest|second\s*guest|3rd\s*(\/|and|&)?\s*4th|third\s*(and|&)\s*fourth|extra\s*guests?|additional\s*guests?|guests?\s*(sail|fly|stay)\s*free|for\s*cabins?\s*\d/i],
+  ["dining", /specialty\s*din|free\s*din|tamarind\s*din|canaletto\s*din|dining\s*(credit|package)|free\s*(meals?|lunch|dinner)/i],
   ["coupon", /coupon\s*booklet|savings?\s*coupon|\bbooklet\b/i],
-  ["perk", /\bperk(?:s)?\b(?!.*\bno\s*perk)/i],
-  ["no-perk", /\bno\s*perk/i],
-  ["deposit", /reduced\s*deposit/i],
-  ["shore-ex", /shore\s*ex|shore\s*excursion/i],
+  ["perks", /\bperk(?:s)?\b(?!.*\bno\s*perk)|free\s*at\s*sea|amenit/i],
+  ["no-perk", /\bno\s*perk|perk[\s-]*free/i],
+  ["deposit", /reduced\s*deposit|deposit\s*(sale|special)|low\s*deposit|\$\s*\d+\s*deposit|(\d+)%\s*deposit/i],
+  ["shore-ex", /shore\s*ex|shore\s*excursion|excursion\s*credit/i],
   ["spa", /spa\s*credit/i],
-  ["military", /military/i],
-  ["resident", /resident\s*rate|florida.*resident|georgia.*resident/i],
-  ["free-at-sea", /free\s*at\s*sea/i],
-  ["wave", /\bwave\b/i],
-  ["flash-sale", /flash\s*sale/i],
-  ["early-saver", /early\s*saver/i],
-  ["all-inclusive", /all[\s-]*inclusive/i],
+  ["military", /military|veteran/i],
+  ["resident", /resident\s*rate|residents?\b.*\brate|florida.*resident|georgia.*resident/i],
+  ["loyalty", /double\s*points|bonus\s*points|loyalty|crown\s*&?\s*anchor|captain.?s\s*club|latitudes|mariner|venetian\s*society|past\s*guest|repeat\s*guest|cruisefirst/i],
+  ["all-inclusive", /all[\s-]*inclusive|bundled|always\s*included/i],
+  ["named-sale", /\b(labor\s*day|memorial\s*day|black\s*friday|cyber|holiday|summer|fall|winter|spring|anniversary|birthday|wave|flash|triple\s*play|early\s*saver)\b.*\b(sale|savings?|event|deals?|rates?)|\b(sale|savings?|event)\b.*\b(labor\s*day|memorial\s*day|black\s*friday|cyber|holiday|anniversary)/i],
+  ["savings", /\bsav(e|ings?)\b|\d\s*%\s*off|\$\s*[\d,]+\s*off|discount|reduced\s*(rates?|fares?|pricing)|low(er|est)?\s*(rates?|fares?)|great\s*rates?|cover\s*rates?|\bfares?\s*from|\bfrom\s*\$/i],
 ];
 
-function extractFeatureBag(text) {
-  const features = new Set();
-  for (const [tag, re] of FEATURE_PATTERNS) {
-    if (re.test(text)) features.add(tag);
-  }
+// Generic sale/savings wording is dropped when a concrete kind of offer is
+// present, so "Labor Day Sale: 40% off + upgrade" reads as savings + upgrade
+// on both sides regardless of how the website copy was phrased.
+const GENERIC_TYPES = new Set(["savings", "named-sale", "perks"]);
 
-  const dollars = [];
+function extractMarkers(text, { exclusive = false } = {}) {
+  const types = new Set();
+  for (const [tag, re] of TYPE_PATTERNS) {
+    if (re.test(text)) types.add(tag);
+  }
+  if (types.has("named-sale")) { types.delete("named-sale"); types.add("savings"); }
+  const specific = [...types].filter(t => !GENERIC_TYPES.has(t));
+  if (specific.length && types.has("perks")) types.delete("perks");
+  // Savings paired with a concrete perk is common ("save + OBC") and is kept;
+  // savings alone is its own kind.
+
+  const dollars = new Set();
   for (const m of text.matchAll(/\$\s*([\d,]+)/g)) {
     const val = parseInt(m[1].replace(/,/g, ''), 10);
-    if (val > 0 && val < 100000) dollars.push(val);
+    if (val > 0 && val < 100000) dollars.add(val);
   }
 
-  const percents = [];
+  const percents = new Set();
   for (const m of text.matchAll(/(\d{1,3})\s*%/g)) {
     const val = parseInt(m[1], 10);
-    if (val > 0 && val <= 100) percents.push(val);
+    if (val > 0 && val <= 100) percents.add(val);
   }
 
-  if (/ongoing/i.test(text)) features.add("ongoing");
+  const nights = new Set();
+  for (const m of text.matchAll(/\b(\d{1,2})\s*[-–]?\s*(?:nights?|nts?)\b/gi)) {
+    nights.add(parseInt(m[1], 10));
+  }
 
-  return { features, dollars, percents };
+  const isExclusive = exclusive || /\[exclusive\]|\bexclusive\b|\btln\b/i.test(text);
+
+  return { types, exclusive: isExclusive, dollars, percents, nights };
 }
 
-// --- Scoring ---
+// --- Marker comparison ---
 
-const IGNORE_FEATURES = new Set(["wave", "flash-sale", "ongoing"]);
-
-const FEATURE_WEIGHTS = {
-  covert: 6, obc: 4, ppg: 4, "kids-free": 4, instant: 4, exclusive: 3,
-  dining: 4, "drinks-wifi": 4, "all-inclusive": 4, airfare: 3,
-  "2nd-guest": 3, upgrade: 3, coupon: 3, "no-perk": 4, perk: 3,
-  deposit: 3, "shore-ex": 3, spa: 3, military: 5, resident: 5,
-  "free-at-sea": 5, "early-saver": 4,
+const MARKER_LABELS = {
+  type: 'Type of offer',
+  exclusive: 'Exclusive',
+  expiry: 'Expiry',
+  dollars: 'Dollar amounts',
+  percents: 'Percentages',
+  nights: 'Nights',
 };
 
-const TEXT_STOPS = new Set([
-  "the","a","an","and","or","for","on","in","to","of","with","at","by",
-  "from","up","is","are","get","your","our","all","more","plus","per",
-  "off","select","now","book","receive","enjoy",
-]);
-
-function textSimilarity(a, b) {
-  const tokA = new Set(norm(a).split(/\s+/).filter(w => w.length > 2 && !TEXT_STOPS.has(w)));
-  const tokB = new Set(norm(b).split(/\s+/).filter(w => w.length > 2 && !TEXT_STOPS.has(w)));
-  let inter = 0;
-  for (const w of tokA) if (tokB.has(w)) inter++;
-  const union = new Set([...tokA, ...tokB]).size;
-  return union > 0 ? inter / union : 0;
+const TYPE_LABELS = {
+  gratuities: 'Free gratuities', obc: 'Onboard credit', covert: 'Covert rate',
+  'kids-free': 'Kids free', 'instant-savings': 'Instant savings', upgrade: 'Upgrade',
+  'drinks-wifi': 'Drinks / Wi-Fi', airfare: 'Airfare', 'multi-guest': 'Multi-guest discount',
+  dining: 'Dining', coupon: 'Coupon booklet', perks: 'Perks', 'no-perk': 'No-perk rate',
+  deposit: 'Deposit', 'shore-ex': 'Shore excursions', spa: 'Spa', military: 'Military',
+  resident: 'Resident rate', loyalty: 'Loyalty', 'all-inclusive': 'All-inclusive',
+  savings: 'Savings',
+};
+export function describeTypes(types) {
+  return [...types].map(t => TYPE_LABELS[t] || t).join(' + ') || 'Unrecognized';
 }
 
-/** Shared Los Angeles date formatter used by the operator-facing match UI. */
-const dateFmt = new Intl.DateTimeFormat('en-US', {
-  year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'America/Los_Angeles'
-});
-export { dateFmt };
-
-function createStage(key, label, delta, reasons = [], details = null) {
-  return { key, label, delta, reasons, details };
+function setsEqual(a, b) {
+  return a.size === b.size && [...a].every(v => b.has(v));
+}
+function fmtSet(set, prefix = '', suffix = '') {
+  return [...set].sort((a, b) => a - b).map(v => `${prefix}${v.toLocaleString('en-US')}${suffix}`).join(', ');
 }
 
-function confidenceFromScore(score, hasWeb, isExtension) {
-  if (!hasWeb) return 'none';
-  if (isExtension) return score >= 12 ? 'review' : 'weak';
-  if (score >= 18) return 'strong';
-  if (score >= 12) return 'review';
-  if (score > 0) return 'weak';
-  return 'none';
+function compareTypes(hqTypes, webTypes) {
+  if (!hqTypes.size && !webTypes.size) return 'unknown';
+  if (setsEqual(hqTypes, webTypes)) return 'same';
+  // Website copy often adds generic "savings" wording around a concrete perk;
+  // when both sides name the same concrete kinds, that wording is noise.
+  const hqSpecific = new Set([...hqTypes].filter(t => !GENERIC_TYPES.has(t)));
+  const webSpecific = new Set([...webTypes].filter(t => !GENERIC_TYPES.has(t)));
+  if (hqSpecific.size && setsEqual(hqSpecific, webSpecific)) return 'same';
+  const overlap = [...hqTypes].filter(t => webTypes.has(t));
+  if (!overlap.length) return 'different';
+  return 'partial';
 }
 
-// Saved decisions belong to the candidate assignments produced by this version.
-export const MATCHER_VERSION = 2;
+function compareSets(a, b) {
+  if (!a.size && !b.size) return 'n/a';
+  if (setsEqual(a, b)) return 'same';
+  return 'different';
+}
+
+function compareExpiry(hq, web) {
+  if (hq.ongoing) return web.expiryDate ? 'different' : 'same';
+  if (!hq.end && !web.expiryDate) return 'n/a';
+  if (!hq.end || !web.expiryDate) return 'different';
+  return sameDay(hq.end, web.expiryDate) ? 'same' : 'different';
+}
+
+/**
+ * Compares one incoming deal with one website deal marker by marker. The
+ * result is a checklist in the operator's order, an internal rank used only to
+ * pick the best sibling per supplier, and `identical` when nothing differs.
+ */
+function compareMarkers(hq, web) {
+  const H = hq.markers, W = web.markers;
+  const typeStatus = compareTypes(H.types, W.types);
+  const checks = [
+    { key: 'type', status: typeStatus, hq: describeTypes(H.types), web: describeTypes(W.types) },
+    { key: 'exclusive', status: H.exclusive === W.exclusive ? 'same' : 'different', hq: H.exclusive ? 'Yes' : 'No', web: W.exclusive ? 'Yes' : 'No' },
+    { key: 'expiry', status: compareExpiry(hq, web), hq: hq.ongoing ? 'Ongoing' : hq.end ? dateFmt.format(hq.end) : '—', web: web.expiryDate ? dateFmt.format(web.expiryDate) : 'None' },
+    { key: 'dollars', status: compareSets(H.dollars, W.dollars), hq: fmtSet(H.dollars, '$') || '—', web: fmtSet(W.dollars, '$') || '—' },
+    { key: 'percents', status: compareSets(H.percents, W.percents), hq: fmtSet(H.percents, '', '%') || '—', web: fmtSet(W.percents, '', '%') || '—' },
+    { key: 'nights', status: compareSets(H.nights, W.nights), hq: fmtSet(H.nights, '', ' nights') || '—', web: fmtSet(W.nights, '', ' nights') || '—' },
+  ].map(c => ({ ...c, label: MARKER_LABELS[c.key] }));
+
+  const by = Object.fromEntries(checks.map(c => [c.key, c.status]));
+  const sameKind = typeStatus === 'same' || (typeStatus === 'unknown' && by.dollars === 'same');
+  const sibling = sameKind || typeStatus === 'partial';
+
+  // Rank only decides which website deal is shown beside the incoming one.
+  let rank = 0;
+  if (typeStatus === 'same') rank += 100;
+  else if (typeStatus === 'partial') rank += 50;
+  else if (typeStatus === 'unknown') rank += 10;
+  if (by.exclusive === 'same') rank += 20; else rank -= 20;
+  for (const k of ['dollars', 'percents', 'nights']) {
+    if (by[k] === 'same') rank += 15;
+    else if (by[k] === 'different') rank -= 10;
+  }
+  if (by.expiry === 'same') rank += 10;
+  else if (hq.end && web.expiryDate) {
+    const days = Math.abs(Math.round((hq.end - web.expiryDate) / 86400000));
+    if (days <= 90) rank += 3;
+  }
+
+  const identical = sameKind && checks.every(c => c.status === 'same' || c.status === 'n/a' || (c.key === 'type' && c.status === 'unknown'));
+  const differences = checks.filter(c => c.status === 'different').map(c => c.key);
+
+  return {
+    score: sibling ? Math.max(rank, 1) : 0,
+    identical,
+    sibling,
+    typeStatus,
+    checks,
+    differences,
+    candidateRankings: [],
+  };
+}
 
 function buildEmptyMeta(overrides = {}) {
   return {
     score: 0,
-    why: [],
-    shared: new Set(),
-    hqOnly: new Set(),
-    webOnly: new Set(),
-    isExtension: false,
-    stages: [],
-    confidence: 'none',
+    identical: false,
+    sibling: false,
+    typeStatus: 'none',
+    checks: [],
+    differences: [],
     candidateRankings: [],
     ...overrides,
-  };
-}
-
-function scoreFeatureStage(hq, web) {
-  let delta = 0;
-  const why = [];
-  const fH = hq.bag.features;
-  const fW = web.bag.features;
-
-  const hqFeats = new Set([...fH].filter(f => !IGNORE_FEATURES.has(f)));
-  const webFeats = new Set([...fW].filter(f => !IGNORE_FEATURES.has(f)));
-  const shared = new Set([...hqFeats].filter(f => webFeats.has(f)));
-  const hqOnly = new Set([...hqFeats].filter(f => !webFeats.has(f)));
-  const webOnly = new Set([...webFeats].filter(f => !hqFeats.has(f)));
-
-  for (const f of shared) {
-    const w = FEATURE_WEIGHTS[f] || 2;
-    delta += w;
-    why.push({ text: f, type: 'pos' });
-  }
-  for (const f of hqOnly) {
-    const w = FEATURE_WEIGHTS[f] || 2;
-    delta -= Math.ceil(w * 0.6);
-    why.push({ text: '−' + f, type: 'neg' });
-  }
-  for (const f of webOnly) {
-    const w = FEATURE_WEIGHTS[f] || 2;
-    delta -= Math.ceil(w * 0.4);
-    why.push({ text: 'web+' + f, type: 'neg' });
-  }
-
-  if (fH.has('covert') !== fW.has('covert')) {
-    delta -= 10;
-    why.push({ text: 'covert≠', type: 'neg' });
-  }
-
-  return {
-    delta,
-    why,
-    hqFeats,
-    webFeats,
-    shared,
-    hqOnly,
-    webOnly,
-    stage: createStage('features', 'Feature overlap', delta, why.map((item) => item.text), {
-      shared: [...shared],
-      hqOnly: [...hqOnly],
-      webOnly: [...webOnly],
-    }),
-  };
-}
-
-function scoreNumberStage(hq, web) {
-  let delta = 0;
-  const why = [];
-
-  const hqD = hq.bag.dollars, webD = web.bag.dollars;
-  const hqP = hq.bag.percents, webP = web.bag.percents;
-  let numbersMismatch = false;
-
-  for (const [label, hqValues, webValues, bonus, penalty] of [
-    ['$', hqD, webD, 6, 5], ['%', hqP, webP, 5, 4],
-  ]) {
-    // Repeated mentions of the same amount are not additional offer terms.
-    const incoming = [...new Set(hqValues)].sort((a, b) => a - b);
-    const existing = [...new Set(webValues)].sort((a, b) => a - b);
-    if (!incoming.length && !existing.length) continue;
-    if (!incoming.length || !existing.length) {
-      delta -= 1;
-      why.push({ text: `${label}${incoming.length ? 'hq' : 'web'}-only`, type: 'neu' });
-      continue;
-    }
-    const exact = incoming.length === existing.length && incoming.every((value, index) => value === existing[index]);
-    if (exact) {
-      delta += bonus;
-      why.push({ text: `${label}=${incoming.join(',')}`, type: 'pos' });
-    } else {
-      delta -= penalty;
-      numbersMismatch = true;
-      why.push({ text: `${label} terms differ (${incoming.join(',')} vs ${existing.join(',')})`, type: 'neg' });
-    }
-  }
-
-  return {
-    delta,
-    why,
-    numbersMismatch,
-    stage: createStage('numbers', 'Money and percent alignment', delta, why.map((item) => item.text), {
-      hqDollars: hqD,
-      webDollars: webD,
-      hqPercents: hqP,
-      webPercents: webP,
-      numbersMismatch,
-    }),
-  };
-}
-
-function scoreDateStage(hq, web, numbersMismatch) {
-  let delta = 0;
-  const why = [];
-  let isExtension = false;
-
-  if (hq.ongoing && !web.expiryDate) {
-    delta += 3; why.push({ text: 'ongoing✓', type: 'pos' });
-  } else if (hq.ongoing && web.expiryDate) {
-    delta -= 1; why.push({ text: 'ongoing/dated', type: 'neu' });
-  } else if (hq.end && web.expiryDate) {
-    if (sameDay(hq.end, web.expiryDate)) {
-      delta += 4; why.push({ text: 'date=', type: 'pos' });
-    } else {
-      const daysDiff = Math.round((hq.end - web.expiryDate) / 86400000);
-      if (Math.abs(daysDiff) <= 2) {
-        delta += 2; why.push({ text: 'date≈' + daysDiff + 'd', type: 'neu' });
-      } else if (daysDiff > 2 && daysDiff <= 90 && !numbersMismatch) {
-        delta += 1; isExtension = true;
-        why.push({ text: 'extended+' + daysDiff + 'd', type: 'ext' });
-      } else if (daysDiff > 2 && daysDiff <= 90 && numbersMismatch) {
-        delta -= 2; why.push({ text: 'date-shift+$≠', type: 'neg' });
-      } else if (daysDiff < -2) {
-        delta -= 1; why.push({ text: 'date-behind', type: 'neg' });
-      }
-    }
-  }
-
-  return {
-    delta,
-    why,
-    isExtension,
-    stage: createStage('dates', 'Date alignment', delta, why.map((item) => item.text), {
-      hqEnd: hq.end?.toISOString?.() || null,
-      webExpiry: web.expiryDate?.toISOString?.() || null,
-      ongoing: Boolean(hq.ongoing),
-      isExtension,
-    }),
-  };
-}
-
-function scoreTextStage(hq, web, hqFeats, webFeats) {
-  let delta = 0;
-  const why = [];
-  let similarity = 0;
-
-  if (hqFeats.size === 0 && webFeats.size === 0) {
-    similarity = textSimilarity(hq.text, web.text);
-    if (similarity > 0.3) {
-      const pts = Math.round(similarity * 10);
-      delta += pts;
-      why.push({ text: 'text(' + Math.round(similarity * 100) + '%)', type: 'pos' });
-    }
-  } else {
-    similarity = textSimilarity(hq.text, web.text);
-    if (similarity > 0.25) {
-      const pts = Math.min(3, Math.round(similarity * 5));
-      delta += pts;
-      why.push({ text: 'text(' + Math.round(similarity * 100) + '%)', type: 'neu' });
-    }
-  }
-
-  return {
-    delta,
-    why,
-    similarity,
-    stage: createStage('text', 'Text similarity', delta, why.map((item) => item.text), {
-      similarity,
-    }),
-  };
-}
-
-function scorePair(hq, web) {
-  const featureStage = scoreFeatureStage(hq, web);
-  const numberStage = scoreNumberStage(hq, web);
-  const dateStage = scoreDateStage(hq, web, numberStage.numbersMismatch);
-  const textStage = scoreTextStage(hq, web, featureStage.hqFeats, featureStage.webFeats);
-
-  const stages = [
-    featureStage.stage,
-    numberStage.stage,
-    dateStage.stage,
-    textStage.stage,
-  ].filter((stage) => stage.delta !== 0 || stage.reasons.length > 0);
-
-  const why = [
-    ...featureStage.why,
-    ...numberStage.why,
-    ...dateStage.why,
-    ...textStage.why,
-  ];
-
-  const score =
-    featureStage.delta +
-    numberStage.delta +
-    dateStage.delta +
-    textStage.delta;
-
-  const isExtension = dateStage.isExtension;
-
-  return {
-    score,
-    why,
-    shared: featureStage.shared,
-    hqOnly: featureStage.hqOnly,
-    webOnly: featureStage.webOnly,
-    isExtension,
-    numbersMismatch: numberStage.numbersMismatch,
-    stages,
-    confidence: numberStage.numbersMismatch && score >= 18 ? 'review' : confidenceFromScore(score, true, isExtension),
   };
 }
 
@@ -425,31 +295,21 @@ function buildCandidateRankings(matrixRow, webGroup) {
   if (!matrixRow || !webGroup?.length) return [];
   return matrixRow
     .map((meta, index) => ({
-      supplier: webGroup[index]?.supplier || '',
       title: webGroup[index]?.raw?.title || webGroup[index]?.text || '',
       score: meta.score,
-      confidence: meta.confidence,
-      isExtension: meta.isExtension,
-      why: meta.why.slice(0, 4),
+      identical: meta.identical,
+      types: describeTypes(webGroup[index]?.markers?.types || new Set()),
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
 }
 
-function attachCandidateRankings(meta, matrixRow, webGroup, assignedIndex = -1) {
-  const alternatives = matrixRow.filter((_, index) => index !== assignedIndex);
-  const nextScore = alternatives.length ? Math.max(...alternatives.map(candidate => candidate.score)) : null;
-  const margin = assignedIndex >= 0 && nextScore !== null ? meta.score - nextScore : null;
-  // A close runner-up (or a better candidate claimed by another deal) needs eyes.
-  const ambiguous = assignedIndex >= 0 && nextScore > 0 && margin <= 3;
-  return {
-    ...meta,
-    confidence: ambiguous && meta.confidence === 'strong' ? 'review' : meta.confidence,
-    ambiguous,
-    candidateMargin: margin,
-    candidateRankings: buildCandidateRankings(matrixRow, webGroup),
-  };
+function attachCandidateRankings(meta, matrixRow, webGroup) {
+  return { ...meta, candidateRankings: buildCandidateRankings(matrixRow, webGroup) };
 }
+
+// Saved decisions belong to the candidate assignments produced by this version.
+export const MATCHER_VERSION = 3;
 
 // --- Assignment with an independent no-match option for every incoming deal ---
 
@@ -522,17 +382,10 @@ function greedyMatch(hqGroup, webGroup, matrix) {
   }
   for (let i = 0; i < hqGroup.length; i++) {
     const a = assignment.get(i);
-    const fallback = attachCandidateRankings(
-      buildEmptyMeta(),
-      matrix[i],
-      webGroup,
-    );
     results.push({
       hq: hqGroup[i],
       web: a ? webGroup[a.webIdx] : null,
-      meta: a
-        ? attachCandidateRankings(a.meta, matrix[i], webGroup, a.webIdx)
-        : fallback,
+      meta: attachCandidateRankings(a ? a.meta : buildEmptyMeta(), matrix[i], webGroup),
     });
   }
   return results;
@@ -544,7 +397,7 @@ function optimalMatch(hqGroup, webGroup) {
   for (let i = 0; i < n; i++) {
     matrix[i] = [];
     for (let j = 0; j < m; j++) {
-      matrix[i][j] = scorePair(hqGroup[i], webGroup[j]);
+      matrix[i][j] = compareMarkers(hqGroup[i], webGroup[j]);
     }
   }
   if (n <= 20 && m <= 20) {
@@ -552,9 +405,7 @@ function optimalMatch(hqGroup, webGroup) {
     return assignment.map(([i, j]) => ({
       hq: hqGroup[i],
       web: j !== -1 ? webGroup[j] : null,
-      meta: j !== -1
-        ? attachCandidateRankings(matrix[i][j], matrix[i], webGroup, j)
-        : attachCandidateRankings(buildEmptyMeta(), matrix[i], webGroup),
+      meta: attachCandidateRankings(j !== -1 ? matrix[i][j] : buildEmptyMeta(), matrix[i], webGroup),
     }));
   }
   return greedyMatch(hqGroup, webGroup, matrix);
@@ -581,7 +432,7 @@ function looksLikeDealContent(value) {
  * Parses tagged source text into normalized HQ deal records for matching.
  * Vendor context comes only from accepted `v` lines; terminal `X` exclusions
  * are ignored. Deal records retain the original line, supplier resolution
- * status, dates, exclusivity, and the feature bag used by scoring stages.
+ * status, dates, exclusivity, and the markers used for comparison.
  */
 export function parseHQ(text) {
   const lines = (text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -611,7 +462,7 @@ export function parseHQ(text) {
       if (!currentVendor) continue;
       const type = tag === 'ed' ? 'exclusive' : 'deal';
       const dates = parseHQDates(content);
-      const bag = extractFeatureBag(content);
+      const markers = extractMarkers(content, { exclusive: type === 'exclusive' });
       items.push({
         id: ++nextId,
         type,
@@ -625,7 +476,7 @@ export function parseHQ(text) {
         end: dates.end,
         ongoing: dates.ongoing,
         dateWarning: dates.dateWarning,
-        bag,
+        markers,
       });
     }
   }
@@ -649,7 +500,7 @@ export function ingestWebsiteJSON(arr) {
     const expiry = row.expiryDate ? new Date(row.expiryDate) : null;
     const post = row.postDate ? new Date(row.postDate) : null;
     const text = [row.title || '', row.shopListing || ''].join(' · ');
-    const bag = extractFeatureBag(text);
+    const markers = extractMarkers(text);
     return {
       raw: row,
       supplier: vendor,
@@ -659,7 +510,7 @@ export function ingestWebsiteJSON(arr) {
       expiryDate: expiry,
       postDate: post,
       text,
-      bag,
+      markers,
     };
   });
 }
@@ -698,10 +549,7 @@ export function runFullMatch(hqDeals, websiteDeals, { filterSupplier = '' } = {}
       for (const hq of hqGroup) {
         allResults.push({
           hq, web: null,
-          meta: buildEmptyMeta({
-            why: [{ text: 'no web deals', type: 'neg' }],
-            stages: [createStage('availability', 'Candidate availability', 0, ['no web deals'])],
-          }),
+          meta: buildEmptyMeta({ noWebDeals: true }),
         });
       }
     } else {
@@ -712,56 +560,45 @@ export function runFullMatch(hqDeals, websiteDeals, { filterSupplier = '' } = {}
 }
 
 /**
- * Partitions comparison results into explicit, count-conserving outcomes.
- * Operator exclusions and the optional ending-today rule are terminal: neither
- * outcome is eligible for the Copy payload.
+ * Partitions comparison results into two operator outcomes: `identical` rows
+ * (every marker agrees with a website deal, pre-checked as already on the
+ * site) and `work` rows (everything else: new deals, extensions, changed
+ * terms, or a row the operator pulled back). The optional ending-today rule
+ * is terminal and never reaches the Copy payload.
  */
 export function categorizeDedupeResults(
   results,
   {
-    threshold = 1,
     excludedHQIds = [],
     excludeEndingToday = false,
     today = new Date(),
   } = {},
 ) {
-  const rejectedMatchIds = new Set(excludedHQIds);
-  const matched = [];
-  const unmatched = [];
-  const extensions = [];
+  const pulledBack = new Set(excludedHQIds);
+  const identical = [];
+  const work = [];
   const excluded = [];
 
   for (const result of results || []) {
-    const score = result.meta?.score ?? 0;
-
-    if (rejectedMatchIds.has(result.hq.id)) {
-      unmatched.push({
-        ...result,
-        meta: { ...result.meta, operatorRejectedMatch: true },
-      });
+    if (excludeEndingToday && sameDay(result.hq.end, today) && !result.meta?.identical) {
+      excluded.push({ ...result, exclusionReason: 'ending-today' });
       continue;
     }
-
-    if (!result.web || score < threshold) {
-      if (excludeEndingToday && sameDay(result.hq.end, today)) {
-        excluded.push({ ...result, exclusionReason: 'ending-today' });
-      } else {
-        unmatched.push(result);
-      }
-    } else if (result.meta.isExtension) {
-      extensions.push(result);
-    } else {
-      matched.push(result);
+    if (pulledBack.has(result.hq.id)) {
+      work.push({ ...result, meta: { ...result.meta, operatorRejectedMatch: true } });
+      continue;
     }
+    if (result.web && result.meta?.identical) identical.push(result);
+    else work.push(result);
   }
 
-  matched.sort((a, b) => (b.meta?.score ?? 0) - (a.meta?.score ?? 0));
-  unmatched.sort((a, b) => a.hq.vendor.localeCompare(b.hq.vendor));
+  const byVendor = (a, b) => a.hq.vendor.localeCompare(b.hq.vendor) || a.hq.id - b.hq.id;
+  identical.sort(byVendor);
+  work.sort(byVendor);
 
   return {
-    matched,
-    unmatched,
-    extensions,
+    identical,
+    work,
     excluded,
     total: (results || []).length,
     today,

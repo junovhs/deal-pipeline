@@ -247,54 +247,44 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
   const norwegianMatch = findMatch(matches, "Norwegian");
   assert.equal(norwegianMatch.web?.supplier, "Norwegian");
   assert.ok(
-    norwegianMatch.meta.score >= 20,
-    `Expected Norwegian alias match to score strongly, got ${norwegianMatch.meta.score}.`,
+    norwegianMatch.meta.sibling,
+    "Expected Norwegian alias match to find a same-kind website sibling.",
   );
   assert.ok(
-    norwegianMatch.meta.why.some((reason) => reason.text === "obc"),
-    "Expected Norwegian alias match to retain onboard-credit reasoning.",
-  );
-  assert.ok(
-    norwegianMatch.meta.stages.some((stage) => stage.key === "features"),
-    "Expected Norwegian match to expose feature-stage scoring.",
+    norwegianMatch.meta.checks.some((check) => check.key === "type" && /Onboard credit/.test(check.hq)),
+    "Expected Norwegian alias match to recognize onboard credit.",
   );
 
   const royalMatch = findMatch(matches, "Royal Caribbean");
   assert.equal(royalMatch.web?.supplier, "Royal Caribbean");
-  assert.ok(
-    royalMatch.meta.score >= 20,
-    `Expected Royal Caribbean match to score strongly, got ${royalMatch.meta.score}.`,
-  );
+  assert.ok(royalMatch.meta.sibling, "Expected Royal Caribbean to find a same-kind website sibling.");
 
   const carnivalMatch = findMatch(matches, "Carnival");
   assert.equal(carnivalMatch.web, null);
-  assert.deepEqual(collectWarningTypes(carnivalMatch.meta.why), ["neg"]);
-  assert.equal(carnivalMatch.meta.why[0].text, "no web deals");
+  assert.equal(carnivalMatch.meta.noWebDeals, true);
   assert.deepEqual(carnivalMatch.meta.candidateRankings, []);
 
   const categorized = categorizeDedupeResults(matches, {
-    threshold: 8,
     excludedHQIds: [norwegianMatch.hq.id],
   });
   assert.deepEqual(categorized.excluded, []);
   assert.equal(
-    categorized.unmatched.some((row) => row.hq.id === norwegianMatch.hq.id),
+    categorized.work.some((row) => row.hq.id === norwegianMatch.hq.id),
     true,
-    "An operator-rejected match must be reclassified as needing copy.",
+    "An operator-rejected match must land in the work list.",
   );
   assert.equal(
-    categorized.unmatched.find((row) => row.hq.id === norwegianMatch.hq.id)
+    categorized.work.find((row) => row.hq.id === norwegianMatch.hq.id)
       ?.meta.operatorRejectedMatch,
     true,
   );
   assert.match(
-    exportUnmatched(categorized.unmatched.map((row) => row.hq)),
+    exportUnmatched(categorized.work.map((row) => row.hq)),
     /v\s+Norwegian/,
     "The rejected match must be included in the payload sent to Copy.",
   );
   assert.equal(
-    categorized.matched.length + categorized.extensions.length
-      + categorized.unmatched.length + categorized.excluded.length,
+    categorized.identical.length + categorized.work.length + categorized.excluded.length,
     categorized.total,
     "Every dedupe result must have exactly one terminal outcome.",
   );
