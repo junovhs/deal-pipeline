@@ -1686,3 +1686,38 @@ body { background: var(--bg); font-size: 14px; }
   .calm-line { grid-template-columns: 1fr auto; }
   .calm-what { grid-column: 1 / -1; }
 }
+
+/* Jev progress, summary actions and the one-card review. */
+.calm-bar { width: 260px; height: 4px; margin: 22px auto 0; background: #e3e8e4; border-radius: 99px; overflow: hidden; }
+.calm-bar span { display: block; height: 100%; background: var(--accent); transition: width 200ms ease; }
+.calm-actions { margin-top: 28px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.calm-actions .calm-go { margin: 0; }
+.calm-second { padding: 14px 26px; border: 1px solid var(--border-strong) !important; border-radius: 999px; background: #fff !important; color: var(--ink) !important; font: inherit; font-size: 16px !important; font-weight: 600; text-decoration: none !important; cursor: pointer; }
+.calm-second:hover { border-color: var(--ink) !important; }
+.calm-note { margin-top: 16px; font-size: 13px; color: var(--muted); }
+.review { max-width: 1040px; margin: 4vh auto 0; padding: 0 8px 40px; }
+.review-top { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.review-top button, .review-others button { border: 0; background: none; padding: 0; font: inherit; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--border-strong); }
+.review-supplier { margin: 26px 0 12px; font-size: 15px; font-weight: 800; color: var(--ink); }
+.review-pair { display: grid; grid-template-columns: 1fr 1fr; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(25,47,41,.08); }
+.review-side { padding: 26px 28px 24px; background: #fff; display: flex; flex-direction: column; gap: 8px; }
+.review-side.is-site { background: #f6f8f5; border-left: 1px solid var(--border); }
+.review-label { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.review-text { margin: 0; font-size: 21px; line-height: 1.35; font-weight: 600; color: var(--ink); letter-spacing: -.2px; }
+.review-none { color: var(--muted); font-style: italic; font-weight: 500; }
+.review-desc { margin: 0; font-size: 14px; color: var(--muted); }
+.review-date { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.review-diff { margin: 16px 0 0; font-size: 15px; font-weight: 700; color: #8a4d12; text-align: center; }
+.review-call { margin: 22px 0 0; text-align: center; font-size: 16px; color: var(--muted); }
+.review-call strong { color: var(--ink); }
+.review-buttons { margin-top: 18px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.review-buttons button { padding: 11px 18px; border-radius: 999px; border: 1px solid var(--border-strong); background: #fff; color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.review-buttons button:hover:not(:disabled) { border-color: var(--ink); }
+.review-buttons button:disabled { opacity: .35; cursor: default; }
+.review-buttons button.is-main { background: var(--ink); color: #fff; border-color: var(--ink); }
+.review-buttons button.is-main:hover { background: var(--accent); }
+.review kbd { margin-left: 6px; font: inherit; font-size: 11px; opacity: .6; }
+.review-others { margin-top: 26px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; }
+.review-others button.is-on { color: var(--ink); font-weight: 700; text-decoration: none; }
+.review-others kbd { margin: 0 4px 0 0; }
+@media (max-width: 760px) { .review-pair { grid-template-columns: 1fr; } .review-side.is-site { border-left: 0; border-top: 1px solid var(--border); } }

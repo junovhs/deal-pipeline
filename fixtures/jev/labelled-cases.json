@@ -1,0 +1,554 @@
+[
+  {
+    "set": "operator-screenshots",
+    "name": "Cunard amount change",
+    "supplier": "Cunard",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE up to $250 OBC: Ends 11/18/2026",
+    "website": [
+      {
+        "shopOverline": "Cunard",
+        "title": "EXCLUSIVE: Receive Up to $350 Onboard Credit on Your Next Cruise",
+        "shopListing": "Enjoy extra spending money at sea with this exclusive onboard credit promotion.",
+        "expiryDate": "2026-11-18T20:00:00.000Z"
+      },
+      {
+        "shopOverline": "Cunard",
+        "title": "Save Up to 40% on Select Voyages",
+        "shopListing": "Reduced fares on select sailings.",
+        "expiryDate": "2026-12-31T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "EXCLUSIVE: Receive Up to $350 Onboard Credit on Your Next Cruise"
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "CIE ongoing vs dated",
+    "supplier": "CIE Tours",
+    "tag": "d",
+    "incoming": "Last Minute Deals - Save 15% with promo code LASTMINUTE. Ongoing promotion based on availability.",
+    "website": [
+      {
+        "shopOverline": "CIE Tours",
+        "title": "Save 15% on Select Last Minute Deals and Guided Vacations",
+        "shopListing": "Take advantage of spontaneous travel opportunities with special discounted rates on available tour departures.",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      },
+      {
+        "shopOverline": "CIE Tours",
+        "title": "Repeat Guest Savings of Up to $150 Per Person",
+        "shopListing": "Returning travelers save on their next tour.",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "Save 15% on Select Last Minute Deals and Guided Vacations"
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "Carnival year typo",
+    "supplier": "Carnival",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE 10% Savings (PWD): Ends 11/9/2206",
+    "website": [
+      {
+        "shopOverline": "Carnival",
+        "title": "EXCLUSIVE: Receive 10% Savings on Your Next Cruise Vacation",
+        "shopListing": "Enjoy exclusive reduced pricing across exciting itineraries for exceptional savings on your booking.",
+        "expiryDate": "2026-11-09T20:00:00.000Z"
+      },
+      {
+        "shopOverline": "Carnival",
+        "title": "Get Up to $100 Onboard Credit",
+        "shopListing": "Extra spending money onboard.",
+        "expiryDate": "2026-11-30T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "on-site",
+      "website": "EXCLUSIVE: Receive 10% Savings on Your Next Cruise Vacation"
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "Avalon public vs exclusive hidden fares",
+    "supplier": "Avalon Waterways",
+    "tag": "d",
+    "incoming": "Up to $1250 Savings: Ends 11/7/2026",
+    "website": [
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Hidden Fares Featuring Up To 50% Savings",
+        "shopListing": "Discover special hidden savings by calling an agent for more details on your next journey.",
+        "expiryDate": null
+      },
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Bottle of Wine & Box of Chocolates",
+        "shopListing": "A sweet welcome gift onboard.",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "new",
+      "website": null
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "A&K adds percent",
+    "supplier": "Abercrombie & Kent",
+    "tag": "d",
+    "incoming": "Save 50% on the Single Supplement on 2027 Private Jet Journeys. Ends 12/31/26",
+    "website": [
+      {
+        "shopOverline": "Abercrombie & Kent",
+        "title": "Enjoy Special Solo Savings on Select 2025 Small Group Journeys Now",
+        "shopListing": "Solo travelers can enjoy reduced single supplements on specific small group departures throughout the year.",
+        "expiryDate": null
+      },
+      {
+        "shopOverline": "Abercrombie & Kent",
+        "title": "Save Up to $2,500 Per Person on Select Departures",
+        "shopListing": "Savings on small group, small jet and private journeys.",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "Enjoy Special Solo Savings on Select 2025 Small Group Journeys Now"
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "Viking public sale vs exclusive",
+    "supplier": "Viking Ocean",
+    "tag": "d",
+    "incoming": "Quiet Season Sale: Upgrades & Reduced Fares: Ends 10/31/2026",
+    "website": [
+      {
+        "shopOverline": "Viking Ocean",
+        "title": "EXCLUSIVE! Get maximum discounts & bonuses on your next Viking sailing!",
+        "shopListing": "Don't miss this deal, exclusive from TravelPerks.",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "new",
+      "website": null
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "Windstar adds terms",
+    "supplier": "Windstar",
+    "tag": "d",
+    "incoming": "2028 Europe 5% Savings, Up to $200 OBC & Comp All-Inclusive Pkg: Ends 10/31/2026",
+    "website": [
+      {
+        "shopOverline": "Windstar",
+        "title": "Get an All-Inclusive Upgrade",
+        "shopListing": "The offer features an All-Inclusive Upgrade.",
+        "expiryDate": "2026-11-17T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "Get an All-Inclusive Upgrade"
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "Ama covert vs exclusive hidden fares",
+    "supplier": "Ama Waterways",
+    "tag": "ed",
+    "incoming": "Covert Private Fares: Ongoing",
+    "website": [
+      {
+        "shopOverline": "Ama Waterways",
+        "title": "EXCLUSIVE: Access Special Hidden Fares and Private Rates on Your Next Cruise",
+        "shopListing": "Call our travel experts today for full details on these unpublished private fares.",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      },
+      {
+        "shopOverline": "Ama Waterways",
+        "title": "Save Up to $2,500 Per Stateroom",
+        "shopListing": "Season of More savings on select river cruises.",
+        "expiryDate": "2026-12-31T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "EXCLUSIVE: Access Special Hidden Fares and Private Rates on Your Next Cruise"
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "Ama new upgrade sale vs savings deal",
+    "supplier": "Ama Waterways",
+    "tag": "d",
+    "incoming": "Season of More: Save & Upgrade Sale-Save up to $2500 per Stateroom & Comp Upgrade: Ends 12/31/2026",
+    "website": [
+      {
+        "shopOverline": "Ama Waterways",
+        "title": "EXCLUSIVE: Access Special Hidden Fares and Private Rates on Your Next Cruise",
+        "shopListing": "Call our travel experts today for full details on these unpublished private fares.",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      },
+      {
+        "shopOverline": "Ama Waterways",
+        "title": "Save Up to $2,500 Per Stateroom",
+        "shopListing": "Season of More savings on select river cruises.",
+        "expiryDate": "2026-12-31T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "Save Up to $2,500 Per Stateroom"
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "Unrelated new deal",
+    "supplier": "Princess",
+    "tag": "d",
+    "incoming": "Free Wi-Fi + 2 Specialty Dinners: Ends 11/30/2026",
+    "website": [
+      {
+        "shopOverline": "Princess",
+        "title": "EXCLUSIVE: Covert Rates Up to 10% Off",
+        "shopListing": "Unpublished fares.",
+        "expiryDate": null
+      },
+      {
+        "shopOverline": "Princess",
+        "title": "Kids Sail Free on Select Cruises",
+        "shopListing": "Third and fourth guests sail free.",
+        "expiryDate": "2026-12-15T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "new",
+      "website": null
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "NCL same gratuities",
+    "supplier": "Norwegian",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE Free Gratuities for 2: Ongoing",
+    "website": [
+      {
+        "shopOverline": "Norwegian",
+        "title": "EXCLUSIVE: Enjoy Free Gratuities for 2 on Your Cruise Vacation",
+        "shopListing": "",
+        "expiryDate": null
+      },
+      {
+        "shopOverline": "Norwegian",
+        "title": "Up to 40% Off All Cruises",
+        "shopListing": "",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "on-site",
+      "website": "EXCLUSIVE: Enjoy Free Gratuities for 2 on Your Cruise Vacation"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "RCL kids + OBC same",
+    "supplier": "Royal Caribbean",
+    "tag": "d",
+    "incoming": "Kids Sail Free + up to $500 OBC: Ends 12/20/2026",
+    "website": [
+      {
+        "shopOverline": "Royal Caribbean",
+        "title": "Kids Sail Free on Select Sailings",
+        "shopListing": "Plus up to $500 onboard credit per stateroom.",
+        "expiryDate": "2026-12-20T20:00:00.000Z"
+      },
+      {
+        "shopOverline": "Royal Caribbean",
+        "title": "EXCLUSIVE: Covert Rates",
+        "shopListing": "Unpublished fares.",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "on-site",
+      "website": "Kids Sail Free on Select Sailings"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "Celebrity exclusive OBC same",
+    "supplier": "Celebrity Cruises",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE $100 OBC: Ends 11/30/2026",
+    "website": [
+      {
+        "shopOverline": "Celebrity Cruises",
+        "title": "Up to 75% Off Second Guest",
+        "shopListing": "",
+        "expiryDate": "2026-11-30T20:00:00.000Z"
+      },
+      {
+        "shopOverline": "Celebrity Cruises",
+        "title": "EXCLUSIVE: Receive $100 Onboard Credit on Your Next Cruise",
+        "shopListing": "",
+        "expiryDate": "2026-11-30T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "on-site",
+      "website": "EXCLUSIVE: Receive $100 Onboard Credit on Your Next Cruise"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "Princess savings changed",
+    "supplier": "Princess",
+    "tag": "d",
+    "incoming": "Up to 40% Off Cruise Fares: Ends 11/30/2026",
+    "website": [
+      {
+        "shopOverline": "Princess",
+        "title": "Save Up to 30% on Select Cruises",
+        "shopListing": "Reduced fares across the fleet.",
+        "expiryDate": "2026-11-15T20:00:00.000Z"
+      },
+      {
+        "shopOverline": "Princess",
+        "title": "Kids Sail Free",
+        "shopListing": "",
+        "expiryDate": "2026-12-31T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "Save Up to 30% on Select Cruises"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "Oceania adds 2-for-1",
+    "supplier": "Oceania Cruises",
+    "tag": "d",
+    "incoming": "2-for-1 Cruise Fares + Free Roundtrip Airfare: Ends 12/31/2026",
+    "website": [
+      {
+        "shopOverline": "Oceania Cruises",
+        "title": "Enjoy Free Roundtrip Airfare on Select Voyages",
+        "shopListing": "",
+        "expiryDate": "2026-12-31T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "Enjoy Free Roundtrip Airfare on Select Voyages"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "HAL public vs exclusive OBC",
+    "supplier": "Holland America",
+    "tag": "d",
+    "incoming": "Up to $250 OBC: Ends 11/15/2026",
+    "website": [
+      {
+        "shopOverline": "Holland America",
+        "title": "EXCLUSIVE: Receive Up to $250 Onboard Credit",
+        "shopListing": "",
+        "expiryDate": "2026-11-15T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "new",
+      "website": null
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "MSC different kind",
+    "supplier": "MSC Cruises",
+    "tag": "d",
+    "incoming": "Kids Sail Free: Ends 12/31/2026",
+    "website": [
+      {
+        "shopOverline": "MSC Cruises",
+        "title": "Get Up to $500 Onboard Credit",
+        "shopListing": "",
+        "expiryDate": "2026-12-31T20:00:00.000Z"
+      },
+      {
+        "shopOverline": "MSC Cruises",
+        "title": "Save 20% on Caribbean Cruises",
+        "shopListing": "",
+        "expiryDate": "2026-11-30T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "new",
+      "website": null
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "Silversea adds expiry",
+    "supplier": "Silversea",
+    "tag": "d",
+    "incoming": "Save 15% on Select 2027 Voyages: Ends 12/31/2026",
+    "website": [
+      {
+        "shopOverline": "Silversea",
+        "title": "Save 15% on Select Voyages",
+        "shopListing": "Limited-time savings.",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "Save 15% on Select Voyages"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "NCL picks right of two exclusives",
+    "supplier": "Norwegian",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE Rates & $50 OBC (BC100): Ongoing",
+    "website": [
+      {
+        "shopOverline": "Norwegian",
+        "title": "EXCLUSIVE: Covert Opaque Rates",
+        "shopListing": "Unpublished fares.",
+        "expiryDate": null
+      },
+      {
+        "shopOverline": "Norwegian",
+        "title": "EXCLUSIVE: Special Rates Plus $50 Onboard Credit",
+        "shopListing": "",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "EXCLUSIVE: Special Rates Plus $50 Onboard Credit"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "Seabourn sale new",
+    "supplier": "Seabourn",
+    "tag": "d",
+    "incoming": "October 5-Day Sale: Air Credit & up to $2000 Shipboard Credit per Suite 10/15-10/20/2026",
+    "website": [
+      {
+        "shopOverline": "Seabourn",
+        "title": "EXCLUSIVE: Up to $500 Shipboard Credit",
+        "shopListing": "",
+        "expiryDate": "2026-12-31T20:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "new",
+      "website": null
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "Regent OBC amount changed",
+    "supplier": "Regent Seven Seas Cruises",
+    "tag": "d",
+    "incoming": "Up to $300 OBC: Ends 10/31/2026",
+    "website": [
+      {
+        "shopOverline": "Regent Seven Seas Cruises",
+        "title": "Receive Up to $200 Shipboard Credit",
+        "shopListing": "",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      },
+      {
+        "shopOverline": "Regent Seven Seas Cruises",
+        "title": "Free Unlimited Shore Excursions",
+        "shopListing": "",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "Receive Up to $200 Shipboard Credit"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "Viking same exclusive covert",
+    "supplier": "Viking Ocean",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE Covert Rates: Ongoing",
+    "website": [
+      {
+        "shopOverline": "Viking Ocean",
+        "title": "EXCLUSIVE! Get maximum discounts & bonuses on your next Viking sailing!",
+        "shopListing": "Don't miss this deal, exclusive from TravelPerks.",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "update",
+      "website": "EXCLUSIVE! Get maximum discounts & bonuses on your next Viking sailing!"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "Great Safaris same exclusive",
+    "supplier": "Great Safaris",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE: Save Up to $1,000 per person sharing on Select 2026 Itineraries. End date varies by tour.",
+    "website": [
+      {
+        "shopOverline": "Great Safaris",
+        "title": "EXCLUSIVE: Save Up to $1,000 Per Person on Select 2026 Safaris",
+        "shopListing": "Savings when sharing.",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "on-site",
+      "website": "EXCLUSIVE: Save Up to $1,000 Per Person on Select 2026 Safaris"
+    }
+  },
+  {
+    "set": "held-out",
+    "name": "Avalon gift same",
+    "supplier": "Avalon Waterways",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE Bottle of Wine & Box of Chocolate: Ends 10/31/2026",
+    "website": [
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Hidden Fares Featuring Up To 50% Savings",
+        "shopListing": "",
+        "expiryDate": null
+      },
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Enjoy a Bottle of Wine & Box of Chocolates",
+        "shopListing": "A sweet welcome gift onboard.",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "on-site",
+      "website": "EXCLUSIVE: Enjoy a Bottle of Wine & Box of Chocolates"
+    }
+  }
+]

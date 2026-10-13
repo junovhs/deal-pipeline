@@ -269,7 +269,7 @@ function compareExpiry(hq, web) {
  * result is a checklist in the operator's order, an internal rank used only to
  * pick the best sibling per supplier, and `identical` when nothing differs.
  */
-function compareMarkers(hq, web) {
+export function compareMarkers(hq, web) {
   const H = hq.markers, W = web.markers;
   const typeStatus = compareTypes(H.types, W.types);
   const checks = [
@@ -383,7 +383,7 @@ function buildEmptyMeta(overrides = {}) {
   };
 }
 
-// DEC-04: uncertainty is surfaced, never hidden. The operator asked never to
+// DEC-07: uncertainty is surfaced, never hidden. The operator asked never to
 // be blocked, so an uncertain pair still goes to Publish as an update to the
 // best candidate (the safe direction: it stays in front of them) and is
 // marked `guess` when a second website deal fits as well as the chosen one.
@@ -411,7 +411,7 @@ function attachCandidateRankings(meta, matrixRow, webGroup) {
 }
 
 // Saved decisions belong to the candidate assignments produced by this version.
-export const MATCHER_VERSION = 4;
+export const MATCHER_VERSION = 5;
 
 // --- Assignment with an independent no-match option for every incoming deal ---
 
