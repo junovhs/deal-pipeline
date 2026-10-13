@@ -1,7 +1,7 @@
-import React, { useMemo, useCallback, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   parseHQ, resetIds, ingestWebsiteJSON, runFullMatch,
-  categorizeDedupeResults, exportUnmatched, dateFmt,
+  categorizeDedupeResults, exportUnmatched,
   MATCHER_VERSION,
 } from '../logic/dedupe.js';
 import { buildReviewQueue } from '../logic/review.js';
@@ -12,26 +12,26 @@ function parseWebsiteRows(text) {
   return Array.isArray(data) ? data : data.entries || data.data || [];
 }
 
+function plural(n, word) {
+  return `${n} ${word}${n === 1 ? '' : 's'}`;
+}
+
 /**
- * Orchestrates website-export validation, supplier-scoped marker matching, and
- * the matcher's verdicts: every incoming deal is already on the site, an
- * update to a website deal, or new. Only rows the matcher abstains on ask the
- * operator; the rest are one-line rows that can be overridden. Update and new
- * rows are handed to Publish. Matcher inputs are frozen into `lastRun`.
+ * Compares the tagged batch with the website export and decides every deal
+ * itself: already live, an update to a live deal, or new. The operator sees
+ * one sentence and one button; the list behind it is opt-in, and any verdict
+ * can be quietly overridden there. The whole step is a drop target for the
+ * website export, and comparison runs as soon as both inputs exist.
  */
 export default function DedupeStep({ session, onSessionChange, onComplete, showToast }) {
   const fileRef = useRef(null);
   const [importError, setImportError] = useState('');
-  const [search, setSearch] = useState('');
+  const [dragging, setDragging] = useState(false);
+  const [showList, setShowList] = useState(false);
+  const [showLeftOut, setShowLeftOut] = useState(false);
   const [lastDecision, setLastDecision] = useState(null);
   const decisions = session.decisions || {};
-
-  const {
-    hqText,
-    websiteRows,
-    lastRun,
-    supplierFilter,
-  } = session;
+  const { hqText, websiteRows, lastRun } = session;
 
   const updateSession = useCallback((patch) => {
     onSessionChange((prev) => (
@@ -45,27 +45,27 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
     return parseHQ(hqText);
   }, [hqText]);
 
-  const websiteDeals = useMemo(() => ingestWebsiteJSON(websiteRows), [websiteRows]);
-  const webSuppliers = useMemo(
-    () => [...new Set(websiteDeals.map((deal) => deal.supplier))].sort(),
-    [websiteDeals],
-  );
-
   const results = useMemo(() => {
-    if (!lastRun) return null;
-    if (lastRun.matcherVersion !== MATCHER_VERSION) return null;
+    if (!lastRun || lastRun.matcherVersion !== MATCHER_VERSION) return null;
     if (!lastRun.hqText.trim() || !lastRun.websiteRows.length) return null;
     resetIds();
-    const lastRunDeals = parseHQ(lastRun.hqText);
-    const lastRunWebsiteDeals = ingestWebsiteJSON(lastRun.websiteRows);
-    return runFullMatch(lastRunDeals, lastRunWebsiteDeals, {
-      filterSupplier: lastRun.supplierFilter,
-    });
+    return runFullMatch(parseHQ(lastRun.hqText), ingestWebsiteJSON(lastRun.websiteRows));
   }, [lastRun]);
+
+  const canCompare = hqDeals.length > 0 && websiteRows.length > 0;
+
+  // Nothing to press: compare as soon as both inputs are present.
+  useEffect(() => {
+    if (!canCompare || results) return;
+    updateSession({
+      lastRun: { matcherVersion: MATCHER_VERSION, hqText, websiteRows, supplierFilter: '' },
+      decisions: {},
+    });
+    setLastDecision(null);
+  }, [canCompare, results, hqText, websiteRows, updateSession]);
 
   const categorized = useMemo(() => (results ? categorizeDedupeResults(results) : null), [results]);
   const queue = useMemo(() => buildReviewQueue(categorized, decisions), [categorized, decisions]);
-  const filtered = (rows) => rows.filter((row) => `${row.hq.vendor} ${row.hq.text} ${row.web?.raw?.title || ''}`.toLowerCase().includes(search.toLowerCase()));
 
   // Choosing the matcher's own verdict clears the override.
   const decide = (row, value) => {
@@ -81,203 +81,102 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
     setLastDecision(null);
   };
 
-  const dateWarnings = useMemo(() => hqDeals.filter((deal) => deal.dateWarning), [hqDeals]);
-
-  const handleFileLoad = useCallback(async (event) => {
-    const file = event.target.files?.[0];
+  const loadExport = useCallback(async (file) => {
     if (!file) return;
-
     try {
-      const text = await file.text();
-      const rows = parseWebsiteRows(text);
+      const rows = parseWebsiteRows(await file.text());
       const validation = await validateWebsiteExport(rows);
-
       if ('error' in validation) {
         setImportError(validation.error.message);
-        updateSession({ websiteRows: [], lastRun: null, decisions: {} });
-        showToast('Website export not recognized', 'error');
         return;
       }
-
       setImportError('');
       updateSession({ websiteRows: validation.data.rows, websiteFileName: file.name, lastRun: null, decisions: {} });
-      showToast(
-        `${validation.data.recognizedCount} website deals loaded`,
-        'success',
-      );
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setImportError(`Could not read this JSON file: ${message}`);
-      updateSession({ websiteRows: [], lastRun: null, decisions: {} });
-      showToast('Failed to parse website JSON', 'error');
-    } finally {
-      event.target.value = '';
+      setImportError(`That file isn't a website export (${error instanceof Error ? error.message : String(error)}).`);
     }
-  }, [showToast, updateSession]);
+  }, [updateSession]);
 
-  const runMatcher = useCallback(() => {
-    if (!hqDeals.length) {
-      showToast('Paste HQ text first', 'error');
-      return;
-    }
-    if (!websiteRows.length) {
-      showToast('Load website JSON first', 'error');
-      return;
-    }
-
-    updateSession({
-      lastRun: {
-        matcherVersion: MATCHER_VERSION,
-        hqText,
-        websiteRows,
-        supplierFilter,
-      },
-      decisions: {},
-    });
-    setLastDecision(null);
-  }, [hqDeals.length, hqText, showToast, supplierFilter, updateSession, websiteRows]);
+  const dropProps = {
+    onDragOver: (event) => { event.preventDefault(); setDragging(true); },
+    onDragLeave: () => setDragging(false),
+    onDrop: (event) => { event.preventDefault(); setDragging(false); loadExport(event.dataTransfer.files?.[0]); },
+  };
+  const fileInput = <input ref={fileRef} type="file" accept=".json" className="visually-hidden" onChange={(event) => { loadExport(event.target.files?.[0]); event.target.value = ''; }} />;
 
   const toPublish = [...queue.update, ...queue.added];
-  const handleExportWork = async () => {
+  const sendToPublish = () => {
     if (!toPublish.length) return;
-    try {
-      await navigator.clipboard.writeText(exportUnmatched(toPublish.map(row => row.hq)));
-      showToast('Work list copied', 'success');
-    } catch { showToast('Clipboard unavailable. Please try again.', 'error'); }
-  };
-  const handleSendToCopy = () => {
-    if (!toPublish.length || queue.ask.length) return;
     // Updates keep the website entry's URL in Publish; new deals get a slug.
     onComplete(exportUnmatched(toPublish.map(row => row.hq)), [
       ...queue.update.map(row => ({ vendor: row.hq.vendor, text: row.hq.text, action: 'update', websiteTitle: row.web?.raw?.title || '' })),
       ...queue.added.map(row => ({ vendor: row.hq.vendor, text: row.hq.text, action: 'new', websiteTitle: '' })),
     ]);
   };
+  const copyList = async () => {
+    try {
+      await navigator.clipboard.writeText(exportUnmatched(toPublish.map(row => row.hq)));
+      showToast('Copied', 'success');
+    } catch { showToast('Clipboard unavailable', 'error'); }
+  };
 
-  const canCompare = hqDeals.length > 0 && websiteDeals.length > 0;
-  const sourceVendorCount = new Set(hqDeals.map((deal) => deal.vendor)).size;
-  const fileInput = <input ref={fileRef} type="file" accept=".json" className="visually-hidden" onChange={handleFileLoad} />;
-  const sourceControls = (
-    <details className="cmp-source">
-      <summary>Source &amp; filters</summary>
-      <div className="advanced-grid">
-        <label className="advanced-source"><span>Tagged source</span><textarea value={hqText} onChange={(event) => updateSession({ hqText: event.target.value, lastRun: null, decisions: {} })} spellCheck={false} /></label>
-        <div className="advanced-controls">
-          <label className="mini-label">Supplier <select value={supplierFilter} onChange={(event) => updateSession({ supplierFilter: event.target.value, lastRun: null, decisions: {} })}><option value="">All suppliers</option>{webSuppliers.map((supplier) => <option key={String(supplier)}>{String(supplier)}</option>)}</select></label>
-        </div>
-      </div>
-    </details>
-  );
+  if (!hqDeals.length) {
+    return <div className="calm"><p className="calm-head">Nothing to compare yet.</p><p className="calm-sub">Tag this week's deals first.</p></div>;
+  }
 
+  if (!websiteRows.length) {
+    return <div className={`calm calm-drop ${dragging ? 'is-dragging' : ''}`} {...dropProps} onClick={() => fileRef.current?.click()} role="button" tabIndex={0}>
+      <p className="calm-head">Drop this week's website export here.</p>
+      <p className="calm-sub">{importError || 'Or click anywhere to choose it.'}</p>
+      {fileInput}
+    </div>;
+  }
+
+  if (!categorized) return <div className="calm"><p className="calm-sub">Comparing…</p></div>;
+
+  const leftOut = queue.onSite.length + queue.excluded.length;
   return (
-    <div className="dedupe-step cmp">
-      {categorized ? (
-        <div className="cmp-inputs">
-          <span><strong>{hqDeals.length}</strong> incoming from {sourceVendorCount} suppliers</span>
-          <span>·</span>
-          <span><strong>{websiteDeals.length}</strong> on the website</span>
-          <button className="setup-link" onClick={() => fileRef.current?.click()}>Replace {session.websiteFileName || 'export'}</button>
-          {fileInput}
-          <button className="btn btn-sm" onClick={runMatcher} disabled={!canCompare}>Compare again</button>
-          {sourceControls}
-        </div>
-      ) : (
-        <section className="dedupe-setup">
-          <div className="dedupe-setup-grid">
-            <article className={`setup-card ${hqDeals.length ? 'is-ready' : ''}`}>
-              <span className="setup-index">1</span>
-              <div className="setup-card-copy"><span className="setup-label">New deal batch</span><strong>{hqDeals.length ? `${hqDeals.length} deals from ${sourceVendorCount} suppliers` : 'No deals loaded'}</strong><span>{hqDeals.length ? 'Carried forward from Tag' : 'Complete the Tag step first'}</span></div>
-              <span className="setup-check">{hqDeals.length ? '✓' : ''}</span>
-            </article>
-            <article className={`setup-card ${websiteDeals.length ? 'is-ready' : ''}`}>
-              <span className="setup-index">2</span>
-              <div className="setup-card-copy"><span className="setup-label">Current website</span><strong>{websiteDeals.length ? `${websiteDeals.length} live deals loaded` : 'Load the website export'}</strong><button className="setup-link" onClick={() => fileRef.current?.click()}>{websiteDeals.length ? `Replace ${session.websiteFileName || 'JSON export'}` : 'Choose true_entries.json'}</button></div>
-              <span className="setup-check">{websiteDeals.length ? '✓' : ''}</span>
-              {fileInput}
-            </article>
-            <article className={`setup-card setup-action ${canCompare ? 'is-ready' : ''}`}>
-              <span className="setup-index">3</span>
-              <div className="setup-card-copy"><span className="setup-label">Compare</span><strong>{canCompare ? 'Find what is already live' : 'Waiting for both inputs'}</strong></div>
-              <button className="btn btn-accent compare-button" onClick={runMatcher} disabled={!canCompare}>Compare deals</button>
-            </article>
-          </div>
-          {sourceControls}
-        </section>
-      )}
-      {importError && <div className="gate-warning gate-warning-error import-blocker" role="alert"><strong>That website export could not be used.</strong><div>{importError}</div></div>}
+    <div className={`calm ${dragging ? 'is-dragging' : ''}`} {...dropProps}>
+      <p className="calm-head">{toPublish.length ? `${plural(toPublish.length, 'deal')} ready for Publish.` : 'Everything is already on the site.'}</p>
+      {!!toPublish.length && <p className="calm-sub">{[queue.update.length && plural(queue.update.length, 'update'), queue.added.length && `${queue.added.length} new`].filter(Boolean).join(' and ')}</p>}
+      {!!toPublish.length && <button className="calm-go" onClick={sendToPublish}>Continue →</button>}
+      {importError && <p className="calm-sub calm-error">{importError}</p>}
 
-      {dateWarnings.length > 0 && (
-        <details className="cmp-group cmp-warnings">
-          <summary>{dateWarnings.length} date {dateWarnings.length === 1 ? 'warning' : 'warnings'}</summary>
-          {dateWarnings.map((deal, index) => <div key={index} className="cmp-note"><strong>{deal.vendor}:</strong> {deal.dateWarning} — {deal.text}</div>)}
-        </details>
-      )}
+      <div className="calm-links">
+        {!!toPublish.length && <button onClick={() => setShowList(!showList)}>{showList ? 'hide' : 'look them over'}</button>}
+        {lastDecision && <button onClick={undo}>undo</button>}
+      </div>
 
-      {categorized ? (
-        <>
-          <div className="cmp-bar">
-            <div className="cmp-counts">
-              <span className={queue.ask.length ? 'is-ask' : 'is-done'}>{queue.ask.length ? `${queue.ask.length} need you` : '✓ Nothing needs you'}</span>
-              <span>{queue.update.length} update</span>
-              <span>{queue.added.length} new</span>
-              <span>{queue.onSite.length} on site</span>
-              {!!queue.excluded.length && <span>{queue.excluded.length} ending today</span>}
-            </div>
-            <input className="cmp-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter…" />
-            <button className="btn btn-sm" disabled={!lastDecision} onClick={undo}>Undo</button>
-            <button className="btn btn-sm" disabled={!toPublish.length} onClick={handleExportWork}>Copy list</button>
-            <button className="btn btn-sm btn-forward" disabled={!toPublish.length || !!queue.ask.length} onClick={handleSendToCopy}>{queue.ask.length ? `Decide ${queue.ask.length} first` : `Send ${toPublish.length} to Publish →`}</button>
-          </div>
+      {showList && <div className="calm-list">
+        {queue.update.map(row => <DealLine key={row.hq.id} r={row} kind="update" onLeaveOut={() => decide(row, 'on-site')} />)}
+        {queue.added.map(row => <DealLine key={row.hq.id} r={row} kind="new" onLeaveOut={() => decide(row, 'on-site')} />)}
+        <p className="calm-aside">
+          {leftOut ? <>Left out {[queue.onSite.length && `${queue.onSite.length} already live`, queue.excluded.length && `${queue.excluded.length} ending today`].filter(Boolean).join(', ')}. <button onClick={() => setShowLeftOut(!showLeftOut)}>{showLeftOut ? 'hide' : 'show'}</button></> : null}
+          {leftOut ? ' · ' : ''}<button onClick={copyList}>copy as text</button>
+        </p>
+        {showLeftOut && <>
+          {queue.onSite.map(row => <DealLine key={row.hq.id} r={row} kind="live" onPutBack={() => decide(row, row.web ? 'update' : 'new')} />)}
+          {queue.excluded.map(row => <DealLine key={row.hq.id} r={row} kind="ends today" />)}
+        </>}
+      </div>}
 
-          {!!queue.ask.length && <section className="cmp-group cmp-ask">
-            <h3>Needs your call · {queue.ask.length}</h3>
-            {filtered(queue.ask).map(row => <DealRow key={row.hq.id} r={row} bucket="ask" onDecision={decide} />)}
-          </section>}
-          <RowGroup title="Update the website deal" rows={filtered(queue.update)} bucket="update" onDecision={decide} open />
-          <RowGroup title="New — nothing like it on the site" rows={filtered(queue.added)} bucket="new" onDecision={decide} />
-          <RowGroup title="Already on site" rows={filtered(queue.onSite)} bucket="on-site" onDecision={decide} />
-          {!!queue.excluded.length && <details className="cmp-group">
-            <summary>Ending today — not listed · {queue.excluded.length}</summary>
-            {queue.excluded.map(row => <div key={row.hq.id} className="cmp-note"><strong>{row.hq.vendor}</strong> {row.hq.text}</div>)}
-          </details>}
-        </>
-      ) : <div className="dedupe-empty"><h3>{lastRun && lastRun.matcherVersion !== MATCHER_VERSION ? 'Matching has improved — compare again' : 'Load your website export, then compare'}</h3><p>{lastRun && lastRun.matcherVersion !== MATCHER_VERSION ? 'Your inputs are saved. Run a fresh comparison to get the new verdicts.' : 'Your saved source and website file stay here while you move between steps.'}</p></div>}
+      <p className="calm-foot">{session.websiteFileName || 'Website export'} · <button onClick={() => fileRef.current?.click()}>replace</button>{fileInput}</p>
     </div>
   );
 }
 
-function RowGroup({ title, rows, bucket, onDecision, open = false }) {
-  if (!rows.length) return null;
-  return <details className="cmp-group" open={open}>
-    <summary>{title} · {rows.length}</summary>
-    {rows.map(row => <DealRow key={row.hq.id} r={row} bucket={bucket} onDecision={onDecision} />)}
-  </details>;
-}
-
-const CHOICES = [['update', 'Update'], ['new', 'New'], ['on-site', 'On site']];
-
-function endsLabel(hq) {
-  return hq.ongoing ? 'Ongoing' : hq.end ? dateFmt.format(hq.end) : 'No end date';
-}
-
-function DealRow({ r, bucket, onDecision }) {
-  const changes = r.web ? r.meta?.changes || [] : [];
-  return <div className={`cmp-row ${r.decided ? 'is-overridden' : ''}`}>
-    <div className="cmp-supplier">{r.hq.vendor}{r.hq.type === 'exclusive' && <span className="cmp-excl" title="Exclusive">EXCL</span>}</div>
-    <div className="cmp-side">
-      <span className="cmp-text">{r.hq.text}</span>
-      <span className="cmp-date">{endsLabel(r.hq)}</span>
-    </div>
-    <div className="cmp-side cmp-web">
-      {r.web ? <>
-        <a className="cmp-text" href={`https://travelperks.com/admin/entries/deals?search=${encodeURIComponent(r.web.raw?.title || r.hq.vendor)}`} target="travelperks-admin" rel="noreferrer" title={r.web.raw?.shopListing || ''}>{r.web.raw?.title || r.web.text} ↗</a>
-        <span className="cmp-date">{r.web.expiryDate ? dateFmt.format(r.web.expiryDate) : 'No expiry'}</span>
-        {bucket === 'ask' && r.web.raw?.shopListing && <span className="cmp-desc">{r.web.raw.shopListing}</span>}
-      </> : <span className="cmp-none">Nothing similar on site</span>}
-    </div>
-    <div className="cmp-choice" role="group" aria-label="Verdict">
-      {CHOICES.map(([value, label]) => <button key={value} className={bucket === value ? 'is-on' : ''} disabled={value === 'update' && !r.web} onClick={() => onDecision(r, value)}>{label}</button>)}
-    </div>
-    {!!changes.length && <div className="cmp-changes">{changes.map((change, i) => <span key={i}>{change}</span>)}</div>}
+function DealLine({ r, kind, onLeaveOut = null, onPutBack = null }) {
+  const changes = r.web && kind === 'update' ? (r.meta?.changes || []) : [];
+  const hint = [
+    r.web && kind === 'update' ? `Updates “${r.web.raw?.title || ''}”` : '',
+    ...changes,
+    r.meta?.guess ? 'Best guess — another website deal is similar' : '',
+  ].filter(Boolean).join('\n');
+  return <div className={`calm-line ${onPutBack || kind === 'ends today' ? 'is-out' : ''}`} title={hint}>
+    <span className="calm-who">{r.hq.vendor}</span>
+    <span className="calm-what">{r.hq.text}</span>
+    <span className="calm-kind">{kind}{r.meta?.guess && kind === 'update' ? '?' : ''}</span>
+    {onLeaveOut && <button className="calm-x" onClick={onLeaveOut} aria-label="Leave out">×</button>}
+    {onPutBack && <button className="calm-x" onClick={onPutBack} aria-label="Put back">+</button>}
   </div>;
 }

@@ -285,7 +285,7 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
   );
   assert.equal(
     categorized.onSite.length + categorized.update.length + categorized.added.length
-      + categorized.ask.length + categorized.excluded.length,
+      + categorized.excluded.length,
     categorized.total,
     "Every dedupe result must have exactly one terminal outcome.",
   );

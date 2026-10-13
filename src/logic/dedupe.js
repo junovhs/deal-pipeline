@@ -315,7 +315,8 @@ function compareMarkers(hq, web) {
     checks,
     differences,
     changes,
-    verdict: !sibling ? 'new' : identical ? 'on-site' : pairVerdict(H, W, typeStatus, sameKind),
+    verdict: !sibling ? 'new' : identical ? 'on-site' : 'update',
+    guess: sibling && !identical && isGuess(H, W, typeStatus, sameKind),
     candidateRankings: [],
   };
 }
@@ -335,13 +336,11 @@ function conflictingFigures(H, W) {
 /**
  * The operator's rule for a same-exclusivity sibling: the same kind of offer
  * is the same deal whatever changed (money, percent, expiry), so it is an
- * update. A partly-overlapping kind is an update when the incoming deal only
- * adds terms; when the two also disagree on stated figures it is a real call.
+ * update. A partly-overlapping kind is an update too; when the two also
+ * disagree on stated figures the update is only a best guess.
  */
-function pairVerdict(H, W, typeStatus, sameKind) {
-  if (sameKind) return 'update';
-  if (typeStatus === 'partial' && !conflictingFigures(H, W).length) return 'update';
-  return 'ask';
+function isGuess(H, W, typeStatus, sameKind) {
+  return !sameKind && !(typeStatus === 'partial' && !conflictingFigures(H, W).length);
 }
 
 /** Short operator-facing lines naming what an update would change. */
@@ -384,13 +383,14 @@ function buildEmptyMeta(overrides = {}) {
   };
 }
 
-// DEC-04: abstain on uncertainty rather than guess a match.
-// Abstain when a second website deal fits as well as the chosen one: the
-// operator, not the assignment order, decides which entry to update.
+// DEC-04: uncertainty is surfaced, never hidden. The operator asked never to
+// be blocked, so an uncertain pair still goes to Publish as an update to the
+// best candidate (the safe direction: it stays in front of them) and is
+// marked `guess` when a second website deal fits as well as the chosen one.
 function withRunnerUpCheck(meta, matrixRow, chosen) {
   if (chosen === -1 || meta.verdict !== 'update') return meta;
   const tied = matrixRow.some((m, j) => j !== chosen && m.sibling && m.score >= meta.score);
-  return tied ? { ...meta, verdict: 'ask', changes: ['Another website deal fits just as well', ...meta.changes] } : meta;
+  return tied ? { ...meta, guess: true } : meta;
 }
 
 function buildCandidateRankings(matrixRow, webGroup) {
@@ -669,8 +669,7 @@ export function runFullMatch(hqDeals, websiteDeals, { filterSupplier = '' } = {}
 /**
  * Partitions comparison results by the matcher's verdict: `onSite` (identical
  * to a website deal), `update` (same deal on the site, terms or expiry
- * changed), `added` (nothing comparable on the site) and `ask` (the matcher
- * abstains; only these need the operator). Deals ending today are always
+ * changed) and `added` (nothing comparable on the site). Deals ending today are always
  * excluded unless already on the site, and never reach the Publish payload.
  * A row whose match the operator rejected (`excludedHQIds`) becomes `added`.
  */
@@ -682,9 +681,9 @@ export function categorizeDedupeResults(
   } = {},
 ) {
   const pulledBack = new Set(excludedHQIds);
-  const buckets = { onSite: [], update: [], added: [], ask: [] };
+  const buckets = { onSite: [], update: [], added: [] };
   const excluded = [];
-  const bucketFor = { 'on-site': 'onSite', update: 'update', new: 'added', ask: 'ask' };
+  const bucketFor = { 'on-site': 'onSite', update: 'update', new: 'added' };
 
   for (const result of results || []) {
     const verdict = result.web ? result.meta?.verdict : 'new';
@@ -696,7 +695,7 @@ export function categorizeDedupeResults(
       buckets.added.push({ ...result, meta: { ...result.meta, operatorRejectedMatch: true } });
       continue;
     }
-    buckets[bucketFor[verdict] || 'ask'].push(result);
+    buckets[bucketFor[verdict] || 'added'].push(result);
   }
 
   const byVendor = (a, b) => a.hq.vendor.localeCompare(b.hq.vendor) || a.hq.id - b.hq.id;

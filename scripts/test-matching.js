@@ -106,17 +106,20 @@ assert.equal(bucketOf(viking), 'added');
 const windstar = pair('Windstar', '2028 Europe 5% Savings, Up to $200 OBC & Comp All-Inclusive Pkg: Ends 10/31/2026', { title: 'Get an All-Inclusive Upgrade', shopListing: 'The offer features an All-Inclusive Upgrade. Call to speak with an agent!', expiryDate: '2026-11-17T08:00:00Z' });
 assert.equal(windstar.meta.verdict, 'update');
 
-// Partial overlap that contradicts a stated figure is a real call.
+// Partial overlap that contradicts a stated figure goes forward as a best guess.
 const conflict = pair('Windstar', 'Up to $200 OBC & Comp All-Inclusive Pkg: Ends 10/31/2026', { title: 'Get an All-Inclusive Upgrade plus $500 savings', expiryDate: '2026-10-31T07:00:00Z' });
-assert.equal(conflict.meta.verdict, 'ask');
+assert.equal(conflict.meta.verdict, 'update');
+assert.equal(conflict.meta.guess, true);
 
-// Two equally good website deals: the operator picks which to update.
+// Two equally good website deals: update the best one, marked as a guess, never block.
 resetIds();
 const tie = runFullMatch(parseHQ('v\tCunard\nd\tUp to $250 OBC: Ends 11/18/2026'), ingestWebsiteJSON([
   { shopOverline: 'Cunard', title: 'Receive Up to $350 Onboard Credit' },
   { shopOverline: 'Cunard', title: 'Receive Up to $300 Onboard Credit' },
 ]))[0];
-assert.equal(tie.meta.verdict, 'ask');
+assert.equal(tie.meta.verdict, 'update');
+assert.equal(tie.meta.guess, true);
+assert.equal(cunard.meta.guess, false);
 
 // Ending today is always excluded unless it is already on the site.
 const endsToday = pair('Cunard', 'Up to $250 OBC: Ends 10/13/2026', { title: 'Receive Up to $350 Onboard Credit' });

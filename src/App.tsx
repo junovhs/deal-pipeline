@@ -263,16 +263,6 @@ export default function App() {
       )}
 
       <main className="app-main">
-        <section className="workspace-heading" aria-labelledby="current-step-title">
-          <div>
-            <span className="workspace-eyebrow">Step {activeStepIndex + 1} of {STEPS.length}</span>
-            <h2 id="current-step-title">{activeStep.label}</h2>
-            <p>{activeStep.intro}</p>
-          </div>
-          <span className={`status-chip status-${activeState}`}>
-            {activeState === 'complete' ? 'Complete' : activeState === 'ready' ? 'Ready to continue' : 'Current step'}
-          </span>
-        </section>
         <div className="workspace-surface">
         <div className="step-stage" style={{ display: session.activeStep === 'tag' ? 'block' : 'none' }}>
           <DealtagStep

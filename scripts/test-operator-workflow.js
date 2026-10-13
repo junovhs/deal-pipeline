@@ -8,19 +8,18 @@ const rows = [
   { hq: { id: 1, vendor: 'Carnival', text: 'Save 20%', end: new Date(2026, 9, 20) }, web: {}, meta: { verdict: 'update' } },
   { hq: { id: 2, vendor: 'Carnival', text: 'Free drinks' }, web: {}, meta: { verdict: 'on-site' } },
   { hq: { id: 3, vendor: 'Carnival', text: 'New offer' }, web: null, meta: { verdict: 'new' } },
-  { hq: { id: 4, vendor: 'Carnival', text: 'Unsure offer' }, web: {}, meta: { verdict: 'ask' } },
+  { hq: { id: 4, vendor: 'Carnival', text: 'Unsure offer' }, web: {}, meta: { verdict: 'update', guess: true } },
   { hq: { id: 5, vendor: 'Carnival', text: 'Last day', end: today }, web: null, meta: { verdict: 'new' } },
 ];
 const categories = categorizeDedupeResults(rows, { today });
 const ids = list => list.map(r => r.hq.id);
 let queue = buildReviewQueue(categories);
-assert.deepEqual(ids(queue.ask), [4], 'Only abstentions need the operator');
-assert.deepEqual(ids(queue.update), [1]);
+assert.equal(queue.ask, undefined, 'Nothing ever waits on the operator');
+assert.deepEqual(ids(queue.update), [1, 4], 'Best guesses go forward as updates');
 assert.deepEqual(ids(queue.added), [3], 'Nothing-similar rows go straight through as new');
 assert.deepEqual(ids(queue.onSite), [2]);
 assert.deepEqual(ids(queue.excluded), [5], 'Ending today is always excluded');
-queue = buildReviewQueue(categories, { 4: 'update', 2: 'new', 1: 'on-site' });
-assert.deepEqual(ids(queue.ask), []);
+queue = buildReviewQueue(categories, { 2: 'new', 1: 'on-site' });
 assert.deepEqual(ids(queue.update), [4]);
 assert.deepEqual(ids(queue.added), [2, 3]);
 assert.deepEqual(ids(queue.onSite), [1]);
