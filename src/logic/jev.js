@@ -1,81 +1,98 @@
 // =============================================================================
 // JEV MATCHING — DEC-07
 // TypeSafe's Jev decides which website deal (if any) each incoming deal is,
-// taught the operator's rules. Code owns the facts: parsing, the ending-today
-// exclusion, year-typo fixes, and the live-vs-update check on stated terms.
+// taught the operator's rules and given the typed facts code extracted. Code
+// owns the facts and the hard gates: same supplier, same exclusivity, the
+// ending-today exclusion, year-typo fixes, and the live-vs-update term check.
 // =============================================================================
 
-import { compareMarkers, dateFmt, runFullMatch } from './dedupe.js';
+import { compareMarkers, dateFmt, runFullMatch, sameDay } from './dedupe.js';
 
-/** The operator's rules for "is this the same deal?", as Jev is taught them. */
+/**
+ * Every rule the project knows about "is this the same deal?", compiled from
+ * the operator's calls, the matcher's offer vocabulary, past dedupe fixes and
+ * criticism.md's blockers. Kept short: it rides along on every Jev request.
+ * Exclusive-vs-public and ending-today are enforced in code before Jev is asked.
+ */
 export const RULES = [
-  'An exclusive deal and a non-exclusive (public) deal are never the same deal. Covert, hidden, opaque, unpublished or private fares count as exclusive.',
-  'Same supplier, same exclusivity and the same kind of offer means the same deal even when the dollar amount, percentage or expiry date changed. That is an update, not a new deal.',
-  'An incoming deal marked Ongoing matches a website deal with an end date: the website end date was only set so the listing would not run forever. That is an update.',
-  "If the incoming deal shares any part of a website deal's offer and adds more on top (extra credit, a percentage, savings, an upgrade, an expiry), it is the same deal and an update. The website deal only needs to be contained in the incoming deal, not equal to it.",
-  'A website deal that is vague ("special savings", "reduced single supplements", "all-inclusive upgrade") matches an incoming deal that states the concrete version of the same thing ("save 50% on the single supplement", "comp all-inclusive package"). Single supplement savings and solo traveler savings are the same kind of offer.',
-  'Website titles are marketing rewrites of the incoming text: "Receive up to $350 Onboard Credit" and "up to $350 OBC" say the same thing. OBC means onboard credit; PPG means prepaid gratuities.',
-  'Already live means a website deal says the same thing with the same amounts, percentages and end date.',
-  'A different kind of offer from the same supplier (for example onboard credit vs a fare discount vs a gift vs kids sail free) is a different deal.',
+  'Facts were extracted by code and are reliable. When `compared` says amounts or offer kinds differ, trust it over the wording.',
+  'Same kind of offer (and same exclusivity) is the same deal even if the amount, percentage or end date changed: update.',
+  'Offer kinds with no overlap are different deals. A specific benefit (onboard credit, gratuities, a gift, airfare, kids sail free) never matches a website deal that only promises generic discounts, savings or bonuses.',
+  "If the incoming deal keeps the website deal's offer and adds more (credit, a percentage, an upgrade, an end date), it is the same deal: update. A vague website deal (\"special solo savings\", \"all-inclusive upgrade\") matches the concrete version of the same benefit (\"50% off the single supplement\", \"comp all-inclusive package\").",
+  'Incoming "Ongoing" vs a website end date: the operator set that date so the listing would not run forever. Same deal: update (push the date).',
+  'A website deal with no end date tells you nothing about expiry; it is not a difference.',
+  'Already live: same offer, same amounts, percentages and nights, same end date (or both open-ended).',
+  'Wording never matters: website titles are marketing rewrites. Ignore promo/booking codes (PWD, BC100, LASTMINUTE), internal labels (TLN, OCAPP, LTO, GTY, PBP, PHY, P2P), "capacity controlled", "limited availability" and which sailings or tours qualify.',
+  'Glossary: OBC = onboard/shipboard credit; PPG = prepaid gratuities; covert, opaque, hidden, unpublished, private fares and "cover rates" are one exclusive rate kind; named sales (Labor Day, Black Friday, Wave, Quiet Season) are savings.',
 ];
 
-/** Worked examples from the operator's own calls. */
+/** The operator's own calls, as short worked examples. */
 export const EXAMPLES = [
-  { incoming: 'EXCLUSIVE up to $250 OBC: Ends 11/18/2026', website: 'EXCLUSIVE: Receive Up to $350 Onboard Credit on Your Next Cruise (ends 11/18/2026)', answer: 'update: same deal, the amount changed' },
-  { incoming: 'Last Minute Deals - Save 15% with promo code LASTMINUTE. Ongoing promotion.', website: 'Save 15% on Select Last Minute Deals and Guided Vacations (ends 10/31/2026)', answer: 'update: same deal, push the website end date' },
-  { incoming: 'Up to $1250 Savings: Ends 11/7/2026', website: 'EXCLUSIVE: Hidden Fares Featuring Up To 50% Savings', answer: 'new: a public deal is never the same as an exclusive one' },
-  { incoming: '2028 Europe 5% Savings, Up to $200 OBC & Comp All-Inclusive Pkg', website: 'Get an All-Inclusive Upgrade', answer: 'update: the incoming deal keeps the all-inclusive offer and adds more' },
-  { incoming: 'Save 50% on the Single Supplement on Private Jet Journeys', website: 'Enjoy Special Solo Savings on Select Small Group Journeys (no end date)', answer: 'update: same solo / single supplement savings, now with a committed percentage and an end date' },
+  'EXCLUSIVE up to $250 OBC vs "EXCLUSIVE: Receive Up to $350 Onboard Credit" → update (amount changed)',
+  'Save 15% LASTMINUTE, Ongoing vs "Save 15% on Last Minute Deals" ending 10/31 → update (push date)',
+  '5% Savings + $200 OBC + Comp All-Inclusive Pkg vs "Get an All-Inclusive Upgrade" → update (keeps all-inclusive, adds more)',
+  '50% off the Single Supplement vs "Special Solo Savings", no end date → update (same solo savings, now concrete)',
 ];
 
 const STATUS = {
-  live: 'Already live: one of the website deals is this exact deal with the same terms and end date. Nothing to do.',
-  update: 'Update: one of the website deals is the same deal, but its amount, percentage, terms or end date need changing to match the incoming deal.',
+  live: 'Already live: a website deal is this exact deal, same terms and end date.',
+  update: 'Update: a website deal is the same deal but its terms or end date need changing.',
   new: 'New: none of the website deals is this deal.',
 };
 
-const ends = (date) => (date ? dateFmt.format(date) : 'no end date');
+const FACT_NAMES = { type: 'offer', expiry: 'ends', dollars: 'amounts', percents: 'percents', nights: 'nights' };
 
-/** One Jev request for one incoming deal against its supplier's website deals. */
-export function buildJevRequest(hq, webGroup, today = new Date()) {
-  const websiteDeals = Object.fromEntries(webGroup.map((w, i) => [`w${i + 1}`, {
+// How one typed fact compares between the incoming deal and a website deal.
+function factStatus(check, incoming, website) {
+  if (check.key === 'type') return { same: 'same kind', partial: 'partly overlap', different: 'no overlap', unknown: 'unclear' }[check.status] || check.status;
+  if (check.key === 'expiry') {
+    if (!website.expiryDate) return 'website has no end date (not evidence)';
+    if (incoming.ongoing) return 'incoming ongoing, website dated';
+    return check.status === 'same' ? 'same' : 'different';
+  }
+  if (check.status === 'n/a') return 'neither states';
+  if (check.status === 'same') return 'same';
+  if (check.hq === '—') return 'only website states';
+  if (check.web === '—') return 'only incoming states';
+  return 'different';
+}
+
+function factsOf(checks, side) {
+  return Object.fromEntries(checks.filter(c => FACT_NAMES[c.key]).map(c => [FACT_NAMES[c.key], c[side]]));
+}
+
+/**
+ * Website deals Jev may consider for an incoming deal: same supplier family
+ * (the caller's group) and same exclusivity. An exclusive deal and a public
+ * one are never the same deal.
+ */
+export function candidatesFor(hq, webGroup) {
+  return webGroup.filter(w => !!w.markers?.exclusive === !!hq.markers?.exclusive);
+}
+
+/** One Jev request: the incoming deal, each candidate with typed facts and how they compare, and the rules. */
+export function buildJevRequest(hq, candidates, today = new Date(), note = '') {
+  const checksFor = candidates.map(w => compareMarkers(hq, w).checks);
+  const websiteDeals = Object.fromEntries(candidates.map((w, i) => [`w${i + 1}`, {
     title: w.raw?.title || '',
     description: w.raw?.shopListing || '',
-    ends: ends(w.expiryDate),
-    exclusive: !!w.markers?.exclusive,
+    facts: factsOf(checksFor[i], 'web'),
+    compared: Object.fromEntries(checksFor[i].filter(c => FACT_NAMES[c.key]).map(c => [FACT_NAMES[c.key], factStatus(c, hq, w)])),
   }]));
-  const match = Object.fromEntries(Object.entries(websiteDeals).map(([id, w]) => [id, `${w.title} (ends ${w.ends})`]));
-  match.none = 'None of the website deals is this deal.';
-  // One yes/no per website deal: does the incoming deal offer anything that
-  // entry does not mention? Catches extras the term parser cannot name.
-  const adds = Object.fromEntries(Object.entries(websiteDeals).map(([id, w]) => [`adds_${id}`, {
-    type: 'noul',
-    instructions: {
-      website_deal: w,
-      question: 'Does `incoming_deal` offer something (a benefit, amount, percentage or perk) that `website_deal` does not mention? Rewording, marketing phrasing, end dates, promo or booking codes (like PWD, BC100, LASTMINUTE) and which sailings or tours qualify do not count.',
-    },
-  }]));
+  const match = Object.fromEntries(candidates.map((w, i) => [`w${i + 1}`, w.raw?.title || `website deal ${i + 1}`]));
+  match.none = 'None of them.';
   return {
     state: {
       today: dateFmt.format(today),
-      supplier: hq.vendor,
-      incoming_deal: { text: hq.text, exclusive: !!hq.markers?.exclusive, ends: hq.ongoing ? 'ongoing' : ends(hq.end) },
+      incoming_deal: { text: hq.text, facts: factsOf(checksFor[0] || [], 'hq') },
       website_deals: websiteDeals,
       rules: RULES,
       examples: EXAMPLES,
+      ...(note ? { operator_note: note } : {}),
     },
     questions: {
-      status: {
-        type: 'choice',
-        instructions: "Following `rules`, what should happen to `incoming_deal` given the supplier's `website_deals`?",
-        criteria: STATUS,
-      },
-      match: {
-        type: 'choice',
-        instructions: 'Following `rules`, which of `website_deals` is the same deal as `incoming_deal`?',
-        criteria: match,
-      },
-      ...adds,
+      status: { type: 'choice', instructions: 'Following `rules`, is `incoming_deal` already live, an update to one of `website_deals`, or new?', criteria: STATUS },
+      match: { type: 'choice', instructions: 'Following `rules`, which of `website_deals` is the same deal as `incoming_deal`?', criteria: match },
     },
   };
 }
@@ -86,29 +103,32 @@ const FIGURE_KEYS = ['dollars', 'percents', 'nights', 'expiry'];
  * Turns Jev's two answers into a comparison result. Jev decides whether the
  * deal is on the site and which entry it is; when Jev says update/live but
  * names no entry, the likeliest entry is used. A matched deal is live only
- * when its stated terms are all equal and Jev sees nothing extra offered.
+ * when Jev says so and every stated term agrees. `ranked` lists candidates
+ * by Jev's match probability so the operator can step to the next one.
  */
-export function combineJevAnswer(hq, webGroup, answers) {
+export function combineJevAnswer(hq, candidates, answers) {
   const status = answers.status;
   const match = answers.match;
+  const ranked = Object.entries(match.probabilities || {})
+    .filter(([id]) => id !== 'none')
+    .sort((a, b) => b[1] - a[1])
+    .map(([id, p]) => ({ index: Number(id.slice(1)) - 1, p }))
+    .filter(r => r.index >= 0 && r.index < candidates.length);
   let target = match.choice === 'none' ? -1 : Number(String(match.choice).slice(1)) - 1;
   let confidence = Math.min(status.confidence ?? 0, match.confidence ?? 0);
-  if (status.choice !== 'new' && !(target >= 0 && target < webGroup.length)) {
-    const ranked = Object.entries(match.probabilities || {})
-      .filter(([id]) => id !== 'none')
-      .sort((a, b) => b[1] - a[1]);
-    target = ranked.length ? Number(ranked[0][0].slice(1)) - 1 : -1;
-    confidence = Math.min(confidence, ranked[0]?.[1] ?? 0);
+  if (status.choice !== 'new' && !(target >= 0 && target < candidates.length)) {
+    target = ranked.length ? ranked[0].index : -1;
+    confidence = Math.min(confidence, ranked[0]?.p ?? 0);
   }
-  if (status.choice === 'new' || target < 0 || target >= webGroup.length) {
-    return { hq, web: null, meta: { verdict: 'new', confidence: status.confidence ?? 0, source: 'jev', changes: [], candidates: webGroup } };
+  const base = { source: 'jev', candidates, ranked: ranked.map(r => ({ web: candidates[r.index], p: r.p })), reconsidered: !!answers.reconsidered };
+  if (status.choice === 'new' || target < 0) {
+    return { hq, web: null, meta: { ...base, verdict: 'new', confidence: status.confidence ?? 0, changes: [] } };
   }
-  const web = webGroup[target];
+  const web = candidates[target];
   const pair = compareMarkers(hq, web);
-  const termsEqual = FIGURE_KEYS.every(k => !pair.differences.includes(k)) && !pair.differences.includes('exclusive');
-  const addsMore = (answers[`adds_w${target + 1}`]?.noul ?? 0) >= 0.5;
-  const verdict = termsEqual && !addsMore && (pair.identical || status.choice === 'live') ? 'on-site' : 'update';
-  return { hq, web, meta: { ...pair, verdict, guess: false, confidence, source: 'jev', jevStatus: status.choice, candidates: webGroup } };
+  const termsEqual = FIGURE_KEYS.every(k => !pair.differences.includes(k) || (k === 'expiry' && !web.expiryDate));
+  const verdict = status.choice === 'live' && termsEqual ? 'on-site' : 'update';
+  return { hq, web, meta: { ...pair, ...base, verdict, guess: false, confidence, jevStatus: status.choice } };
 }
 
 async function pool(items, size, work) {
@@ -118,23 +138,29 @@ async function pool(items, size, work) {
   }));
 }
 
+function groupByFamily(websiteDeals) {
+  const byFamily = {};
+  for (const w of websiteDeals) (byFamily[w.vendorFamily] ||= []).push(w);
+  return byFamily;
+}
+
 /**
  * Compares every incoming deal with Jev. `call(body)` sends one request and
- * resolves to Jev's `answers`. Deals whose supplier has nothing on the site,
- * and deals Jev could not answer, keep the rule-based verdict (the latter
- * marked `jevError`). `cache` maps hq id → answers already received.
+ * resolves to Jev's `answers`. Only deals with a same-exclusivity candidate
+ * that are not ending today are sent, to keep calls minimal. Deals Jev could
+ * not answer keep the rule-based verdict, marked `jevError`. `cache` maps
+ * hq id → answers already received.
  */
 export async function compareWithJev(hqDeals, websiteDeals, call, { today = new Date(), cache = {}, concurrency = 6, onProgress = (_done, _total) => {} } = {}) {
   const ruleResults = runFullMatch(hqDeals, websiteDeals);
-  const byFamily = {};
-  for (const w of websiteDeals) (byFamily[w.vendorFamily] ||= []).push(w);
+  const byFamily = groupByFamily(websiteDeals);
   const answers = { ...cache };
-  const todo = hqDeals.filter(hq => byFamily[hq.vendorFamily]?.length && !answers[hq.id]);
+  const todo = hqDeals.filter(hq => candidatesFor(hq, byFamily[hq.vendorFamily] || []).length && !sameDay(hq.end, today) && !answers[hq.id]);
   let done = hqDeals.length - todo.length;
   onProgress(done, hqDeals.length);
   await pool(todo, concurrency, async (hq) => {
     try {
-      answers[hq.id] = await call(buildJevRequest(hq, byFamily[hq.vendorFamily], today));
+      answers[hq.id] = await call(buildJevRequest(hq, candidatesFor(hq, byFamily[hq.vendorFamily]), today));
     } catch {
       // Left unanswered: the rule-based verdict stands for this deal.
     }
@@ -145,15 +171,28 @@ export async function compareWithJev(hqDeals, websiteDeals, call, { today = new 
 
 /** Re-applies stored Jev answers to rule-based results (no network). */
 export function applyJevAnswers(ruleResults, websiteDeals, answers) {
-  const byFamily = {};
-  for (const w of websiteDeals) (byFamily[w.vendorFamily] ||= []).push(w);
+  const byFamily = groupByFamily(websiteDeals);
   return ruleResults.map((result) => {
-    const group = byFamily[result.hq.vendorFamily];
-    if (!group?.length) return result;
+    const candidates = candidatesFor(result.hq, byFamily[result.hq.vendorFamily] || []);
+    if (!candidates.length) return { hq: result.hq, web: null, meta: { verdict: 'new', changes: [], candidates: [], ranked: [] } };
     const got = answers[result.hq.id];
-    if (!got?.status || !got?.match) return { ...result, meta: { ...result.meta, jevError: true, candidates: group } };
-    return combineJevAnswer(result.hq, group, got);
+    if (!got?.status || !got?.match) {
+      return { ...result, meta: { ...result.meta, jevError: true, candidates, ranked: candidates.map(web => ({ web, p: null })) } };
+    }
+    return combineJevAnswer(result.hq, candidates, got);
   });
+}
+
+/**
+ * Asks Jev again about one deal, telling it the operator doubts its call.
+ * Resolves to the new answers, marked `reconsidered`.
+ */
+export async function reconsiderWithJev(hq, websiteDeals, doubted, call, today = new Date()) {
+  const candidates = candidatesFor(hq, websiteDeals.filter(w => w.vendorFamily === hq.vendorFamily));
+  const note = doubted
+    ? `The operator doubts that "${doubted.raw?.title}" is the same deal. Re-check every fact before answering; it may be another website deal or new.`
+    : 'The operator doubts this deal is new. Re-check every fact against each website deal before answering.';
+  return { ...(await call(buildJevRequest(hq, candidates, today, note))), reconsidered: true };
 }
 
 /**

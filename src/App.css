@@ -1721,3 +1721,17 @@ body { background: var(--bg); font-size: 14px; }
 .review-others button.is-on { color: var(--ink); font-weight: 700; text-decoration: none; }
 .review-others kbd { margin: 0 4px 0 0; }
 @media (max-width: 760px) { .review-pair { grid-template-columns: 1fr; } .review-side.is-site { border-left: 0; border-top: 1px solid var(--border); } }
+.facts { width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 14px; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(25,47,41,.05); }
+.facts th, .facts td { padding: 7px 18px; text-align: left; border-top: 1px solid #eef2ee; font-variant-numeric: tabular-nums; }
+.facts tr:first-child th, .facts tr:first-child td { border-top: 0; }
+.facts th { width: 190px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.facts td { width: calc(50% - 95px); color: var(--ink); }
+.fact-glyph { display: inline-block; width: 19px; height: 19px; line-height: 19px; margin-right: 10px; border-radius: 50%; text-align: center; font-size: 11px; font-weight: 900; background: #e6ece8; color: var(--muted); }
+.fact-same .fact-glyph { background: var(--good); color: #fff; }
+.fact-different .fact-glyph { background: var(--bad); color: #fff; }
+.fact-different td { color: var(--bad); font-weight: 700; }
+.fact-partial .fact-glyph, .fact-unknown .fact-glyph { background: var(--warn); color: #fff; }
+.fact-partial td { color: var(--warn); font-weight: 700; }
+.fact-na th, .fact-na td, .fact-open td { color: var(--muted); font-weight: 500; }
+.review-others { flex-direction: row !important; flex-wrap: wrap; justify-content: center; color: var(--muted); }
+.review-others button { margin-left: 8px; }

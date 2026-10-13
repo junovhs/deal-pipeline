@@ -238,6 +238,25 @@
     }
   },
   {
+    "set": "operator-screenshots",
+    "name": "Viking exclusive OBC vs generic exclusive discounts",
+    "supplier": "Viking Ocean",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE Ocean & River up to $200 OBC: Ends 10/31/2026",
+    "website": [
+      {
+        "shopOverline": "Viking Ocean",
+        "title": "EXCLUSIVE! Get maximum discounts & bonuses on your next Viking sailing!",
+        "shopListing": "Don't miss this deal, exclusive from TravelPerks.",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "new",
+      "website": null
+    }
+  },
+  {
     "set": "held-out",
     "name": "NCL same gratuities",
     "supplier": "Norwegian",

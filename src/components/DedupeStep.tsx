@@ -4,7 +4,7 @@ import {
   categorizeDedupeResults, exportUnmatched, dateFmt,
   MATCHER_VERSION,
 } from '../logic/dedupe.js';
-import { compareWithJev, applyJevAnswers, applyDecisions } from '../logic/jev.js';
+import { compareWithJev, applyJevAnswers, applyDecisions, reconsiderWithJev } from '../logic/jev.js';
 import { validateWebsiteExport } from '../logic/dealCoreClient';
 
 function parseWebsiteRows(text) {
@@ -163,8 +163,22 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
   const byId = new Map<number, any>((results || []).map((r: any) => [r.hq.id, r]));
   const reviewRow = reviewAt >= 0 && reviewAt < reviewOrder.length ? byId.get(reviewOrder[reviewAt]) : null;
   if (reviewRow) {
+    // Re-ask Jev with the operator's doubt; the new answer replaces the old
+    // one and any decision on this deal is cleared so the card shows it.
+    const reconsider = async (row) => {
+      try {
+        const answers = await reconsiderWithJev(row.hq, frozen.web, row.web, callJev);
+        updateSession((prev) => {
+          const nextDecisions = { ...(prev.decisions || {}) };
+          delete nextDecisions[row.hq.id];
+          return { ...prev, decisions: nextDecisions, lastRun: { ...prev.lastRun, jev: { ...prev.lastRun.jev, [row.hq.id]: answers } } };
+        });
+      } catch {
+        showToast('Jev could not be reached', 'error');
+      }
+    };
     return <ReviewCard
-      key={reviewRow.hq.id}
+      key={`${reviewRow.hq.id}-${lastRun.jev?.[reviewRow.hq.id]?.reconsidered ? 'again' : 'first'}-${reviewRow.web ? frozen.web.indexOf(reviewRow.web) : 'none'}`}
       r={reviewRow}
       websiteDeals={frozen.web}
       position={reviewAt + 1}
@@ -172,6 +186,7 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
       onDecide={decide}
       onBack={() => setReviewAt((at) => Math.max(0, at - 1))}
       onClose={() => setReviewAt(-1)}
+      onReconsider={reconsider}
     />;
   }
 
@@ -210,42 +225,76 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
   );
 }
 
-function ends(date, ongoing = false) {
-  return ongoing ? 'Ongoing' : date ? `Ends ${dateFmt.format(date)}` : 'No end date';
+const GLYPH = { same: '✓', different: '✗', partial: '~', unknown: '?', 'n/a': '–', open: '–' };
+
+// The typed facts side by side. A website deal with no end date is neutral:
+// it says nothing about expiry.
+function FactsTable({ hq, web }) {
+  const checks = web ? compareMarkers(hq, web).checks : null;
+  if (!checks) return null;
+  return <table className="facts">
+    <tbody>
+      {checks.map((c) => {
+        const status = c.key === 'expiry' && !web.expiryDate ? 'open' : c.status;
+        return <tr key={c.key} className={`fact-${status === 'n/a' ? 'na' : status}`}>
+          <th><span className="fact-glyph">{GLYPH[status] || '?'}</span>{c.label}</th>
+          <td>{c.hq}</td>
+          <td>{status === 'open' ? 'No end date' : c.web}</td>
+        </tr>;
+      })}
+    </tbody>
+  </table>;
 }
 
 /**
  * One of Jev's calls: this week's deal beside the website deal Jev picked,
- * what differs, and Jev's verdict. → keeps Jev's call; U / L / N set update,
- * live or new; number keys compare against another website deal instead.
+ * the typed facts compared, and Jev's verdict. → keeps Jev's call; U / L set
+ * update or live against the shown deal; N means "not this one" and steps to
+ * Jev's next most likely website deal, landing on new when none are left;
+ * R asks Jev to reconsider.
  */
-function ReviewCard({ r, websiteDeals, position, total, onDecide, onBack, onClose }) {
-  const candidates = r.meta?.candidates || [];
-  const pickedIndex = r.web ? websiteDeals.indexOf(r.web) : -1;
-  const [shown, setShown] = useState(pickedIndex >= 0 ? pickedIndex : -1);
-  const web = shown >= 0 ? websiteDeals[shown] : null;
-  const changes = web ? compareMarkers(r.hq, web).changes : [];
+function ReviewCard({ r, websiteDeals, position, total, onDecide, onBack, onClose, onReconsider }) {
+  const ranked = r.meta?.ranked?.length ? r.meta.ranked : (r.meta?.candidates || []).map(web => ({ web, p: null }));
   const jevVerdict = r.web ? r.meta?.verdict : 'new';
+  // Even when Jev says new, start on its closest website deal so it can be compared.
+  const start = r.web ? Math.max(0, ranked.findIndex(x => x.web === r.web)) : 0;
+  const [at, setAt] = useState(start);
+  const [asking, setAsking] = useState(false);
+  const shown = at < ranked.length ? ranked[at] : null;
+  const web = shown?.web || null;
+  const index = web ? websiteDeals.indexOf(web) : null;
   const sure = r.meta?.jevError ? null : Math.round((r.meta?.confidence ?? 0) * 100);
+  const isJevPick = !!web && web === r.web;
+
+  const notThisOne = useCallback(() => {
+    if (at + 1 < ranked.length) setAt(at + 1);
+    else onDecide(r, 'new', null);
+  }, [at, ranked.length, onDecide, r]);
+  const reconsider = useCallback(async () => {
+    if (asking) return;
+    setAsking(true);
+    try { await onReconsider(r); } finally { setAsking(false); }
+  }, [asking, onReconsider, r]);
 
   useEffect(() => {
     const onKey = (event) => {
       if (event.target instanceof HTMLElement && ['INPUT', 'TEXTAREA'].includes(event.target.tagName)) return;
       const key = event.key.toLowerCase();
-      if (key === 'arrowright' || key === 'enter') onDecide(r, jevVerdict, pickedIndex);
+      if (key === 'arrowright' || key === 'enter') onDecide(r, jevVerdict, r.web ? websiteDeals.indexOf(r.web) : null);
       else if (key === 'arrowleft') onBack();
       else if (key === 'escape') onClose();
-      else if (key === 'u' && web) onDecide(r, 'update', shown);
-      else if (key === 'l' && web) onDecide(r, 'on-site', shown);
-      else if (key === 'n') onDecide(r, 'new', null);
-      else if (/^[1-9]$/.test(key) && candidates[+key - 1]) setShown(websiteDeals.indexOf(candidates[+key - 1]));
+      else if (key === 'u' && web) onDecide(r, 'update', index);
+      else if (key === 'l' && web) onDecide(r, 'on-site', index);
+      else if (key === 'n') notThisOne();
+      else if (key === 'r') reconsider();
       else return;
       event.preventDefault();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [r, jevVerdict, pickedIndex, web, shown, candidates, websiteDeals, onDecide, onBack, onClose]);
+  }, [r, jevVerdict, web, index, websiteDeals, onDecide, onBack, onClose, notThisOne, reconsider]);
 
+  const others = ranked.length - 1;
   return <div className="review">
     <div className="review-top">
       <span>{position} of {total}</span>
@@ -256,30 +305,34 @@ function ReviewCard({ r, websiteDeals, position, total, onDecide, onBack, onClos
       <div className="review-side">
         <span className="review-label">This week</span>
         <p className="review-text">{r.hq.text}</p>
-        <span className="review-date">{ends(r.hq.end, r.hq.ongoing)}{r.hq.type === 'exclusive' ? ' · Exclusive' : ''}</span>
       </div>
       <div className="review-side is-site">
-        <span className="review-label">{shown === pickedIndex && web ? 'On the website — Jev\'s pick' : 'On the website'}</span>
+        <span className="review-label">
+          {web ? `${isJevPick ? 'On the website — Jev\'s pick' : jevVerdict === 'new' && at === 0 ? 'Closest on the website' : 'On the website'}${shown.p != null ? ` · Jev ${Math.round(shown.p * 100)}% match` : ''}` : 'On the website'}
+        </span>
         {web ? <>
           <p className="review-text">{web.raw?.title}</p>
           {web.raw?.shopListing && <p className="review-desc">{web.raw.shopListing}</p>}
-          <span className="review-date">{ends(web.expiryDate)}</span>
-        </> : <p className="review-text review-none">Nothing on the site matches.</p>}
+        </> : <p className="review-text review-none">{ranked.length ? `None of ${r.hq.vendor}'s ${ranked.length} website ${ranked.length === 1 ? 'deal matches' : 'deals match'}.` : `${r.hq.vendor} has nothing comparable on the site.`}</p>}
       </div>
     </div>
-    {changes.length > 0 && <p className="review-diff">{changes.join(' · ')}</p>}
-    <p className="review-call">Jev: <strong>{CALL[jevVerdict]}</strong>{sure !== null ? ` · ${sure}% sure` : ' · Jev unavailable, built-in rules'}</p>
+    <FactsTable hq={r.hq} web={web} />
+    <p className="review-call">
+      Jev: <strong>{CALL[jevVerdict]}</strong>
+      {sure !== null ? ` · ${sure}% sure` : ' · Jev unavailable, built-in rules'}
+      {r.meta?.reconsidered ? ' · reconsidered' : ''}
+    </p>
     <div className="review-buttons">
-      <button className="is-main" onClick={() => onDecide(r, jevVerdict, pickedIndex)}>Jev's right <kbd>→</kbd></button>
-      <button disabled={!web} onClick={() => onDecide(r, 'update', shown)}>Update <kbd>U</kbd></button>
-      <button disabled={!web} onClick={() => onDecide(r, 'on-site', shown)}>Already live <kbd>L</kbd></button>
-      <button onClick={() => onDecide(r, 'new', null)}>New <kbd>N</kbd></button>
+      <button className="is-main" onClick={() => onDecide(r, jevVerdict, r.web ? websiteDeals.indexOf(r.web) : null)}>Jev's right <kbd>→</kbd></button>
+      <button disabled={!web} onClick={() => onDecide(r, 'update', index)}>Same deal, update <kbd>U</kbd></button>
+      <button disabled={!web} onClick={() => onDecide(r, 'on-site', index)}>Already live <kbd>L</kbd></button>
+      <button onClick={notThisOne}>{web && at + 1 < ranked.length ? 'Not this one' : 'New deal'} <kbd>N</kbd></button>
+      <button onClick={reconsider} disabled={asking}>{asking ? 'Asking Jev…' : 'Ask Jev to reconsider'} <kbd>R</kbd></button>
     </div>
-    {candidates.length > 1 && <p className="review-others">
-      {candidates.map((c, i) => {
-        const index = websiteDeals.indexOf(c);
-        return <button key={index} className={index === shown ? 'is-on' : ''} onClick={() => setShown(index)}><kbd>{i + 1}</kbd> {c.raw?.title}</button>;
-      })}
-    </p>}
+    <p className="review-others">
+      {others > 0
+        ? <>{web ? `${others} other ${r.hq.vendor} ${others === 1 ? 'deal' : 'deals'} on the site` : `${ranked.length} ${r.hq.vendor} ${ranked.length === 1 ? 'deal' : 'deals'} on the site`}, Jev's next most likely first: {ranked.map((x, i) => i === at ? null : <button key={i} onClick={() => setAt(i)}>{x.web.raw?.title}{x.p != null ? ` (${Math.round(x.p * 100)}%)` : ''}</button>)}</>
+        : web ? `No other ${r.hq.vendor} deals on the site, so "New deal" means nothing there matches.` : ''}
+    </p>
   </div>;
 }
