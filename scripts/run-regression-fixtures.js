@@ -63,7 +63,7 @@ async function main() {
   assert.equal(validatedWebsite.ok, true);
   assert.equal(validatedWebsite.data.recognizedCount, websiteRows.length);
   assert.equal(validatedWebsite.data.rows[0].shopOverline, "Norwegian Cruise Line");
-  assert.equal(validatedWebsite.data.rows[0].title, "Free Gratuities for 2");
+  assert.equal(validatedWebsite.data.rows[0].title, "EXCLUSIVE: Free Gratuities for 2");
   assert.equal(validatedWebsite.data.rows[0] instanceof Map, false);
 
   const tagged = transform(rawPromo, { includeUnknowns: true });
@@ -269,22 +269,23 @@ Up to 35% Savings & up to $250 OBC: Ends 8/31/2026`;
   });
   assert.deepEqual(categorized.excluded, []);
   assert.equal(
-    categorized.work.some((row) => row.hq.id === norwegianMatch.hq.id),
+    categorized.added.some((row) => row.hq.id === norwegianMatch.hq.id),
     true,
-    "An operator-rejected match must land in the work list.",
+    "An operator-rejected match must be published as a new deal.",
   );
   assert.equal(
-    categorized.work.find((row) => row.hq.id === norwegianMatch.hq.id)
+    categorized.added.find((row) => row.hq.id === norwegianMatch.hq.id)
       ?.meta.operatorRejectedMatch,
     true,
   );
   assert.match(
-    exportUnmatched(categorized.work.map((row) => row.hq)),
+    exportUnmatched(categorized.added.map((row) => row.hq)),
     /v\s+Norwegian/,
     "The rejected match must be included in the payload sent to Copy.",
   );
   assert.equal(
-    categorized.identical.length + categorized.work.length + categorized.excluded.length,
+    categorized.onSite.length + categorized.update.length + categorized.added.length
+      + categorized.ask.length + categorized.excluded.length,
     categorized.total,
     "Every dedupe result must have exactly one terminal outcome.",
   );

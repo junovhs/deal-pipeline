@@ -29,7 +29,6 @@ function createDefaultSession() {
       threshold: 0,
       supplierFilter: '',
       viewFilter: 'review',
-      restrictToday: false,
       rejectedHQIds: [],
       decisions: {},
     },
@@ -131,7 +130,6 @@ export default function App() {
       const outputChanged = current.hqText !== next.hqText
         || current.lastRun !== next.lastRun
         || current.threshold !== next.threshold
-        || current.restrictToday !== next.restrictToday
         || current.rejectedHQIds !== next.rejectedHQIds
         || current.decisions !== next.decisions;
 
