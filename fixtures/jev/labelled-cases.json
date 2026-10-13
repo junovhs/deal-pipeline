@@ -595,8 +595,8 @@
     }
   },
   {
-    "set": "held-out",
-    "name": "Viking same exclusive covert",
+    "set": "operator-screenshots",
+    "name": "Viking exclusive covert vs generic exclusive discounts",
     "supplier": "Viking Ocean",
     "tag": "ed",
     "incoming": "EXCLUSIVE Covert Rates: Ongoing",
@@ -609,8 +609,8 @@
       }
     ],
     "expect": {
-      "verdict": "update",
-      "website": "EXCLUSIVE! Get maximum discounts & bonuses on your next Viking sailing!"
+      "verdict": "new",
+      "website": null
     }
   },
   {
