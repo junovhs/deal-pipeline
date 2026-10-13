@@ -227,10 +227,22 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
 
   const totalDeals = finalGroups.reduce((n, g) => n + g.deals.length, 0);
   const doneDeals = finalGroups.reduce((n, g) => n + g.deals.filter((d) => d.checked).length, 0);
-  const issueDeals = finalGroups.reduce((n, g) => n + g.deals.filter((d) => !d.checked && d.warnings?.length).length, 0);
+  const needsAttention = (d) => !d.checked && d.warnings?.length > 0 && !d.warningsOk;
+  const issueDeals = finalGroups.reduce((n, g) => n + g.deals.filter(needsAttention).length, 0);
+
+  // "All good": the operator has looked at this deal's warnings and approves the copy.
+  const clearWarnings = useCallback((vIdx, dIdx) => {
+    updateSession((prev) => ({
+      ...prev,
+      finalGroups: prev.finalGroups.map((g, gi) => gi !== vIdx ? g : {
+        ...g,
+        deals: g.deals.map((d, di) => (di === dIdx ? { ...d, warningsOk: true } : d)),
+      }),
+    }));
+  }, [updateSession]);
 
   const matchesFilter = useCallback((deal, group) => {
-    const status = workFilter === "all" || (workFilter === "pending" && !deal.checked) || (workFilter === "done" && deal.checked) || (workFilter === "issues" && !deal.checked && deal.warnings?.length > 0);
+    const status = workFilter === "all" || (workFilter === "pending" && !deal.checked) || (workFilter === "done" && deal.checked) || (workFilter === "issues" && !deal.checked && deal.warnings?.length > 0 && !deal.warningsOk);
     return status && `${group.name} ${deal.headline} ${deal.originalText}`.toLowerCase().includes(workSearch.toLowerCase());
   }, [workFilter, workSearch]);
 
@@ -332,6 +344,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                 onSelect={() => setCursor(row.key)}
                 onCopy={(field) => copyField(row.vIdx, row.dIdx, row.deal, field, row.showSlug)}
                 onToggle={() => toggleCheck(row.vIdx, row.dIdx)}
+                onWarningsOk={() => clearWarnings(row.vIdx, row.dIdx)}
                 onNote={(text) => updateSession({ dealNotes: { ...dealNotes, [row.deal.dealId || row.key]: text } })}
                 onFixPrompt={(note) => copyFixPrompt(row.group, row.deal, note)}
                 onPatch={() => { setDialog({ type: "patch", group: row.group, deal: row.deal }); setPatchInput(""); }}
@@ -386,7 +399,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
 }
 
 /** One deal in the publishing queue: fields to copy, its source, and quiet fix tools. */
-function DealRow({ row, isCurrent, isFresh, copiedFields, nextField, flash, note, onSelect, onCopy, onToggle, onNote, onFixPrompt, onPatch }) {
+function DealRow({ row, isCurrent, isFresh, copiedFields, nextField, flash, note, onSelect, onCopy, onToggle, onWarningsOk, onNote, onFixPrompt, onPatch }) {
   const { deal, showSlug, key } = row;
   const fieldButton = (field, className, content) => (
     <button
@@ -416,9 +429,10 @@ function DealRow({ row, isCurrent, isFresh, copiedFields, nextField, flash, note
           {deal.endDate && fieldButton("ed", "chip chip-date", <>End {deal.endDate}</>)}
           {showSlug && deal.urlSlug && fieldButton("slug", "chip chip-mono", deal.urlSlug)}
         </div>
-        {deal.warnings?.length > 0 && <ul className="deal-warnings">
-          {deal.warnings.map((w, i) => <li key={i} className={w.severity === "error" ? "is-error" : ""}><span className="label">{w.severity === "error" ? "Error" : "Check"}</span> {w.msg}</li>)}
-        </ul>}
+        {deal.warnings?.length > 0 && !deal.warningsOk && <div className="deal-warnings">
+          <ul>{deal.warnings.map((w, i) => <li key={i} className={w.severity === "error" ? "is-error" : ""}><span className="label">{w.severity === "error" ? "Error" : "Check"}</span> {w.msg}</li>)}</ul>
+          <button className="deal-warnings-ok" onClick={(e) => { e.stopPropagation(); onWarningsOk(); }}>All good ✓</button>
+        </div>}
         <p className="deal-source">From: {deal.originalText}{deal.isExclusive && <span className="label label-exclusive">Exclusive</span>}</p>
         <details className="deal-fix" onClick={(e) => e.stopPropagation()}>
           <summary>Fix this copy</summary>
