@@ -218,12 +218,12 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
   return (
     <div className={`calm ${dragging ? 'is-dragging' : ''}`} {...dropProps}>
       <p className="calm-head">{toPublish.length ? `${plural(toPublish.length, 'deal')} ready for Publish.` : 'Everything is already on the site.'}</p>
-      <p className="calm-sub">{[
-        categorized.update.length && plural(categorized.update.length, 'update'),
-        categorized.added.length && `${categorized.added.length} new`,
-        categorized.onSite.length && `${categorized.onSite.length} already live`,
-        categorized.excluded.length && `${categorized.excluded.length} ending today, left out`,
-      ].filter(Boolean).join(' · ')}</p>
+      <div className="tally">
+        <Tally kind="update" n={categorized.update.length} label={categorized.update.length === 1 ? 'update' : 'updates'} />
+        <Tally kind="new" n={categorized.added.length} label="new" />
+        <Tally kind="live" n={categorized.onSite.length} label="already live" />
+        {!!categorized.excluded.length && <Tally kind="out" n={categorized.excluded.length} label="end today, left out" />}
+      </div>
       {jevDown && <p className="calm-sub calm-error">Jev isn't connected, so these are the built-in rules' calls.</p>}
       <div className="calm-actions">
         {leftToReview > 0 && <button className="calm-go" onClick={() => startReview()}>Check {leftToReview === 1 ? 'the 1 deal' : `the ${leftToReview} deals`} Jev isn't sure about →</button>}
@@ -327,6 +327,7 @@ function ReviewCard({ r, websiteDeals, position, total, onDecide, onBack, onClos
   return <div className="review">
     <div className="review-top">
       <span>{position} of {total}</span>
+      <span className="review-progress" aria-hidden="true"><span style={{ width: `${Math.round(((position - 1) / Math.max(1, total)) * 100)}%` }} /></span>
       <button onClick={onClose}>done for now</button>
     </div>
     <p className="review-supplier">{r.hq.vendor}</p>
@@ -353,8 +354,8 @@ function ReviewCard({ r, websiteDeals, position, total, onDecide, onBack, onClos
     </p>
     <div className="review-buttons">
       <button className="is-main" onClick={correct}>{onAlt ? 'Yes, this one' : 'Correct'} <kbd>→</kbd></button>
-      <button disabled={!web} onClick={() => onDecide(r, 'update', index)}>Same deal, update <kbd>U</kbd></button>
-      <button onClick={wrong}>{onAlt ? 'No' : 'Wrong'} <kbd>W</kbd></button>
+      <button className="is-update" disabled={!web} onClick={() => onDecide(r, 'update', index)}>Same deal, update <kbd>U</kbd></button>
+      <button className="is-wrong" onClick={wrong}>{onAlt ? 'No' : 'Wrong'} <kbd>W</kbd></button>
     </div>
     <p className="review-others">
       <button onClick={reconsider} disabled={asking}>{asking ? 'asking Jev…' : 'ask Jev again'}</button>
@@ -390,5 +391,30 @@ function SkimList({ rows, onOpen, onClose }) {
         <span className={`skim-call is-${r.web ? r.meta?.verdict : 'new'}`}>{SKIM_CALL[r.web ? r.meta?.verdict : 'new']}</span>
       </button>)}
     </div>
+  </div>;
+}
+
+// Counts up from zero when the summary appears.
+function useCountUp(target, ms = 700) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    let frame = 0;
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / ms);
+      setValue(Math.round(target * (1 - (1 - t) ** 3)));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [target, ms]);
+  return value;
+}
+
+function Tally({ kind, n, label }) {
+  const shown = useCountUp(n);
+  return <div className={`tally-item tally-${kind}`}>
+    <span className="tally-num" aria-hidden="true">{shown}</span>
+    <span className="tally-label"><span className="visually-hidden">{n} </span>{label}</span>
   </div>;
 }

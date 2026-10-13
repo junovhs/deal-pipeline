@@ -10,6 +10,12 @@ import '../App.css';
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content="A guided workflow for preparing weekly travel deals." />
     <title>Deal Pipeline</title>
+    <script is:inline>
+      try {
+        const saved = localStorage.getItem('deal-pipeline-theme');
+        document.documentElement.dataset.theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      } catch {}
+    </script>
   </head>
   <body>
     <App client:only="react" />

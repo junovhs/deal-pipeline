@@ -68,8 +68,31 @@ function loadSession() {
  * Tag, Dedupe, and Copy. Step handoffs deliberately reset downstream derived
  * state, while the global reset clears persisted work and remounts every step.
  */
+const THEME_KEY = 'deal-pipeline-theme';
+
+// The saved choice wins; otherwise follow the system. index.astro applies the
+// same rule before first paint so there is no flash.
+function initialTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light' || saved === 'dark') return saved;
+  } catch {}
+  return typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 export default function App() {
   const [session, setSession] = useState(loadSession);
+  const [theme, setTheme] = useState(initialTheme);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+  const toggleTheme = useCallback(() => {
+    setTheme((current) => {
+      const next = current === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem(THEME_KEY, next); } catch {}
+      return next;
+    });
+  }, []);
   const [notify, setNotify] = useState(null);
   const [showGlobalReset, setShowGlobalReset] = useState(false);
   const [resetVersion, setResetVersion] = useState(0);
@@ -216,7 +239,7 @@ export default function App() {
               return (
                 <li key={step.key}>
                   <button
-                    className={`step ${current ? 'is-current' : ''}`}
+                    className={`step ${current ? 'is-current' : ''} ${state === 'complete' ? 'is-done' : ''}`}
                     onClick={() => setStep(step.key)}
                     aria-current={current ? 'step' : undefined}
                   >
@@ -229,7 +252,17 @@ export default function App() {
             })}
           </ol>
         </nav>
-        <button className="link" onClick={() => setShowGlobalReset(true)}>Start over</button>
+        <div className="header-actions">
+          <button className="link" onClick={() => setShowGlobalReset(true)}>Start over</button>
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          >
+            <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
+          </button>
+        </div>
       </header>
 
       {showGlobalReset && (

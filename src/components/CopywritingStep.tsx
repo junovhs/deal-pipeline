@@ -15,8 +15,27 @@ function loadConfetti() {
   if (confettiFn) return;
   import("canvas-confetti").then((mod) => { confettiFn = mod.default; }).catch(() => {});
 }
-function fireConfetti() {
-  confettiFn?.({ particleCount: 100, spread: 70, origin: { y: 0.6 }, zIndex: 2000, disableForReducedMotion: true });
+const CONFETTI_COLORS = ["#7fe3bd", "#0b6150", "#f6b866", "#9db8ff", "#c7b4f7"];
+
+// A small burst from the deal's check button when it is published.
+function burstFrom(key) {
+  if (!confettiFn) return;
+  const el = document.querySelector(`[data-deal-key="${key}"] .deal-check`);
+  const r = el?.getBoundingClientRect();
+  const origin = r ? { x: (r.left + r.width / 2) / window.innerWidth, y: (r.top + r.height / 2) / window.innerHeight } : { x: 0.5, y: 0.5 };
+  confettiFn({ particleCount: 36, spread: 60, startVelocity: 26, scalar: 0.8, ticks: 120, origin, colors: CONFETTI_COLORS, zIndex: 2000 });
+}
+
+// Fireworks when the whole queue is published.
+function fireworks() {
+  if (!confettiFn) return;
+  const end = Date.now() + 2200;
+  (function frame() {
+    confettiFn({ particleCount: 6, angle: 60, spread: 70, origin: { x: 0, y: 0.7 }, colors: CONFETTI_COLORS, zIndex: 2000 });
+    confettiFn({ particleCount: 6, angle: 120, spread: 70, origin: { x: 1, y: 0.7 }, colors: CONFETTI_COLORS, zIndex: 2000 });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
+  setTimeout(() => confettiFn({ particleCount: 160, spread: 100, startVelocity: 45, origin: { y: 0.45 }, colors: CONFETTI_COLORS, zIndex: 2000 }), 300);
 }
 
 const FIELD_LABEL = { h: "headline", d: "description", sd: "start date", ed: "end date", slug: "URL slug" };
@@ -61,6 +80,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
   const [flash, setFlash] = useState(null);
   const [copied, setCopied] = useState({});
   const [cursor, setCursor] = useState(null);
+  const [justDone, setJustDone] = useState(null);
   const [checkResult, setCheckResult] = useState(null);
   const [dialog, setDialog] = useState(null);
   const [patchInput, setPatchInput] = useState("");
@@ -126,7 +146,11 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
         deals: g.deals.map((d, di) => {
           if (gi !== vIdx || di !== dIdx) return d;
           const next = forceState !== null ? forceState : !d.checked;
-          if (next && prev.finalGroups.every((group, x) => group.deals.every((deal, y) => (x === vIdx && y === dIdx) || deal.checked))) fireConfetti();
+          if (next && !d.checked) {
+            setTimeout(() => setJustDone(`${vIdx}-${dIdx}`), 0);
+            const allDone = prev.finalGroups.every((group, x) => group.deals.every((deal, y) => (x === vIdx && y === dIdx) || deal.checked));
+            setTimeout(() => (allDone ? fireworks() : burstFrom(`${vIdx}-${dIdx}`)), 0);
+          }
           return { ...d, checked: next };
         }),
       })),
@@ -216,7 +240,8 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
     finalGroups.forEach((group, vIdx) => group.deals.forEach((deal, dIdx) => {
       if (!matchesFilter(deal, group)) return;
       const action = (session.sourceActions || []).find((a) => a.vendor === group.name && a.text === deal.originalText);
-      rows.push({ key: `${vIdx}-${dIdx}`, vIdx, dIdx, group, deal, action, showSlug: action?.action !== "update" });
+      // Every deal gets a fresh URL slug, updates included.
+      rows.push({ key: `${vIdx}-${dIdx}`, vIdx, dIdx, group, deal, action, showSlug: true });
     }));
     return rows;
   }, [finalGroups, matchesFilter, session.sourceActions]);
@@ -266,6 +291,9 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
         {dialogs}
         <div className="queue-head">
           <p className="queue-count"><strong>{totalDeals - doneDeals}</strong> left to publish <span className="muted">· {doneDeals} done</span></p>
+          <div className="queue-progress" role="progressbar" aria-label="Published" aria-valuemin={0} aria-valuemax={totalDeals} aria-valuenow={doneDeals}>
+            <span style={{ width: `${totalDeals ? (doneDeals / totalDeals) * 100 : 0}%` }} />
+          </div>
           <div className="filters" role="group" aria-label="Show">
             {[["pending", "To publish"], ["issues", `Needs attention${issueDeals ? ` (${issueDeals})` : ""}`], ["done", "Done"], ["all", "All"]].map(([value, label]) =>
               <button key={value} className="filter" aria-pressed={workFilter === value} onClick={() => setWorkFilter(value)}>{label}</button>)}
@@ -281,7 +309,9 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
           </div>
         </div>
 
-        {!visible.length && <p className="empty">{totalDeals && doneDeals === totalDeals ? "Everything is published." : "No deals in this view."}</p>}
+        {!visible.length && (totalDeals && doneDeals === totalDeals
+          ? <div className="all-done"><p>Everything is published.</p><p className="muted">{totalDeals} deals live this week.</p></div>
+          : <p className="empty">No deals in this view.</p>)}
         {finalGroups.map((group, vIdx) => {
           const rows = visible.filter((r) => r.vIdx === vIdx);
           if (!rows.length) return null;
@@ -294,6 +324,7 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
                 key={row.key}
                 row={row}
                 isCurrent={current?.key === row.key}
+                isFresh={justDone === row.key}
                 copiedFields={copied[row.key] || {}}
                 nextField={row.key === current?.key ? nextFieldOf(row) : null}
                 flash={flash}
@@ -355,11 +386,11 @@ export default function CopywritingStep({ session, onSessionChange, showToast })
 }
 
 /** One deal in the publishing queue: fields to copy, its source, and quiet fix tools. */
-function DealRow({ row, isCurrent, copiedFields, nextField, flash, note, onSelect, onCopy, onToggle, onNote, onFixPrompt, onPatch }) {
-  const { deal, action, showSlug, key } = row;
+function DealRow({ row, isCurrent, isFresh, copiedFields, nextField, flash, note, onSelect, onCopy, onToggle, onNote, onFixPrompt, onPatch }) {
+  const { deal, showSlug, key } = row;
   const fieldButton = (field, className, content) => (
     <button
-      className={`copyable ${className} ${copiedFields[field] ? "is-copied" : ""} ${nextField === field ? "is-next" : ""}`}
+      className={`copyable ${className} ${copiedFields[field] ? "is-copied" : ""} ${nextField === field ? "is-next" : ""} ${flash === `${key}-${field}` ? "is-flash" : ""}`}
       onClick={(e) => { e.stopPropagation(); onCopy(field); }}
       aria-label={`Copy ${FIELD_LABEL[field]}: ${valueOf(deal, field)}`}
     >
@@ -368,7 +399,7 @@ function DealRow({ row, isCurrent, copiedFields, nextField, flash, note, onSelec
     </button>
   );
   return (
-    <article className={`deal ${isCurrent ? "is-current" : ""} ${deal.checked ? "is-done" : ""}`} onClick={onSelect}>
+    <article data-deal-key={key} className={`deal ${isCurrent ? "is-current" : ""} ${deal.checked ? "is-done" : ""} ${isFresh && deal.checked ? "is-fresh" : ""}`} onClick={onSelect}>
       <button
         className="deal-check"
         aria-pressed={!!deal.checked}
@@ -378,16 +409,11 @@ function DealRow({ row, isCurrent, copiedFields, nextField, flash, note, onSelec
         <span aria-hidden="true">{deal.checked ? "✓" : ""}</span>
       </button>
       <div className="deal-body">
-        {action?.action === "update" && <p className="deal-note">
-          Update the live deal{" "}
-          <a href={`https://travelperks.com/admin/entries/deals?search=${encodeURIComponent(action.websiteTitle || row.group.name)}`} target="travelperks-admin" rel="noreferrer" onClick={(e) => e.stopPropagation()}>{action.websiteTitle || row.group.name}</a>
-          {" "}and keep its URL.
-        </p>}
         {fieldButton("h", "deal-headline", deal.headline)}
         {fieldButton("d", "deal-desc", deal.description)}
         <div className="deal-fields">
-          {deal.startDate && fieldButton("sd", "chip", <>Start {deal.startDate}</>)}
-          {deal.endDate && fieldButton("ed", "chip", <>End {deal.endDate}</>)}
+          {deal.startDate && fieldButton("sd", "chip chip-date", <>Start {deal.startDate}</>)}
+          {deal.endDate && fieldButton("ed", "chip chip-date", <>End {deal.endDate}</>)}
           {showSlug && deal.urlSlug && fieldButton("slug", "chip chip-mono", deal.urlSlug)}
         </div>
         {deal.warnings?.length > 0 && <ul className="deal-warnings">

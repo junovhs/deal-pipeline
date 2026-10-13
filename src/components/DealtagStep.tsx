@@ -105,7 +105,7 @@ export default function DealtagStep({ session, onSessionChange, onComplete, show
         <section className="pair-side" aria-labelledby="tag-out">
           <div className="pair-head">
             <h2 id="tag-out">Tagged deals</h2>
-            {stats && <p className="muted">{stats.deals} deals from {stats.vendors} suppliers · {stats.excl} exclusive{stats.unknownSuppliers ? ` · ${stats.unknownSuppliers} unknown suppliers skipped` : ''}</p>}
+            {stats && <p className="tag-stats"><span><strong>{stats.deals}</strong> deals</span><span><strong>{stats.vendors}</strong> suppliers</span><span><strong>{stats.excl}</strong> exclusive</span>{stats.unknownSuppliers ? <span><strong>{stats.unknownSuppliers}</strong> skipped</span> : null}</p>}
           </div>
           <div
             ref={rightRef}
@@ -116,17 +116,19 @@ export default function DealtagStep({ session, onSessionChange, onComplete, show
           >
             {!groups.length && <p className="empty">Tagged deals appear here as soon as you paste.</p>}
             {groups.map((line, index) => {
-              if (line.tag === 'v') return <h3 key={index} className="tagged-supplier">{line.text}</h3>;
+              // Lines ease in one after another, capped so long lists stay quick.
+              const style = { animationDelay: `${Math.min(index * 14, 700)}ms` };
+              if (line.tag === 'v') return <h3 key={index} className="tagged-supplier" style={style}>{line.text}</h3>;
               if (line.tag === 'X') {
                 const open = !!openSkips[index];
-                return <div key={index} className="tagged-skip">
+                return <div key={index} className="tagged-skip" style={style}>
                   <button className="link" aria-expanded={open} onClick={() => setOpenSkips({ ...openSkips, [index]: !open })}>
                     Skipped {line.items.length === 1 ? '1 line' : `${line.items.length} lines`}: {line.items[0]}{line.items.length > 1 ? '…' : ''}
                   </button>
                   {open && <ul>{line.items.map((item, i) => <li key={i}>{item}</li>)}</ul>}
                 </div>;
               }
-              return <p key={index} className="tagged-deal">
+              return <p key={index} className="tagged-deal" style={style}>
                 {line.tag === 'ed' && <span className="label label-exclusive">Exclusive</span>}
                 {line.text}
               </p>;
