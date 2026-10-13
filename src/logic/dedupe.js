@@ -411,7 +411,7 @@ function attachCandidateRankings(meta, matrixRow, webGroup) {
 }
 
 // Saved decisions belong to the candidate assignments produced by this version.
-export const MATCHER_VERSION = 6;
+export const MATCHER_VERSION = 7;
 
 // --- Assignment with an independent no-match option for every incoming deal ---
 

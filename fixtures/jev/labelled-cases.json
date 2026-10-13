@@ -257,6 +257,93 @@
     }
   },
   {
+    "set": "operator-screenshots",
+    "name": "Seabourn covert ongoing vs secret rates no end date",
+    "supplier": "Seabourn",
+    "tag": "d",
+    "incoming": "Covert Fares: Ongoing",
+    "website": [
+      {
+        "shopOverline": "Seabourn",
+        "title": "EXCLUSIVE: Secret Rates – Unveil the Luxury!",
+        "shopListing": "Experience unparalleled luxury with exclusive secret rates on select sailings. Speak with an agent for more details on applicable sailings",
+        "expiryDate": null
+      },
+      {
+        "shopOverline": "Seabourn",
+        "title": "EXCLUSIVE: Receive Up to $400 in Onboard Credit on Cruises",
+        "shopListing": "",
+        "expiryDate": null
+      }
+    ],
+    "expect": {
+      "verdict": "on-site",
+      "website": "EXCLUSIVE: Secret Rates – Unveil the Luxury!"
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "Avalon wine same",
+    "supplier": "Avalon Waterways",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE Bottle of Wine: Ends 10/31/2026",
+    "website": [
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Hidden Fares Featuring Up To 50% Savings",
+        "shopListing": "Discover special hidden savings by calling an agent for more details on your next journey.",
+        "expiryDate": null
+      },
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Enjoy Complimentary Prepaid Gratuities on Your Upcoming Cruise Vacation",
+        "shopListing": "Relax with added peace of mind as gratuities are completely taken care of. Ends 10/31.",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      },
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Receive a Bottle of Wine and Box of Chocolates",
+        "shopListing": "Celebrate your cruise vacation with delightful welcome treats delivered directly to your accommodations. Ends 10/31.",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "on-site",
+      "website": "EXCLUSIVE: Receive a Bottle of Wine and Box of Chocolates"
+    }
+  },
+  {
+    "set": "operator-screenshots",
+    "name": "Avalon TLN gratuities same",
+    "supplier": "Avalon Waterways",
+    "tag": "ed",
+    "incoming": "EXCLUSIVE TLN Prepaid Gratuities: Ends 10/31/2026",
+    "website": [
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Hidden Fares Featuring Up To 50% Savings",
+        "shopListing": "Discover special hidden savings by calling an agent for more details on your next journey.",
+        "expiryDate": null
+      },
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Enjoy Complimentary Prepaid Gratuities on Your Upcoming Cruise Vacation",
+        "shopListing": "Relax with added peace of mind as gratuities are completely taken care of. Ends 10/31.",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      },
+      {
+        "shopOverline": "Avalon Waterways",
+        "title": "EXCLUSIVE: Receive a Bottle of Wine and Box of Chocolates",
+        "shopListing": "Celebrate your cruise vacation with delightful welcome treats delivered directly to your accommodations. Ends 10/31.",
+        "expiryDate": "2026-10-31T19:00:00.000Z"
+      }
+    ],
+    "expect": {
+      "verdict": "on-site",
+      "website": "EXCLUSIVE: Enjoy Complimentary Prepaid Gratuities on Your Upcoming Cruise Vacation"
+    }
+  },
+  {
     "set": "held-out",
     "name": "NCL same gratuities",
     "supplier": "Norwegian",

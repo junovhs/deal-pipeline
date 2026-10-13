@@ -1,10 +1,10 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   parseHQ, resetIds, ingestWebsiteJSON, runFullMatch, compareMarkers,
-  categorizeDedupeResults, exportUnmatched, dateFmt,
+  categorizeDedupeResults, exportUnmatched,
   MATCHER_VERSION,
 } from '../logic/dedupe.js';
-import { compareWithJev, applyJevAnswers, applyDecisions, reconsiderWithJev } from '../logic/jev.js';
+import { compareWithJev, applyJevAnswers, applyDecisions, reconsiderWithJev, needsReview } from '../logic/jev.js';
 import { validateWebsiteExport } from '../logic/dealCoreClient';
 
 function parseWebsiteRows(text) {
@@ -96,23 +96,29 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
   const categorized = useMemo(() => (results ? categorizeDedupeResults(results) : null), [results]);
   const jevDown = !!results && results.some(r => r.meta?.candidates?.length) && results.every(r => !r.meta?.candidates?.length || r.meta?.jevError);
 
-  // Every call Jev made against a real website deal, least sure first.
-  const reviewable = useMemo(() => {
-    if (!categorized) return [];
-    return [...categorized.update, ...categorized.onSite, ...categorized.added]
+  // Every call Jev made against a real website deal, split into the few it is
+  // unsure about (cards) and the confident rest (optional skim list).
+  const { unsure, sure } = useMemo(() => {
+    if (!categorized) return { unsure: [], sure: [] };
+    const calls = [...categorized.update, ...categorized.onSite, ...categorized.added]
       .filter(r => r.meta?.candidates?.length)
       .sort((a, b) => (a.meta?.jevError ? -1 : a.meta?.confidence ?? 0) - (b.meta?.jevError ? -1 : b.meta?.confidence ?? 0) || a.hq.id - b.hq.id);
-  }, [categorized]);
+    // A row the operator already decided stays where it was first sorted.
+    const isUnsure = (r) => (r.meta?.reviewed ? !!decisions[r.hq.id]?.wasUnsure : needsReview(r));
+    return { unsure: calls.filter(isUnsure), sure: calls.filter(r => !isUnsure(r)) };
+  }, [categorized, decisions]);
+  const [skimming, setSkimming] = useState(false);
   // Freeze the order when review starts so cards don't jump as calls change.
   const [reviewOrder, setReviewOrder] = useState([]);
-  const startReview = () => {
-    const unreviewed = reviewable.filter(r => !decisions[r.hq.id]);
-    setReviewOrder((unreviewed.length ? unreviewed : reviewable).map(r => r.hq.id));
+  const startReview = (rows = unsure) => {
+    const pending = rows.filter(r => !decisions[r.hq.id]);
+    setReviewOrder((pending.length ? pending : rows).map(r => r.hq.id));
     setReviewAt(0);
   };
 
   const decide = useCallback((row, verdict, webIndex) => {
-    updateSession({ decisions: { ...decisions, [row.hq.id]: { verdict, web: verdict === 'new' ? null : webIndex } } });
+    const wasUnsure = row.meta?.reviewed ? !!decisions[row.hq.id]?.wasUnsure : needsReview(row);
+    updateSession({ decisions: { ...decisions, [row.hq.id]: { verdict, web: verdict === 'new' ? null : webIndex, wasUnsure } } });
     setReviewAt((at) => at + 1);
   }, [decisions, updateSession]);
 
@@ -190,9 +196,16 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
     />;
   }
 
+  if (skimming) {
+    return <SkimList
+      rows={sure}
+      onOpen={(row) => { setSkimming(false); startReview([row]); }}
+      onClose={() => setSkimming(false)}
+    />;
+  }
+
   const toPublish = [...categorized.update, ...categorized.added];
-  const reviewed = reviewable.filter(r => decisions[r.hq.id]).length;
-  const leftToReview = reviewable.length - reviewed;
+  const leftToReview = unsure.filter(r => !decisions[r.hq.id]).length;
   const sendToPublish = () => {
     if (!toPublish.length) return;
     // Updates keep the website entry's URL in Publish; new deals get a slug.
@@ -213,12 +226,13 @@ export default function DedupeStep({ session, onSessionChange, onComplete, showT
       ].filter(Boolean).join(' · ')}</p>
       {jevDown && <p className="calm-sub calm-error">Jev isn't connected, so these are the built-in rules' calls.</p>}
       <div className="calm-actions">
-        {leftToReview > 0 && <button className="calm-go" onClick={startReview}>Review Jev's calls →</button>}
+        {leftToReview > 0 && <button className="calm-go" onClick={() => startReview()}>Check {leftToReview === 1 ? 'the 1 deal' : `the ${leftToReview} deals`} Jev isn't sure about →</button>}
         {!!toPublish.length && <button className={leftToReview > 0 ? 'calm-second' : 'calm-go'} onClick={sendToPublish}>Continue to Publish →</button>}
       </div>
-      <p className="calm-note">{leftToReview > 0
-        ? `${plural(leftToReview, 'call')} to look over, least sure first.${reviewed ? ` ${reviewed} done.` : ''}`
-        : reviewable.length ? <>All of Jev's calls reviewed. <button onClick={startReview}>look again</button></> : ''}</p>
+      <p className="calm-note">
+        {leftToReview === 0 && unsure.length > 0 ? 'Every unsure call is checked. ' : ''}
+        {sure.length > 0 && <>Jev is sure about {sure.length} more. <button onClick={() => setSkimming(true)}>skim them</button></>}
+      </p>
       {importError && <p className="calm-sub calm-error">{importError}</p>}
       <p className="calm-foot">{session.websiteFileName || 'Website export'} · <button onClick={() => fileRef.current?.click()}>replace</button>{fileInput}</p>
     </div>
@@ -235,11 +249,12 @@ function FactsTable({ hq, web }) {
   return <table className="facts">
     <tbody>
       {checks.map((c) => {
-        const status = c.key === 'expiry' && !web.expiryDate ? 'open' : c.status;
+        // Ongoing and no end date are the same thing; a dated deal vs no end date is neutral.
+        const status = c.key === 'expiry' && !web.expiryDate ? (hq.ongoing || !hq.end ? 'same' : 'open') : c.status;
         return <tr key={c.key} className={`fact-${status === 'n/a' ? 'na' : status}`}>
           <th><span className="fact-glyph">{GLYPH[status] || '?'}</span>{c.label}</th>
           <td>{c.hq}</td>
-          <td>{status === 'open' ? 'No end date' : c.web}</td>
+          <td>{c.key === 'expiry' && !web.expiryDate ? 'No end date' : c.web}</td>
         </tr>;
       })}
     </tbody>
@@ -266,10 +281,25 @@ function ReviewCard({ r, websiteDeals, position, total, onDecide, onBack, onClos
   const sure = r.meta?.jevError ? null : Math.round((r.meta?.confidence ?? 0) * 100);
   const isJevPick = !!web && web === r.web;
 
-  const notThisOne = useCallback(() => {
-    if (at + 1 < ranked.length) setAt(at + 1);
-    else onDecide(r, 'new', null);
-  }, [at, ranked.length, onDecide, r]);
+  // Looking at a different website deal than the one Jev picked.
+  const onAlt = !!r.web && at !== start;
+  const jevIndex = r.web ? websiteDeals.indexOf(r.web) : null;
+  // "It is this deal": live when every stated term agrees, otherwise update.
+  const sameAs = useCallback((w, i) => onDecide(r, compareMarkers(r.hq, w).differences.some(k => ['dollars', 'percents', 'nights', 'expiry'].includes(k)) ? 'update' : 'on-site', i), [onDecide, r]);
+  const correct = useCallback(() => {
+    if (onAlt && web) sameAs(web, index);
+    else onDecide(r, jevVerdict, jevIndex);
+  }, [onAlt, web, index, sameAs, onDecide, r, jevVerdict, jevIndex]);
+  // Wrong on a match: try Jev's next plausible website deal, else it is new.
+  // Wrong on "new": it is the closest website deal shown.
+  const wrong = useCallback(() => {
+    if (!r.web) {
+      if (web) sameAs(web, index); else onDecide(r, 'new', null);
+      return;
+    }
+    const next = ranked.findIndex((x, i) => i > at && i !== start && (x.p == null || x.p >= 0.1));
+    if (next >= 0) setAt(next); else onDecide(r, 'new', null);
+  }, [r, web, index, sameAs, onDecide, ranked, at, start]);
   const reconsider = useCallback(async () => {
     if (asking) return;
     setAsking(true);
@@ -280,19 +310,18 @@ function ReviewCard({ r, websiteDeals, position, total, onDecide, onBack, onClos
     const onKey = (event) => {
       if (event.target instanceof HTMLElement && ['INPUT', 'TEXTAREA'].includes(event.target.tagName)) return;
       const key = event.key.toLowerCase();
-      if (key === 'arrowright' || key === 'enter') onDecide(r, jevVerdict, r.web ? websiteDeals.indexOf(r.web) : null);
+      if (key === 'arrowright' || key === 'enter' || key === 'c') correct();
       else if (key === 'arrowleft') onBack();
       else if (key === 'escape') onClose();
       else if (key === 'u' && web) onDecide(r, 'update', index);
-      else if (key === 'l' && web) onDecide(r, 'on-site', index);
-      else if (key === 'n') notThisOne();
+      else if (key === 'w' || key === 'n') wrong();
       else if (key === 'r') reconsider();
       else return;
       event.preventDefault();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [r, jevVerdict, web, index, websiteDeals, onDecide, onBack, onClose, notThisOne, reconsider]);
+  }, [web, index, onDecide, r, onBack, onClose, correct, wrong, reconsider]);
 
   const others = ranked.length - 1;
   return <div className="review">
@@ -318,21 +347,48 @@ function ReviewCard({ r, websiteDeals, position, total, onDecide, onBack, onClos
     </div>
     <FactsTable hq={r.hq} web={web} />
     <p className="review-call">
-      Jev: <strong>{CALL[jevVerdict]}</strong>
-      {sure !== null ? ` · ${sure}% sure` : ' · Jev unavailable, built-in rules'}
-      {r.meta?.reconsidered ? ' · reconsidered' : ''}
+      {onAlt
+        ? <>Is it this one instead?</>
+        : <>Jev: <strong>{CALL[jevVerdict]}</strong>{sure !== null ? ` · ${sure}% sure` : ' · Jev unavailable, built-in rules'}{r.meta?.reconsidered ? ' · reconsidered' : ''}</>}
     </p>
     <div className="review-buttons">
-      <button className="is-main" onClick={() => onDecide(r, jevVerdict, r.web ? websiteDeals.indexOf(r.web) : null)}>Jev's right <kbd>→</kbd></button>
+      <button className="is-main" onClick={correct}>{onAlt ? 'Yes, this one' : 'Correct'} <kbd>→</kbd></button>
       <button disabled={!web} onClick={() => onDecide(r, 'update', index)}>Same deal, update <kbd>U</kbd></button>
-      <button disabled={!web} onClick={() => onDecide(r, 'on-site', index)}>Already live <kbd>L</kbd></button>
-      <button onClick={notThisOne}>{web && at + 1 < ranked.length ? 'Not this one' : 'New deal'} <kbd>N</kbd></button>
-      <button onClick={reconsider} disabled={asking}>{asking ? 'Asking Jev…' : 'Ask Jev to reconsider'} <kbd>R</kbd></button>
+      <button onClick={wrong}>{onAlt ? 'No' : 'Wrong'} <kbd>W</kbd></button>
     </div>
     <p className="review-others">
-      {others > 0
-        ? <>{web ? `${others} other ${r.hq.vendor} ${others === 1 ? 'deal' : 'deals'} on the site` : `${ranked.length} ${r.hq.vendor} ${ranked.length === 1 ? 'deal' : 'deals'} on the site`}, Jev's next most likely first: {ranked.map((x, i) => i === at ? null : <button key={i} onClick={() => setAt(i)}>{x.web.raw?.title}{x.p != null ? ` (${Math.round(x.p * 100)}%)` : ''}</button>)}</>
-        : web ? `No other ${r.hq.vendor} deals on the site, so "New deal" means nothing there matches.` : ''}
+      <button onClick={reconsider} disabled={asking}>{asking ? 'asking Jev…' : 'ask Jev again'}</button>
+      {others > 0 && <> · other {r.hq.vendor} deals: {ranked.map((x, i) => i === at ? null : <button key={i} onClick={() => setAt(i)}>{x.web.raw?.title}{x.p != null ? ` (${Math.round(x.p * 100)}%)` : ''}</button>)}</>}
+      {others === 0 && web && <> · no other {r.hq.vendor} deals on the site</>}
     </p>
+  </div>;
+}
+
+const SKIM_CALL = { update: 'update', 'on-site': 'already live', new: 'new' };
+
+/**
+ * Optional: Jev's confident calls as one skimmable list, this week's deal
+ * beside the website deal it matched. Clicking a row opens it as a card.
+ */
+function SkimList({ rows, onOpen, onClose }) {
+  useEffect(() => {
+    const onKey = (event) => { if (event.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return <div className="skim">
+    <div className="review-top">
+      <span>Jev is sure about these {rows.length}. Click any that look wrong.</span>
+      <button onClick={onClose}>back</button>
+    </div>
+    <div className="skim-list">
+      {rows.map(r => <button key={r.hq.id} className="skim-row" onClick={() => onOpen(r)}>
+        <span className="skim-who">{r.hq.vendor}</span>
+        <span className="skim-in">{r.hq.text}</span>
+        <span className="skim-arrow">→</span>
+        <span className={`skim-site ${r.web ? '' : 'is-none'}`}>{r.web ? r.web.raw?.title : 'not on the site'}</span>
+        <span className={`skim-call is-${r.web ? r.meta?.verdict : 'new'}`}>{SKIM_CALL[r.web ? r.meta?.verdict : 'new']}</span>
+      </button>)}
+    </div>
   </div>;
 }

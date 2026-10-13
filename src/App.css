@@ -1735,3 +1735,16 @@ body { background: var(--bg); font-size: 14px; }
 .fact-na th, .fact-na td, .fact-open td { color: var(--muted); font-weight: 500; }
 .review-others { flex-direction: row !important; flex-wrap: wrap; justify-content: center; color: var(--muted); }
 .review-others button { margin-left: 8px; }
+.skim { max-width: 1280px; margin: 4vh auto 0; padding: 0 8px 40px; }
+.skim-list { margin-top: 18px; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(25,47,41,.06); }
+.skim-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 20px minmax(0, 1fr) 96px; gap: 14px; align-items: baseline; width: 100%; padding: 10px 18px; border: 0; border-top: 1px solid #eef2ee; background: none; font: inherit; font-size: 13.5px; line-height: 1.4; text-align: left; color: var(--ink); cursor: pointer; }
+.skim-row:first-child { border-top: 0; }
+.skim-row:hover { background: #f6f8f5; }
+.skim-who { font-weight: 700; }
+.skim-arrow { color: var(--muted); text-align: center; }
+.skim-site.is-none { color: var(--muted); font-style: italic; }
+.skim-call { font-size: 12px; font-weight: 700; text-align: right; color: var(--muted); }
+.skim-call.is-update { color: var(--warn); }
+.skim-call.is-on-site { color: var(--good); }
+.fact-open td { color: var(--muted); }
+@media (max-width: 800px) { .skim-row { grid-template-columns: 1fr; } .skim-arrow { display: none; } .skim-call { text-align: left; } }

@@ -20,8 +20,8 @@ export const RULES = [
   'Offer kinds with no overlap are different deals. A specific benefit (onboard credit, gratuities, a gift, airfare, kids sail free) never matches a website deal that only promises generic discounts, savings or bonuses.',
   "If the incoming deal keeps the website deal's offer and adds more (credit, a percentage, an upgrade, an end date), it is the same deal: update. A vague website deal (\"special solo savings\", \"all-inclusive upgrade\") matches the concrete version of the same benefit (\"50% off the single supplement\", \"comp all-inclusive package\").",
   'Incoming "Ongoing" vs a website end date: the operator set that date so the listing would not run forever. Same deal: update (push the date).',
-  'A website deal with no end date tells you nothing about expiry; it is not a difference.',
-  'Already live: same offer, same amounts, percentages and nights, same end date (or both open-ended).',
+  '"Ongoing" and "no end date" mean the same thing: open-ended. Both open-ended is the same end date.',
+  'Already live: same offer, same amounts, percentages and nights, same end date (or both open-ended). A website deal that has everything the incoming deal has plus a little more (wine vs wine and chocolates) is still already live.',
   'Wording never matters: website titles are marketing rewrites. Ignore promo/booking codes (PWD, BC100, LASTMINUTE), internal labels (TLN, OCAPP, LTO, GTY, PBP, PHY, P2P), "capacity controlled", "limited availability" and which sailings or tours qualify.',
   'Glossary: OBC = onboard/shipboard credit; PPG = prepaid gratuities; covert, opaque, hidden, unpublished, private fares and "cover rates" are one exclusive rate kind; named sales (Labor Day, Black Friday, Wave, Quiet Season) are savings.',
 ];
@@ -46,7 +46,8 @@ const FACT_NAMES = { type: 'offer', expiry: 'ends', dollars: 'amounts', percents
 function factStatus(check, incoming, website) {
   if (check.key === 'type') return { same: 'same kind', partial: 'partly overlap', different: 'no overlap', unknown: 'unclear' }[check.status] || check.status;
   if (check.key === 'expiry') {
-    if (!website.expiryDate) return 'website has no end date (not evidence)';
+    // Ongoing and no end date are the same thing: open-ended.
+    if (!website.expiryDate) return incoming.ongoing || !incoming.end ? 'same (both open-ended)' : 'incoming adds an end date';
     if (incoming.ongoing) return 'incoming ongoing, website dated';
     return check.status === 'same' ? 'same' : 'different';
   }
@@ -115,20 +116,33 @@ export function combineJevAnswer(hq, candidates, answers) {
     .map(([id, p]) => ({ index: Number(id.slice(1)) - 1, p }))
     .filter(r => r.index >= 0 && r.index < candidates.length);
   let target = match.choice === 'none' ? -1 : Number(String(match.choice).slice(1)) - 1;
-  let confidence = Math.min(status.confidence ?? 0, match.confidence ?? 0);
-  if (status.choice !== 'new' && !(target >= 0 && target < candidates.length)) {
-    target = ranked.length ? ranked[0].index : -1;
-    confidence = Math.min(confidence, ranked[0]?.p ?? 0);
-  }
+  if (status.choice !== 'new' && !(target >= 0 && target < candidates.length)) target = ranked.length ? ranked[0].index : -1;
+  const sp = status.probabilities || {};
+  const pNew = sp.new ?? (status.choice === 'new' ? status.confidence ?? 0 : 0);
   const base = { source: 'jev', candidates, ranked: ranked.map(r => ({ web: candidates[r.index], p: r.p })), reconsidered: !!answers.reconsidered };
   if (status.choice === 'new' || target < 0) {
-    return { hq, web: null, meta: { ...base, verdict: 'new', confidence: status.confidence ?? 0, changes: [] } };
+    // Sure it is new = sure it is new AND no website deal looks like a match.
+    const confidence = Math.min(pNew, 1 - (ranked[0]?.p ?? 0));
+    return { hq, web: null, meta: { ...base, verdict: 'new', confidence, changes: [] } };
   }
   const web = candidates[target];
   const pair = compareMarkers(hq, web);
-  const termsEqual = FIGURE_KEYS.every(k => !pair.differences.includes(k) || (k === 'expiry' && !web.expiryDate));
-  const verdict = status.choice === 'live' && termsEqual ? 'on-site' : 'update';
+  // Live vs update comes from the facts. When every stated term agrees the
+  // deal is live unless Jev is clearly sure something extra is offered that
+  // the facts cannot name (e.g. "2-for-1 fares").
+  const termsEqual = FIGURE_KEYS.every(k => !pair.differences.includes(k));
+  const verdict = termsEqual && (sp.update ?? (status.choice === 'update' ? 1 : 0)) < 0.7 ? 'on-site' : 'update';
+  // Sure of the match = sure it is this website deal AND that it is not new.
+  const matchP = ranked.find(r => r.index === target)?.p ?? match.confidence ?? 0;
+  const confidence = Math.min(matchP, 1 - pNew);
   return { hq, web, meta: { ...pair, ...base, verdict, guess: false, confidence, jevStatus: status.choice } };
+}
+
+/** Calls the operator needs to look at: Jev unsure, Jev unavailable. Everything else is skim-only. */
+export const REVIEW_BELOW = 0.8;
+export function needsReview(row) {
+  if (!row.meta?.candidates?.length) return false;
+  return !!row.meta.jevError || (row.meta.confidence ?? 0) < REVIEW_BELOW;
 }
 
 async function pool(items, size, work) {
