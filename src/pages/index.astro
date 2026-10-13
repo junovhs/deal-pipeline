@@ -1,16 +1,17 @@
+---
+import App from '../App';
+import '../App.css';
+---
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="description" content="Deal Pipeline turns weekly promotion inputs into website-ready travel deals." />
+    <meta name="description" content="A guided workflow for preparing weekly travel deals." />
     <title>Deal Pipeline</title>
   </head>
   <body>
-    <main>
-      <h1>Deal Pipeline</h1>
-      <p>A faster, safer path from weekly promotions to website-ready deals.</p>
-      <a href="/app">Open the operator console</a>
-    </main>
+    <App client:only="react" />
   </body>
 </html>
