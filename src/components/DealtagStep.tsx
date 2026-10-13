@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { filterAcceptedTaggedText, transform } from '../logic/dealtag.js';
 
 function parseLines(output) {
@@ -9,18 +9,30 @@ function parseLines(output) {
   });
 }
 
+// Consecutive skipped (X) lines collapse into one quiet row.
+function groupLines(lines) {
+  const out = [];
+  for (const line of lines) {
+    const last = out[out.length - 1];
+    if (line.tag === 'X' && last?.tag === 'X') last.items.push(line.text);
+    else out.push(line.tag === 'X' ? { tag: 'X', items: [line.text] } : line);
+  }
+  return out;
+}
+
 /**
- * Presents raw-email tagging as a reviewable two-pane operation. It delegates
- * classification to `transform`, keeps input and output scrolling aligned, and
- * hands only the operator-reviewed tagged text to the Dedupe step.
+ * The weekly email on the left becomes tagged deals on the right as it is
+ * pasted: no button to press. Suppliers read as headings, deals beneath them,
+ * exclusivity and skipped lines in words. Only accepted lines go to Compare.
  */
 export default function DealtagStep({ session, onSessionChange, onComplete, showToast }) {
   const leftRef = useRef(null);
   const rightRef = useRef(null);
   const syncing = useRef(false);
+  const [openSkips, setOpenSkips] = useState({});
 
   const { input, output, stats, includeX } = session;
-  const lines = useMemo(() => parseLines(output), [output]);
+  const groups = useMemo(() => groupLines(parseLines(output)), [output]);
 
   const updateSession = useCallback((patch) => {
     onSessionChange((prev) => (
@@ -28,108 +40,104 @@ export default function DealtagStep({ session, onSessionChange, onComplete, show
     ));
   }, [onSessionChange]);
 
-  const run = useCallback(() => {
-    const result = transform(input, { includeUnknowns: includeX });
-    updateSession({
-      output: result.text,
-      stats: result.stats,
-    });
-  }, [includeX, input, updateSession]);
+  // Tag as the email is pasted or edited.
+  useEffect(() => {
+    if (!input.trim()) {
+      if (output) updateSession({ output: '', stats: null });
+      return;
+    }
+    if (output) return;
+    const timer = setTimeout(() => {
+      const result = transform(input, { includeUnknowns: includeX });
+      updateSession({ output: result.text, stats: result.stats });
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [input, includeX, output, updateSession]);
 
   const copy = useCallback(() => {
-    navigator.clipboard.writeText(output).then(() => showToast('Output copied', 'success')).catch(() => showToast('Could not copy. Please try again.', 'error'));
+    navigator.clipboard.writeText(output).then(() => showToast('Tagged text copied', 'success')).catch(() => showToast('Could not copy. Please try again.', 'error'));
   }, [output, showToast]);
 
-  const sendToDedupe = useCallback(() => {
-    if (!output) {
-      showToast('Run transform first', 'error');
+  const sendToCompare = useCallback(() => {
+    const accepted = filterAcceptedTaggedText(output);
+    if (!accepted) {
+      showToast('No deals to compare yet', 'error');
       return;
     }
-    const acceptedOutput = filterAcceptedTaggedText(output);
-    if (!acceptedOutput) {
-      showToast('No accepted deals to send', 'error');
-      return;
-    }
-    onComplete(acceptedOutput);
+    onComplete(accepted);
   }, [onComplete, output, showToast]);
 
   const syncScroll = useCallback((from, to) => {
     if (syncing.current) return;
     syncing.current = true;
-    const maxFrom = Math.max(1, from.scrollHeight - from.clientHeight);
-    const ratio = from.scrollTop / maxFrom;
-    const maxTo = Math.max(1, to.scrollHeight - to.clientHeight);
-    to.scrollTop = ratio * maxTo;
+    const ratio = from.scrollTop / Math.max(1, from.scrollHeight - from.clientHeight);
+    to.scrollTop = ratio * Math.max(1, to.scrollHeight - to.clientHeight);
     syncing.current = false;
   }, []);
 
   return (
-    <div className="dealtag-step">
-      <div className="two-col">
-        <div className="panel">
-          <div className="panel-header">
-            <h2>Weekly promo email</h2>
-            <span className="pill">{input.trim() ? input.split('\n').length : 0} lines</span>
-          </div>
-          <div
-            className="panel-body"
-            ref={leftRef}
-            onScroll={() => rightRef.current && syncScroll(leftRef.current, rightRef.current)}
-          >
-            <textarea
-              value={input}
-              onChange={(e) => updateSession({ input: e.target.value, output: '', stats: null })}
-              placeholder="Paste your full promo list here..."
-              spellCheck={false}
-            />
-          </div>
-          <div className="panel-footer">
-            <label className="toggle">
+    <div className="tag-step">
+      <div className="pair">
+        <section className="pair-side" aria-labelledby="tag-in">
+          <div className="pair-head">
+            <h2 id="tag-in">Weekly promo email</h2>
+            <label className="check">
               <input
                 type="checkbox"
                 checked={includeX}
                 onChange={(e) => updateSession({ includeX: e.target.checked, output: '', stats: null })}
               />
-              Include unknowns (X)
+              Show skipped lines
             </label>
-            <button className="btn btn-accent" onClick={run} disabled={!input.trim()}>Tag deals</button>
-            <button className="btn" onClick={copy} disabled={!output}>Copy Output</button>
           </div>
-        </div>
+          <textarea
+            ref={leftRef}
+            className="pair-body source"
+            aria-labelledby="tag-in"
+            value={input}
+            onChange={(e) => updateSession({ input: e.target.value, output: '', stats: null })}
+            onScroll={() => rightRef.current && syncScroll(leftRef.current, rightRef.current)}
+            placeholder="Paste this week's promo email here."
+            spellCheck={false}
+          />
+        </section>
 
-        <div className="panel">
-          <div className="panel-header">
-            <h2>Tagged deals</h2>
-            {stats && (
-              <div className="stat-pills">
-                <span className="pill pill-ok">{stats.vendors} suppliers</span>
-                <span className="pill">{stats.deals} deals</span>
-                <span className="pill pill-warn">{stats.excl} exclusive</span>
-                <span className="pill pill-bad">{stats.unknownSuppliers} unknown</span>
-              </div>
-            )}
+        <section className="pair-side" aria-labelledby="tag-out">
+          <div className="pair-head">
+            <h2 id="tag-out">Tagged deals</h2>
+            {stats && <p className="muted">{stats.deals} deals from {stats.vendors} suppliers · {stats.excl} exclusive{stats.unknownSuppliers ? ` · ${stats.unknownSuppliers} unknown suppliers skipped` : ''}</p>}
           </div>
           <div
-            className="panel-body scrollpane"
             ref={rightRef}
+            className="pair-body tagged"
             onScroll={() => leftRef.current && syncScroll(rightRef.current, leftRef.current)}
+            tabIndex={0}
+            aria-label="Tagged deals"
           >
-            <div className="output-lines">
-              {lines.map((line, index) => (
-                <div key={index} className="output-line">
-                  <span className={`tag tag-${line.tag}`}>{line.tag}</span>
-                  <span className="tag-text">{line.text}</span>
-                </div>
-              ))}
-              {lines.length === 0 && <div className="empty-state">Tag the email to review your deals here</div>}
-            </div>
+            {!groups.length && <p className="empty">Tagged deals appear here as soon as you paste.</p>}
+            {groups.map((line, index) => {
+              if (line.tag === 'v') return <h3 key={index} className="tagged-supplier">{line.text}</h3>;
+              if (line.tag === 'X') {
+                const open = !!openSkips[index];
+                return <div key={index} className="tagged-skip">
+                  <button className="link" aria-expanded={open} onClick={() => setOpenSkips({ ...openSkips, [index]: !open })}>
+                    Skipped {line.items.length === 1 ? '1 line' : `${line.items.length} lines`}: {line.items[0]}{line.items.length > 1 ? '…' : ''}
+                  </button>
+                  {open && <ul>{line.items.map((item, i) => <li key={i}>{item}</li>)}</ul>}
+                </div>;
+              }
+              return <p key={index} className="tagged-deal">
+                {line.tag === 'ed' && <span className="label label-exclusive">Exclusive</span>}
+                {line.text}
+              </p>;
+            })}
           </div>
-          <div className="panel-footer">
-            <button className="btn btn-forward" onClick={sendToDedupe} disabled={!output}>
-              Continue to Compare →
-            </button>
-          </div>
-        </div>
+        </section>
+      </div>
+
+      <div className="step-actions">
+        <button className="link" onClick={copy} disabled={!output}>Copy tagged text</button>
+        <button className="btn btn-primary" onClick={sendToCompare} disabled={!output}>Continue to Compare →</button>
       </div>
     </div>
   );
